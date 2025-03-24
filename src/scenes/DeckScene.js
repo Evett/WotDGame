@@ -10,10 +10,10 @@ export class DeckScene extends Phaser.Scene {
     }
 
     create() {
-        this.add.image(400, 300, 'background').setScale(1.2); // Adjust based on image size
+        this.add.image(300, 300, 'background').setScale(1.2); // Adjust based on image size
 
         // Title
-        this.add.text(400, 150, 'DeckScene', {
+        this.add.text(300, 150, 'DeckScene', {
             fontSize: '40px',
             color: '#ffffff'
         }).setOrigin(0.5);
