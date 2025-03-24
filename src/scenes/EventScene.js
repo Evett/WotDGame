@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import SceneManager from '../SceneManager';
 
 export class EventScene extends Phaser.Scene {
     constructor() {
@@ -10,6 +11,7 @@ export class EventScene extends Phaser.Scene {
     }
 
     create() {
+        this.sceneManager = new SceneManager(this);
         this.add.image(300, 300, 'background').setScale(1.2); // Adjust based on image size
 
         // Title
@@ -17,5 +19,9 @@ export class EventScene extends Phaser.Scene {
             fontSize: '40px',
             color: '#ffffff'
         }).setOrigin(0.5);
+
+        this.time.delayedCall(3000, () => {
+            this.sceneManager.switchScene('MapScene');
+        });
     }
 }

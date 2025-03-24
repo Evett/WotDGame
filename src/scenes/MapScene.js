@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import gameState from '../GameState';
+import SceneManager from '../SceneManager';
 
 export class MapScene extends Phaser.Scene {
     constructor() {
@@ -7,6 +8,7 @@ export class MapScene extends Phaser.Scene {
     }
 
     create() {
+        this.sceneManager = new SceneManager(this);
         this.add.text(300, 50, 'Choose Your Path', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
 
         this.nodes = [
@@ -19,24 +21,18 @@ export class MapScene extends Phaser.Scene {
             let nodeGraphic = this.add.circle(node.x, node.y, 20, 0xffffff).setInteractive();
 
             nodeGraphic.on('pointerdown', () => {
-                this.handleNodeSelection(node);
+                gameState.currentNode = node;
+                this.sceneManager.switchScene(this.getSceneType(node.type));
             });
         });
     }
 
-    handleNodeSelection(node) {
-        gameState.currentNode = node;
-
-        switch (node.type) {
-            case 'battle':
-                this.scene.start('BattleScene');
-                break;
-            case 'event':
-                this.scene.start('EventScene');
-                break;
-            case 'altar':
-                this.scene.start('AltarScene');
-                break;
-        }
+    getSceneType(type) {
+        const sceneMap = {
+            'battle' : 'BattleScene',
+            'event' : 'EventScene',
+            'altar' : 'AltarScene'
+        };
+        return sceneMap[type] || 'MapScene';
     }
 }
