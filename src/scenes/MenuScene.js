@@ -6,14 +6,14 @@ export class MenuScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('background', 'assets/background.png'); // Replace with your own background
+        this.load.image('background', 'assets/background.png');
     }
 
     create() {
-        this.add.image(400, 300, 'background').setScale(1.2); // Adjust based on your image size
+        this.add.image(400, 300, 'background').setScale(1.2); // Adjust based on image size
 
         // Title
-        this.add.text(400, 150, 'Deckbuilder Game', {
+        this.add.text(400, 150, 'Wars of the Defeated', {
             fontSize: '40px',
             color: '#ffffff'
         }).setOrigin(0.5);
@@ -35,7 +35,7 @@ export class MenuScene extends Phaser.Scene {
         });
 
         playButton.on('pointerdown', () => {
-            this.scene.start('GameScene'); // Change this when your main game is ready
+            this.scene.start('MapScene');
         });
 
         // Quit Button (for now, just logs to console)

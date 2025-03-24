@@ -1,6 +1,12 @@
 import { Preloader } from './scenes/Preloader';
 import { Play } from './scenes/Play';
 import { MenuScene } from './scenes/MenuScene';
+import { MapScene } from './scenes/MapScene';
+import { BattleScene } from './scenes/BattleScene';
+import { EventScene } from './scenes/EventScene';
+import { BossScene } from './scenes/BossScene';
+import { AltarScene } from './scenes/AltarScene';
+import { DeckScene } from './scenes/DeckScene';
 import Phaser from 'phaser';
 
 const config = {
@@ -17,6 +23,12 @@ const config = {
     },
     scene: [
         MenuScene,
+        MapScene,
+        BattleScene,
+        EventScene,
+        BossScene,
+        AltarScene,
+        DeckScene,
         Preloader,
         Play
     ]
