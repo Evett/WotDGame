@@ -1,3 +1,5 @@
+import CardLibrary from './CardLibrary.js';
+
 class Character {
     constructor(name, health, actions, deck, heroAbility) {
         this.name = name;
@@ -13,9 +15,14 @@ const characters = {
         "Alaen",
         120,
         3,
-        ["Strike", "Block", "Berserk"],
+        [
+            CardLibrary.Strike,
+            CardLibrary.Strike,
+            CardLibrary.Block,
+            CardLibrary.Berserk
+        ],
         (gameState) => {
-            console.log("Alaen's Rage: Gain +1 Action!");
+            console.log("Alaen's Summon Khan: Gain +1 Action!");
             gameState.actions += 1;
         }
     ),
@@ -23,7 +30,12 @@ const characters = {
         "Hassan",
         90,
         4,
-        ["Quick Strike", "Evasion", "Backstab"],
+        [
+            CardLibrary.Strike,
+            CardLibrary.Block,
+            CardLibrary.Block,
+            CardLibrary.Berserk
+        ],
         (gameState) => {
             console.log("Hassan's Shadow Step: Gain temporary Evasion!");
         }
@@ -32,7 +44,12 @@ const characters = {
         "Marcus",
         80,
         3,
-        ["Fireball", "Arcane Shield", "Mana Surge"],
+        [
+            CardLibrary.Strike,
+            CardLibrary.Strike,
+            CardLibrary.Berserk,
+            CardLibrary.Berserk
+        ],
         (gameState) => {
             console.log("Marcus's Arcane Boost: Restore 1 action!");
             gameState.actions += 1;
@@ -42,7 +59,12 @@ const characters = {
         "Mohef",
         100,
         4,
-        ["Arrow Shot", "Dodge", "Multi-Shot"],
+        [
+            CardLibrary.Strike,
+            CardLibrary.Berserk,
+            CardLibrary.Block,
+            CardLibrary.Berserk
+        ],
         (gameState) => {
             console.log("Mohef's Precision: Your next attack deals double damage!");
         }
@@ -51,7 +73,12 @@ const characters = {
         "Nephereta",
         110,
         3,
-        ["Holy Strike", "Divine Shield", "Smite"],
+        [
+            CardLibrary.Strike,
+            CardLibrary.Strike,
+            CardLibrary.Block,
+            CardLibrary.Block
+        ],
         (gameState) => {
             console.log("Nephereta's Blessing: Heal 5 HP!");
             gameState.health = Math.min(gameState.health + 5, gameState.maxHealth);
@@ -61,7 +88,12 @@ const characters = {
         "Urusha",
         85,
         3,
-        ["Life Drain", "Dark Pact", "Hellfire"],
+        [
+            CardLibrary.Strike,
+            CardLibrary.Strike,
+            CardLibrary.Block,
+            CardLibrary.Strike
+        ],
         (gameState) => {
             console.log("Urusha's Sacrifice: Lose 5 HP, gain 2 actions.");
             gameState.health -= 5;
