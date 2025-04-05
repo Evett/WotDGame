@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import gameState from '../GameState.js';
 import SceneManager from '../SceneManager';
+import CardRenderer from '../CardRenderer.js';
 
 export class BattleScene extends Phaser.Scene {
     constructor() {
@@ -49,41 +50,33 @@ export class BattleScene extends Phaser.Scene {
     }
 
     updateHandDisplay() {
-        if (this.handTexts) {
-            this.handTexts.forEach(t => t.destroy());
+        if (this.cardUIs) {
+            this.cardUIs.forEach(t => t.destroy());
         }
 
-        this.handTexts = [];
+        this.cardUIs = [];
 
-        gameState.hand.forEach((card, i) => {
-            const costText = [];
+        const spacing = 120;
+        const startX = this.cameras.main.centerX - ((gameState.hand.length - 1) * spacing) / 2;
+        const y = 400;
 
-            if (card.actionCost > 0) costText.push(`${card.actionCost}A`);
-            if (card.manaCost > 0) costText.push(`${card.manaCost}M`);
+        gameState.hand.forEach((card, index) => {
+            const x = startX + index * spacing;
 
-            this.handTexts.push(this.add.text(50 + i * 100, 325, costText.join(" + "), {
-                fontSize: '16px',
-                color: '#fff'
-            }));
-            const txt = this.add.text(50 + i * 100, 350, `${card.name}\n(${card.type})\n${card.description}`, {
-                fontSize: '16px',
-                color: '#fff',
-                backgroundColor: '#333',
-                padding: 10,
-            }).setInteractive();
-    
-            txt.on('pointerdown', () => {
-                gameState.playCard(i);
-                this.updateHandDisplay();
-                this.updateResourceDisplay();
+            const renderer = new CardRenderer(this, card, x, y, gameState, (clickedCard) => {
+                const cardIndex = gameState.hand.indexOf(clickedCard);
+                if (cardIndex !== -1) {
+                    gameState.playCard(cardIndex);
+                    this.updateHandDisplay();
+                    this.updateResourceDisplay();
+                }
             });
-    
-            this.handTexts.push(txt);
+            this.cardUIs.push(renderer);
         });
     }
 
     createEndTurnButton() {
-        const btn = this.add.text(400, 430, 'End Turn', {
+        const btn = this.add.text(400, 230, 'End Turn', {
             fontSize: '20px',
             backgroundColor: '#444',
             padding: 10
