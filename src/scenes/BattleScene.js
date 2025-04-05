@@ -40,6 +40,7 @@ export class BattleScene extends Phaser.Scene {
 
         abilityButton.on('pointerdown', () => {
             gameState.character.heroAbility(gameState);
+            this.updateResourceDisplay();
         });
 
         returnToMapButton.on('pointerdown', () => {
