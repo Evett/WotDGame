@@ -23,6 +23,8 @@ class GameState {
         this.handLimit = 6;
         this.block = 0;
 
+        this.enemies = [];
+
         this.character = null;
     }
 
@@ -40,6 +42,10 @@ class GameState {
         console.log("After shuffle deck draw pile:", this.drawPile);
         this.drawHand();
         console.log("Initial hand:", this.hand);
+    }
+
+    startBattle(enemiesArray) {
+        this.enemies = enemiesArray;
     }
 
     useHeroAbility() {
@@ -86,8 +92,14 @@ class GameState {
                 console.log("Not enough actions!");
                 return;
             }
+
             if (this.mana < card.manaCost) {
                 console.log("Not enough mana!");
+                return;
+            }
+
+            if (card.requiresTarget && !target) {
+                console.log("No target selected!");
                 return;
             }
     

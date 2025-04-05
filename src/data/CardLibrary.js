@@ -8,6 +8,7 @@ const CardLibrary = {
         actionCost: 1,
         manaCost: 0,
         type: "Attack",
+        requiresTarget: true,
         description: "Deal 6 damage.",
         effect: (target, state) => {
             if (target) {
@@ -20,6 +21,7 @@ const CardLibrary = {
         actionCost: 0,
         manaCost: 1,
         type: "Skill",
+        requiresTarget: false,
         description: "Gain 5 block.",
         effect: (target, state) => {
             state.block = (state.block || 0) + 5;
@@ -30,6 +32,7 @@ const CardLibrary = {
         actionCost: 1,
         manaCost: 1,
         type: "Power",
+        requiresTarget: false,
         description: "Next attack deals double damage.",
         effect: (target, state) => {
             state.nextAttackBonus = "double";

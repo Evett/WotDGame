@@ -1,7 +1,9 @@
 import Phaser from 'phaser';
 import gameState from '../GameState.js';
 import SceneManager from '../SceneManager';
-import CardRenderer from '../CardRenderer.js';
+import CardRenderer from '../renderers/CardRenderer.js';
+import EnemyRenderer from '../renderers/EnemyRenderer.js';
+import Enemy from '../data/Enemy.js';
 
 export class BattleScene extends Phaser.Scene {
     constructor() {
@@ -21,13 +23,13 @@ export class BattleScene extends Phaser.Scene {
         this.createEndTurnButton();
         this.startCombat();
         this.add.image(300, 300, 'background').setScale(1.2); // Adjust based on image size
-        this.add.text(300, 100, `Battling as: ${gameState.character.name}`, { fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
+        this.add.text(300, 75, `Battling as: ${gameState.character.name}`, { fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
         console.log("Hand on entering battle:", gameState.hand);
 
 
         // Title
-        this.add.text(300, 150, 'BattleScene', {
-            fontSize: '40px',
+        this.add.text(100, 25, 'BattleScene', {
+            fontSize: '20px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
@@ -35,7 +37,7 @@ export class BattleScene extends Phaser.Scene {
             .setOrigin(0.5)
             .setInteractive();
 
-        let returnToMapButton = this.add.text(300, 200, 'Return to Map', { fontSize: '24px', backgroundColor: '#ff5500' })
+        let returnToMapButton = this.add.text(300, 225, 'Return to Map', { fontSize: '24px', backgroundColor: '#ff5500' })
             .setOrigin(0.5)
             .setInteractive();
 
@@ -66,9 +68,10 @@ export class BattleScene extends Phaser.Scene {
             const renderer = new CardRenderer(this, card, x, y, gameState, (clickedCard) => {
                 const cardIndex = gameState.hand.indexOf(clickedCard);
                 if (cardIndex !== -1) {
-                    gameState.playCard(cardIndex);
+                    gameState.playCard(cardIndex, this.selectedTarget);
                     this.updateHandDisplay();
                     this.updateResourceDisplay();
+                    this.enemyUIs.forEach(ui => ui.update());
                 }
             });
             this.cardUIs.push(renderer);
@@ -101,12 +104,19 @@ export class BattleScene extends Phaser.Scene {
 
     startCombat() {
         // Draw opening hand (e.g. 5 cards)
+
+        gameState.startBattle([
+            new Enemy("Goblin", 20),
+            new Enemy("Orc", 35)
+        ]);
+
         for (let i = 0; i < 5; i++) {
             gameState.drawCard();
         }
     
         this.updateHandDisplay();
         this.updateResourceDisplay();
+        this.updateEnemyDisplay();
     }
 
     updateResourceDisplay() {
@@ -114,5 +124,21 @@ export class BattleScene extends Phaser.Scene {
             `Actions: ${gameState.actions} / ${gameState.maxActions}\n` +
             `Mana: ${gameState.mana} / ${gameState.maxMana}`
         );
+    }
+
+    updateEnemyDisplay() {
+        this.enemyUIs = [];
+
+        gameState.enemies.forEach((enemy, index) => {
+            const x = 200 + index * 150;
+            const y = 150;
+
+            const enemyUI = new EnemyRenderer(this, enemy, x, y, (target) => {
+                this.selectedTarget = target;
+                console.log('Target selected:', target.name);
+            });
+
+            this.enemyUIs.push(enemyUI);
+        });
     }
 }

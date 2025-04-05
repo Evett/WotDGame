@@ -11,7 +11,7 @@ import { CharacterSelectScene } from './scenes/CharacterSelectScene';
 import Phaser from 'phaser';
 
 const config = {
-    title: 'Card Memory Game',
+    title: 'WotDGame',
     type: Phaser.AUTO,
     width: 549,
     height: 480,
