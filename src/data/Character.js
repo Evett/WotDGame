@@ -1,10 +1,11 @@
 import CardLibrary from './CardLibrary.js';
 
 class Character {
-    constructor(name, health, actions, deck, heroAbility) {
+    constructor(name, health, actions, mana, deck, heroAbility) {
         this.name = name;
         this.health = health;
         this.actions = actions;
+        this.mana = mana;
         this.deck = deck;
         this.heroAbility = heroAbility;
     }
@@ -15,6 +16,7 @@ const characters = {
         "Alaen",
         120,
         3,
+        2,
         [
             CardLibrary.Strike,
             CardLibrary.Strike,
@@ -30,6 +32,7 @@ const characters = {
         "Hassan",
         90,
         4,
+        2,
         [
             CardLibrary.Strike,
             CardLibrary.Block,
@@ -43,6 +46,7 @@ const characters = {
     marcus: new Character(
         "Marcus",
         80,
+        3,
         3,
         [
             CardLibrary.Strike,
@@ -59,6 +63,7 @@ const characters = {
         "Mohef",
         100,
         4,
+        1,
         [
             CardLibrary.Strike,
             CardLibrary.Berserk,
@@ -73,6 +78,7 @@ const characters = {
         "Nephereta",
         110,
         3,
+        1,
         [
             CardLibrary.Strike,
             CardLibrary.Strike,
@@ -88,6 +94,7 @@ const characters = {
         "Urusha",
         85,
         3,
+        2,
         [
             CardLibrary.Strike,
             CardLibrary.Strike,

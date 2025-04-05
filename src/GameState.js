@@ -6,7 +6,10 @@ class GameState {
     reset() {
         this.health = 100;
         this.maxHealth = 100;
+        this.maxActions = 3;
         this.actions = 3;
+        this.maxMana = 3;
+        this.mana = 3;
         this.deck = [];
         this.gold = 50;
         this.relics = [];
@@ -27,7 +30,8 @@ class GameState {
         this.character = character;
         this.health = character.health;
         this.maxHealth = character.health;
-        this.actions = character.actions;
+        this.maxActions = this.actions = character.actions;
+        this.maxMana = this. mana = character.mana;
 
         this.fullDeck = [...character.deck]; //Initial deck
         this.drawPile = this.fullDeck;
@@ -75,11 +79,26 @@ class GameState {
 
     playCard(index, target = null) {
         if (index >= 0 && index < this.hand.length) {
-            const card = this.hand.splice(index, 1)[0];
+            const card = this.hand[index];
+
+            // Determine if requirements are met, I'm using both mana and actions basically
+            if (this.actions < card.actionCost) {
+                console.log("Not enough actions!");
+                return;
+            }
+            if (this.mana < card.manaCost) {
+                console.log("Not enough mana!");
+                return;
+            }
+    
+            // Deduct cost
+            this.actions -= card.actionCost;
+            this.mana -= card.manaCost;
+
+            this.hand.splice(index, 1)[0];
             card.play(target, this);
             console.log("You just played this card:", card);
             this.discardPile.push(card);
-            // Card effects
         }
     }
 

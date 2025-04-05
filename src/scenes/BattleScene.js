@@ -13,13 +13,16 @@ export class BattleScene extends Phaser.Scene {
 
     create() {
         this.sceneManager = new SceneManager(this);
+        this.resourceText = this.add.text(20, 20, '', {
+            fontSize: '20px',
+            color: '#fff'
+        });
         this.createEndTurnButton();
         this.startCombat();
         this.add.image(300, 300, 'background').setScale(1.2); // Adjust based on image size
         this.add.text(300, 100, `Battling as: ${gameState.character.name}`, { fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
         console.log("Hand on entering battle:", gameState.hand);
 
-        this.updateHandDisplay();
 
         // Title
         this.add.text(300, 150, 'BattleScene', {
@@ -52,6 +55,15 @@ export class BattleScene extends Phaser.Scene {
         this.handTexts = [];
 
         gameState.hand.forEach((card, i) => {
+            const costText = [];
+
+            if (card.actionCost > 0) costText.push(`${card.actionCost}A`);
+            if (card.manaCost > 0) costText.push(`${card.manaCost}M`);
+
+            this.handTexts.push(this.add.text(50 + i * 100, 325, costText.join(" + "), {
+                fontSize: '16px',
+                color: '#fff'
+            }));
             const txt = this.add.text(50 + i * 100, 350, `${card.name}\n(${card.type})\n${card.description}`, {
                 fontSize: '16px',
                 color: '#fff',
@@ -62,6 +74,7 @@ export class BattleScene extends Phaser.Scene {
             txt.on('pointerdown', () => {
                 gameState.playCard(i);
                 this.updateHandDisplay();
+                this.updateResourceDisplay();
             });
     
             this.handTexts.push(txt);
@@ -79,6 +92,8 @@ export class BattleScene extends Phaser.Scene {
             // Discard all cards in hand
             gameState.discardPile.push(...gameState.hand);
             gameState.hand = [];
+            gameState.mana = gameState.maxMana;
+            gameState.actions = gameState.maxActions;
     
             // Draw a new hand
             for (let i = 0; i < 5; i++) {
@@ -86,6 +101,7 @@ export class BattleScene extends Phaser.Scene {
             }
     
             this.updateHandDisplay();
+            this.updateResourceDisplay();
         });
     }
 
@@ -96,5 +112,13 @@ export class BattleScene extends Phaser.Scene {
         }
     
         this.updateHandDisplay();
+        this.updateResourceDisplay();
+    }
+
+    updateResourceDisplay() {
+        this.resourceText.setText(
+            `Actions: ${gameState.actions} / ${gameState.maxActions}\n` +
+            `Mana: ${gameState.mana} / ${gameState.maxMana}`
+        );
     }
 }

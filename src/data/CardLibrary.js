@@ -5,7 +5,8 @@ const createCard = (options) => new Card(options);
 const CardLibrary = {
     Strike: createCard({
         name: "Strike",
-        cost: 1,
+        actionCost: 1,
+        manaCost: 0,
         type: "Attack",
         description: "Deal 6 damage.",
         effect: (target, state) => {
@@ -16,7 +17,8 @@ const CardLibrary = {
     }),
     Block: createCard({
         name: "Block",
-        cost: 1,
+        actionCost: 0,
+        manaCost: 1,
         type: "Skill",
         description: "Gain 5 block.",
         effect: (target, state) => {
@@ -25,7 +27,8 @@ const CardLibrary = {
     }),
     Berserk: createCard({
         name: "Berserk",
-        cost: 0,
+        actionCost: 1,
+        manaCost: 1,
         type: "Power",
         description: "Next attack deals double damage.",
         effect: (target, state) => {
