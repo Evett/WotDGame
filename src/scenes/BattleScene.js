@@ -13,7 +13,7 @@ export class BattleScene extends Phaser.Scene {
 
     create() {
         this.sceneManager = new SceneManager(this);
-        this.resourceText = this.add.text(20, 20, '', {
+        this.resourceText = this.add.text(350, 20, '', {
             fontSize: '20px',
             color: '#fff'
         });
