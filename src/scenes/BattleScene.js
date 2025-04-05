@@ -16,7 +16,7 @@ export class BattleScene extends Phaser.Scene {
 
     create() {
         this.sceneManager = new SceneManager(this);
-        this.resourceText = this.add.text(350, 20, '', {
+        this.resourceText = this.add.text(350, 10, '', {
             fontSize: '20px',
             color: '#fff'
         });
@@ -121,6 +121,7 @@ export class BattleScene extends Phaser.Scene {
 
     updateResourceDisplay() {
         this.resourceText.setText(
+            `Armor: ${gameState.armor}\n` +
             `Actions: ${gameState.actions} / ${gameState.maxActions}\n` +
             `Mana: ${gameState.mana} / ${gameState.maxMana}`
         );
@@ -135,6 +136,7 @@ export class BattleScene extends Phaser.Scene {
 
             const enemyUI = new EnemyRenderer(this, enemy, x, y, (target) => {
                 this.selectedTarget = target;
+                this.enemyUIs.forEach(ui => ui.select(ui.enemy === target));
                 console.log('Target selected:', target.name);
             });
 

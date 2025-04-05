@@ -24,7 +24,7 @@ const CardLibrary = {
         requiresTarget: false,
         description: "Gain 5 block.",
         effect: (target, state) => {
-            state.block = (state.block || 0) + 5;
+            state.armor = (state.armor || 0) + 5;
         }
     }),
     Berserk: createCard({

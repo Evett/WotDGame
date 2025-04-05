@@ -2,6 +2,21 @@ class EnemyRenderer {
     constructor(scene, enemy, x, y, onTarget = () => {}) {
         this.scene = scene;
         this.enemy = enemy;
+        this.x = x;
+        this.y = y;
+        this.onTarget = onTarget;
+        this.container = null;
+
+        this.selected = scene.add.rectangle(0, 0, 110, 110, 0x00ffff, 0.3)
+            .setStrokeStyle(3, 0x00ffff)
+            .setVisible(false);
+
+        this.render();
+    }
+
+    render() {
+        const { scene, enemy, x, y } = this;
+
         this.container = scene.add.container(x, y);
 
         const bg = scene.add.rectangle(0, 0, 100, 100, 0x770000).setStrokeStyle(2, 0xffffff);
@@ -10,15 +25,19 @@ class EnemyRenderer {
 
         bg.setInteractive({ useHandCursor: true });
         bg.on('pointerdown', () => {
-            onTarget(enemy);
+            this.onTarget(enemy);
         });
 
         this.healthText = healthText;
-        this.container.add([bg, nameText, healthText]);
+        this.container.add([bg, nameText, healthText, this.selected]);
     }
 
     update() {
         this.healthText.setText(`HP: ${this.enemy.health}/${this.enemy.maxHealth}`);
+    }
+
+    select(isSelected) {
+        this.selected.setVisible(isSelected);
     }
 
     destroy() {

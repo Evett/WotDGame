@@ -21,7 +21,7 @@ class GameState {
         this.hand = [];
         this.discardPile = [];
         this.handLimit = 6;
-        this.block = 0;
+        this.armor = 0;
 
         this.enemies = [];
 
