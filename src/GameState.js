@@ -18,6 +18,7 @@ class GameState {
         this.hand = [];
         this.discardPile = [];
         this.handLimit = 6;
+        this.block = 0;
 
         this.character = null;
     }
@@ -50,9 +51,14 @@ class GameState {
         }
     }
 
+    reshuffleDiscardIntoDraw() {
+        this.drawPile = Phaser.Utils.Array.Shuffle([...this.discardPile]);
+        this.discardPile = [];
+    }
+
     drawCard() {
         if (this.drawPile.length === 0) {
-            this.restockDeck();
+            this.reshuffleDiscardIntoDraw();
         }
         if (this.drawPile.length > 0 && this.hand.length < this.handLimit) {
             const card = this.drawPile.pop();
@@ -67,10 +73,10 @@ class GameState {
         }
     }
 
-    playCard(index) {
+    playCard(index, target = null) {
         if (index >= 0 && index < this.hand.length) {
             const card = this.hand.splice(index, 1)[0];
-            card.play(null, this);
+            card.play(target, this);
             console.log("You just played this card:", card);
             this.discardPile.push(card);
             // Card effects

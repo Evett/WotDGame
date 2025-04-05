@@ -13,6 +13,8 @@ export class BattleScene extends Phaser.Scene {
 
     create() {
         this.sceneManager = new SceneManager(this);
+        this.createEndTurnButton();
+        this.startCombat();
         this.add.image(300, 300, 'background').setScale(1.2); // Adjust based on image size
         this.add.text(300, 100, `Battling as: ${gameState.character.name}`, { fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
         console.log("Hand on entering battle:", gameState.hand);
@@ -24,24 +26,6 @@ export class BattleScene extends Phaser.Scene {
             fontSize: '40px',
             color: '#ffffff'
         }).setOrigin(0.5);
-
-        // Button to draw new card
-        const drawBtn = this.add.text(300, 400, 'Draw Card', { fontSize: '24px', backgroundColor: '#444' })
-            .setOrigin(0.5)
-            .setInteractive()
-            .on('pointerdown', () => {
-                gameState.drawCard();
-                this.updateHandDisplay();
-            });
-
-        // Button to play first card
-        const playBtn = this.add.text(300, 450, 'Play First Card', { fontSize: '24px', backgroundColor: '#555' })
-            .setOrigin(0.5)
-            .setInteractive()
-            .on('pointerdown', () => {
-                gameState.playCard(0);
-                this.updateHandDisplay();
-            });
 
         let abilityButton = this.add.text(300, 300, 'Use Hero Ability', { fontSize: '24px', backgroundColor: '#ff5500' })
             .setOrigin(0.5)
@@ -67,11 +51,50 @@ export class BattleScene extends Phaser.Scene {
 
         this.handTexts = [];
 
-        const hand = gameState.hand;
-        for (let i = 0; i < hand.length; i++) {
-            const card = hand[i];
-            const txt = this.add.text(50 + i * 100, 350, `${card.name}\n(${card.type})\n${card.description}`, { fontSize: '20px', color: '#fff' });
+        gameState.hand.forEach((card, i) => {
+            const txt = this.add.text(50 + i * 100, 350, `${card.name}\n(${card.type})\n${card.description}`, {
+                fontSize: '16px',
+                color: '#fff',
+                backgroundColor: '#333',
+                padding: 10,
+            }).setInteractive();
+    
+            txt.on('pointerdown', () => {
+                gameState.playCard(i);
+                this.updateHandDisplay();
+            });
+    
             this.handTexts.push(txt);
+        });
+    }
+
+    createEndTurnButton() {
+        const btn = this.add.text(400, 430, 'End Turn', {
+            fontSize: '20px',
+            backgroundColor: '#444',
+            padding: 10
+        }).setInteractive();
+    
+        btn.on('pointerdown', () => {
+            // Discard all cards in hand
+            gameState.discardPile.push(...gameState.hand);
+            gameState.hand = [];
+    
+            // Draw a new hand
+            for (let i = 0; i < 5; i++) {
+                gameState.drawCard();
+            }
+    
+            this.updateHandDisplay();
+        });
+    }
+
+    startCombat() {
+        // Draw opening hand (e.g. 5 cards)
+        for (let i = 0; i < 5; i++) {
+            gameState.drawCard();
         }
+    
+        this.updateHandDisplay();
     }
 }
