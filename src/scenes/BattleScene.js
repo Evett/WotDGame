@@ -22,7 +22,8 @@ export class BattleScene extends Phaser.Scene {
         });
         this.createEndTurnButton();
         this.startCombat();
-        this.add.image(300, 300, 'background').setScale(1.2); // Adjust based on image size
+        this.bg = this.add.image(0, 0, 'background').setOrigin(0).setDisplaySize(this.scale.width, this.scale.height).setDepth(-10);
+        this.scale.on('resize', this.resize, this);
         this.add.text(300, 75, `Battling as: ${gameState.character.name}`, { fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
         console.log("Hand on entering battle:", gameState.hand);
 
@@ -49,6 +50,15 @@ export class BattleScene extends Phaser.Scene {
         returnToMapButton.on('pointerdown', () => {
             this.sceneManager.switchScene('MapScene');
         });
+    }
+
+    resize (gameSize, baseSize, displaySize, resolution) {
+        const width = gameSize.width;
+        const height = gameSize.height;
+
+        this.cameras.resize(width, height);
+
+        this.bg.setSize(width, height);
     }
 
     updateHandDisplay() {

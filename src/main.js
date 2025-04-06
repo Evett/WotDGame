@@ -13,13 +13,13 @@ import Phaser from 'phaser';
 const config = {
     title: 'WotDGame',
     type: Phaser.AUTO,
-    width: 549,
-    height: 480,
+    width: window.innerWidth,
+    height: window.innerHeight,
     parent: 'game-container',
     backgroundColor: '#192a56',
     pixelArt: true,
     scale: {
-        mode: Phaser.Scale.FIT,
+        mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
     scene: [
