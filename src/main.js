@@ -1,5 +1,3 @@
-import { Preloader } from './scenes/Preloader';
-import { Play } from './scenes/Play';
 import { MenuScene } from './scenes/MenuScene';
 import { MapScene } from './scenes/MapScene';
 import { BattleScene } from './scenes/BattleScene';
@@ -30,9 +28,7 @@ const config = {
         BossScene,
         AltarScene,
         DeckScene,
-        CharacterSelectScene,
-        Preloader,
-        Play
+        CharacterSelectScene
     ]
 };
 
