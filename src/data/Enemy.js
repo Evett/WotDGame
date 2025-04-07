@@ -1,5 +1,5 @@
 class Enemy {
-    constructor(name, maxHealth) {
+    constructor({ name, maxHealth }) {
         this.name = name;
         this.maxHealth = maxHealth;
         this.health = maxHealth;

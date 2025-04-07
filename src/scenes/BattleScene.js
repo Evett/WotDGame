@@ -3,7 +3,7 @@ import gameState from '../GameState.js';
 import SceneManager from '../SceneManager';
 import CardRenderer from '../renderers/CardRenderer.js';
 import EnemyRenderer from '../renderers/EnemyRenderer.js';
-import Enemy from '../data/Enemy.js';
+import EnemyLibrary from '../data/EnemyLibrary.js';
 
 export class BattleScene extends Phaser.Scene {
     constructor() {
@@ -116,8 +116,8 @@ export class BattleScene extends Phaser.Scene {
         // Draw opening hand (e.g. 5 cards)
 
         gameState.startBattle([
-            new Enemy("Goblin", 20),
-            new Enemy("Orc", 35)
+            EnemyLibrary.Goblin,
+            EnemyLibrary.Orc
         ]);
 
         for (let i = 0; i < 5; i++) {
