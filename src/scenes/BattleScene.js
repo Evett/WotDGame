@@ -89,7 +89,7 @@ export class BattleScene extends BaseScene {
     }
 
     createEndTurnButton() {
-        const btn = this.add.text(this.x+200, this.y+300, 'End Turn', {
+        const btn = this.add.text(this.cameras.main.centerX+200, this.cameras.main.centerY+300, 'End Turn', {
             fontSize: '20px',
             backgroundColor: '#444',
             padding: 10
