@@ -1,6 +1,6 @@
-import Phaser from 'phaser';
+import BaseScene from './BaseScene';
 
-export class DeckScene extends Phaser.Scene {
+export class DeckScene extends BaseScene {
     constructor() {
         super({ key: 'DeckScene' });
     }
@@ -10,10 +10,12 @@ export class DeckScene extends Phaser.Scene {
     }
 
     create() {
-        this.add.image(300, 300, 'background').setScale(1.2); // Adjust based on image size
+        const { x, y } = this.getCenter(this);
+        this.sceneManager = new SceneManager(this);
+        this.createBackground();
 
         // Title
-        this.add.text(300, 150, 'DeckScene', {
+        this.add.text(x, y, 'DeckScene', {
             fontSize: '40px',
             color: '#ffffff'
         }).setOrigin(0.5);

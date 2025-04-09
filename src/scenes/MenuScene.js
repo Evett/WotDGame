@@ -1,12 +1,7 @@
-import Phaser from 'phaser';
 import SceneManager from '../SceneManager';
+import BaseScene from './BaseScene';
 
-const sizes={
-    width:300,
-    height:300
-};
-
-export class MenuScene extends Phaser.Scene {
+export class MenuScene extends BaseScene {
     constructor() {
         super({ key: 'MenuScene' });
     }
@@ -16,17 +11,18 @@ export class MenuScene extends Phaser.Scene {
     }
 
     create() {
+        const { x, y } = this.getCenter(this);
         this.sceneManager = new SceneManager(this);
-        this.add.image(sizes.width, sizes.height, 'background').setScale(1.2); // Adjust based on image size
+        this.createBackground();
 
         // Title
-        this.add.text(sizes.width, sizes.height/2, 'Wars of the Defeated', {
+        this.add.text(x, y-100, 'Wars of the Defeated', {
             fontSize: '40px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
         // Play Button
-        const playButton = this.add.text(sizes.width, sizes.height, 'Play', {
+        const playButton = this.add.text(x, y, 'Play', {
             fontSize: '30px',
             color: '#ffffff',
             backgroundColor: '#0077ff',
@@ -46,7 +42,7 @@ export class MenuScene extends Phaser.Scene {
         });
 
         // Quit Button (for now, just logs to console)
-        const quitButton = this.add.text(sizes.width, sizes.height+100, 'Quit', {
+        const quitButton = this.add.text(x, y+100, 'Quit', {
             fontSize: '30px',
             color: '#ffffff',
             backgroundColor: '#ff3333',

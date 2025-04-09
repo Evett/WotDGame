@@ -1,44 +1,40 @@
-import Phaser from 'phaser';
 import gameState from '../GameState.js';
 import SceneManager from '../SceneManager';
 import CardRenderer from '../renderers/CardRenderer.js';
 import EnemyRenderer from '../renderers/EnemyRenderer.js';
 import EnemyLibrary from '../data/EnemyLibrary.js';
+import BaseScene from './BaseScene.js';
 
-export class BattleScene extends Phaser.Scene {
+export class BattleScene extends BaseScene {
     constructor() {
         super({ key: 'BattleScene' });
     }
 
     preload() {
-        this.load.image('background', 'assets/background.png');
     }
 
     create() {
+        const { x, y } = this.getCenter(this);
         this.sceneManager = new SceneManager(this);
-        this.resourceText = this.add.text(350, 10, '', {
+        this.createBackground();
+        this.resourceText = this.add.text(x+500, 10, '', {
             fontSize: '20px',
             color: '#fff'
         });
         this.createEndTurnButton();
         this.startCombat();
-        this.bg = this.add.image(0, 0, 'background').setOrigin(0).setDisplaySize(this.scale.width, this.scale.height).setDepth(-10);
         this.scale.on('resize', this.resize, this);
-        this.add.text(300, 75, `Battling as: ${gameState.character.name}`, { fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
+        this.add.text(x, y-300, `Battling as: ${gameState.character.name}`, { fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
         console.log("Hand on entering battle:", gameState.hand);
 
 
         // Title
-        this.add.text(100, 25, 'BattleScene', {
+        this.add.text(x, 25, 'BattleScene', {
             fontSize: '20px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
-        let abilityButton = this.add.text(300, 300, 'Use Hero Ability', { fontSize: '24px', backgroundColor: '#ff5500' })
-            .setOrigin(0.5)
-            .setInteractive();
-
-        let returnToMapButton = this.add.text(300, 225, 'Return to Map', { fontSize: '24px', backgroundColor: '#ff5500' })
+        let abilityButton = this.add.text(x, y+300, 'Use Hero Ability', { fontSize: '24px', backgroundColor: '' })
             .setOrigin(0.5)
             .setInteractive();
 
@@ -46,6 +42,10 @@ export class BattleScene extends Phaser.Scene {
             gameState.character.heroAbility(gameState);
             this.updateResourceDisplay();
         });
+
+        let returnToMapButton = this.add.text(x, 225, 'Return to Map', { fontSize: '24px', backgroundColor: '' })
+            .setOrigin(0.5)
+            .setInteractive();
 
         returnToMapButton.on('pointerdown', () => {
             this.sceneManager.switchScene('MapScene');
@@ -70,12 +70,12 @@ export class BattleScene extends Phaser.Scene {
 
         const spacing = 120;
         const startX = this.cameras.main.centerX - ((gameState.hand.length - 1) * spacing) / 2;
-        const y = 400;
 
         gameState.hand.forEach((card, index) => {
-            const x = startX + index * spacing;
+            const xPos = startX + index * spacing;
+            const yPos = this.cameras.main.centerY * 1.8;
 
-            const renderer = new CardRenderer(this, card, x, y, gameState, (clickedCard) => {
+            const renderer = new CardRenderer(this, card, xPos, yPos, gameState, (clickedCard) => {
                 const cardIndex = gameState.hand.indexOf(clickedCard);
                 if (cardIndex !== -1) {
                     gameState.playCard(cardIndex, this.selectedTarget);
@@ -89,7 +89,7 @@ export class BattleScene extends Phaser.Scene {
     }
 
     createEndTurnButton() {
-        const btn = this.add.text(400, 230, 'End Turn', {
+        const btn = this.add.text(this.x+200, this.y+300, 'End Turn', {
             fontSize: '20px',
             backgroundColor: '#444',
             padding: 10
@@ -140,11 +140,13 @@ export class BattleScene extends Phaser.Scene {
     updateEnemyDisplay() {
         this.enemyUIs = [];
 
+        const spacing = 300;
+        const startY = this.cameras.main.centerY - ((gameState.enemies.length - 1) * spacing) / 2;
         gameState.enemies.forEach((enemy, index) => {
-            const x = 200 + index * 150;
-            const y = 150;
+            const xPos = this.cameras.main.centerX * 1.8;
+            const yPos = startY + index * spacing;
 
-            const enemyUI = new EnemyRenderer(this, enemy, x, y, (target) => {
+            const enemyUI = new EnemyRenderer(this, enemy, xPos, yPos, (target) => {
                 this.selectedTarget = target;
                 this.enemyUIs.forEach(ui => ui.select(ui.enemy === target));
                 console.log('Target selected:', target.name);

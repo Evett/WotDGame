@@ -1,26 +1,30 @@
-import Phaser from 'phaser';
 import SceneManager from '../SceneManager';
+import BaseScene from './BaseScene';
 
-export class AltarScene extends Phaser.Scene {
+export class AltarScene extends BaseScene {
     constructor() {
         super({ key: 'AltarScene' });
     }
 
     preload() {
-        this.load.image('background', 'assets/background.png');
     }
 
     create() {
+        const { x, y } = this.getCenter(this);
         this.sceneManager = new SceneManager(this);
-        this.add.image(300, 300, 'background').setScale(1.2); // Adjust based on image size
+        this.createBackground();
 
         // Title
-        this.add.text(300, 150, 'AltarScene', {
+        this.add.text(x, y-100, 'AltarScene', {
             fontSize: '40px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
-        this.time.delayedCall(3000, () => {
+        let returnToMapButton = this.add.text(x, y, 'Return to Map', { fontSize: '24px', backgroundColor: '' })
+            .setOrigin(0.5)
+            .setInteractive();
+
+        returnToMapButton.on('pointerdown', () => {
             this.sceneManager.switchScene('MapScene');
         });
     }

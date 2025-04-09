@@ -1,22 +1,24 @@
-import Phaser from 'phaser';
 import gameState from '../GameState.js';
 import CharacterLibrary from '../data/CharacterLibrary.js';
 import SceneManager from '../SceneManager.js';
+import BaseScene from './BaseScene.js';
 
-export class CharacterSelectScene extends Phaser.Scene {
+export class CharacterSelectScene extends BaseScene {
     constructor() {
         super({ key: 'CharacterSelectScene' });
     }
 
     create() {
+        const { x, y } = this.getCenter(this);
         this.sceneManager = new SceneManager(this);
-        this.add.text(300, 100, 'Choose Your Character', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
+        this.createBackground();
+        this.add.text(x, y-200, 'Choose Your Character', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
 
-        let yPos = 200;
+        let yPos = y-100;
         Object.keys(CharacterLibrary).forEach((charKey) => {
             const character = CharacterLibrary[charKey];
 
-            let charButton = this.add.text(300, yPos, character.name, { fontSize: '24px', backgroundColor: '#0077ff' })
+            let charButton = this.add.text(x, yPos, character.name, { fontSize: '24px', backgroundColor: '#0077ff' })
                 .setOrigin(0.5)
                 .setInteractive();
 
