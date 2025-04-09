@@ -22,6 +22,7 @@ class GameState {
         this.discardPile = [];
         this.handLimit = 6;
         this.armor = 0;
+        this.nextAttackBonus = 1;
 
         this.enemies = [];
 
@@ -109,6 +110,9 @@ class GameState {
 
             this.hand.splice(index, 1)[0];
             card.play(target, this);
+            if (card.type === "Attack") {
+                this.temporaryEffectReset();
+            }
             console.log("You just played this card:", card);
             this.discardPile.push(card);
         }
@@ -125,6 +129,10 @@ class GameState {
             this.discardPile = [];
             this.shuffleDeck();
         }
+    }
+    
+    temporaryEffectReset() {
+        this.nextAttackBonus = 1;
     }
 
 }

@@ -6,7 +6,6 @@ export class DeckScene extends BaseScene {
     }
 
     preload() {
-        this.load.image('background', 'assets/background.png');
     }
 
     create() {

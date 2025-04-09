@@ -12,7 +12,7 @@ const CardLibrary = {
         description: "Deal 6 damage.",
         effect: (target, state) => {
             if (target) {
-                target.takeDamage(6);
+                target.takeDamage(6 * state.nextAttackBonus);
             }
         }
     }),
@@ -35,7 +35,7 @@ const CardLibrary = {
         requiresTarget: false,
         description: "Next attack deals double damage.",
         effect: (target, state) => {
-            state.nextAttackBonus = "double";
+            state.nextAttackBonus *= 2;
         }
     }),
 };

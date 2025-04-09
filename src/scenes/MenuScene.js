@@ -7,7 +7,6 @@ export class MenuScene extends BaseScene {
     }
 
     preload() {
-        this.load.image('background', 'assets/background.png');
     }
 
     create() {
