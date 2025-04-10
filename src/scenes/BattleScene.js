@@ -78,7 +78,7 @@ export class BattleScene extends BaseScene {
 
             const renderer = new CardRenderer(this, card, xPos, yPos, gameState, (clickedCard) => {
                 const cardIndex = gameState.hand.indexOf(clickedCard);
-                if (cardIndex !== -1) {
+                if (cardIndex !== -1 && this.allowCardPlay) {
                     gameState.playCard(cardIndex, this.selectedTarget);
                     this.updateHandDisplay();
                     this.updateResourceDisplay();
@@ -106,8 +106,8 @@ export class BattleScene extends BaseScene {
     startCombat() {
         console.log("Combat Start");
         gameState.startBattle([
-            EnemyLibrary.Goblin,
-            EnemyLibrary.Orc
+            EnemyLibrary.Goblin(this),
+            EnemyLibrary.Orc(this)
         ]);
 
         this.updateEnemyDisplay();
@@ -118,6 +118,7 @@ export class BattleScene extends BaseScene {
 
     updateResourceDisplay() {
         this.resourceText.setText(
+            `Health: ${gameState.health}\n` +
             `Armor: ${gameState.armor}\n` +
             `Actions: ${gameState.actions} / ${gameState.maxActions}\n` +
             `Mana: ${gameState.mana} / ${gameState.maxMana}`
@@ -144,6 +145,10 @@ export class BattleScene extends BaseScene {
     }
 
     startPlayerTurn() {
+        if(gameState.isDead()) {
+            this.sceneManager.switchScene('GameOverScene');
+            return;
+        }
         this.turnState = 'players';
         this.allowCardPlay = true;
 
@@ -169,5 +174,25 @@ export class BattleScene extends BaseScene {
 
         this.endTurnButton.setAlpha(0.5);
         this.endTurnButton.disableInteractive();
+        console.log('Player turn ended!');
+        this.startEnemyTurn();
+    }
+
+    startEnemyTurn() {
+        let index = 0;
+
+        const processNextEnemy = () => {
+            if (index < gameState.enemies.length) {
+                const enemy = gameState.enemies[index++];
+                enemy.takeTurn(processNextEnemy, gameState);
+                this.updateResourceDisplay();
+            } else {
+                this.time.delayedCall(600, () => {
+                    this.startPlayerTurn();
+                });
+            }
+        };
+
+        processNextEnemy();
     }
 }

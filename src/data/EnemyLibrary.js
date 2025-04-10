@@ -1,13 +1,12 @@
 import Enemy from './Enemy.js'
 
-const createEnemy = (options) => new Enemy(options);
-
 const EnemyLibrary = {
-    Goblin: createEnemy({
+    Goblin: (scene) => new Enemy(scene, {
         name: "Goblin",
         maxHealth: 20
     }),
-    Orc: createEnemy({
+
+    Orc: (scene) => new Enemy(scene, {
         name: "Orc",
         maxHealth: 35
     }),

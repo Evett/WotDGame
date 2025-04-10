@@ -1,9 +1,26 @@
 class Enemy {
-    constructor({ name, maxHealth }) {
-        this.name = name;
-        this.maxHealth = maxHealth;
-        this.health = maxHealth;
+    constructor(scene, options) {
+        this.scene = scene;
+        this.name = options.name;
+        this.maxHealth = options.maxHealth;
+        this.health = options.maxHealth;
         this.isAlive = true;
+    }
+
+    takeTurn(done, target) {
+        if (!this.isAlive) {
+            done();
+            return;
+        }
+
+        console.log('Enemy attacks!');
+
+        const damage = 30
+        target.playerTakeDamage(damage);
+
+        this.scene.time.delayedCall(500, () => {
+            done();
+        })
     }
 
     takeDamage(amount) {

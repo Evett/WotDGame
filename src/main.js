@@ -6,6 +6,7 @@ import { BossScene } from './scenes/BossScene';
 import { AltarScene } from './scenes/AltarScene';
 import { DeckScene } from './scenes/DeckScene';
 import { CharacterSelectScene } from './scenes/CharacterSelectScene';
+import { GameOverScene } from './scenes/GameOverScene';
 import Phaser from 'phaser';
 
 const config = {
@@ -28,7 +29,8 @@ const config = {
         BossScene,
         AltarScene,
         DeckScene,
-        CharacterSelectScene
+        CharacterSelectScene,
+        GameOverScene
     ]
 };
 

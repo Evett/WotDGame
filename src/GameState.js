@@ -45,6 +45,12 @@ class GameState {
         console.log("Initial hand:", this.hand);
     }
 
+    playerTakeDamage(amount) {
+        this.health -= amount;
+        if (this.health < 0) this.health = 0;
+        console.log(`Player takes ${amount} damage. HP: ${this.health}`);
+    }
+
     startBattle(enemiesArray) {
         this.enemies = enemiesArray;
     }
@@ -88,6 +94,9 @@ class GameState {
 
     drawHand() {
         console.log("Drawing Hand");
+        if (this.drawPile.length === 0) {
+            this.reshuffleDiscardIntoDraw();
+        }
         while (this.hand.length < this.handLimit && this.drawPile.length > 0) {
             this.drawCard();
         }
@@ -142,6 +151,13 @@ class GameState {
     
     temporaryEffectReset() {
         this.nextAttackBonus = 1;
+    }
+
+    isDead() {
+        if (this.health === 0) {
+            return true;
+        }
+        return false;
     }
 
 }

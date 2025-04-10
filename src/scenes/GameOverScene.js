@@ -1,0 +1,35 @@
+import gameState from '../GameState.js';
+import SceneManager from '../SceneManager';
+import BaseScene from './BaseScene';
+
+export class GameOverScene extends BaseScene {
+    constructor() {
+        super({ key: 'GameOverScene' });
+    }
+
+    preload() {
+        this.load.image('background', 'assets/jooooooooel.png');
+    }
+
+    create() {
+        const { x, y } = this.getCenter(this);
+        this.sceneManager = new SceneManager(this);
+        this.createBackground();
+
+        this.add.image(x, y, 'background').setScale(1.2);
+
+        // Title
+        this.add.text(x, y-100, 'LOL LOSER you really died while testing xD', {
+            fontSize: '40px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+
+        let restartButton = this.add.text(x, y, 'Try again', { fontSize: '24px', backgroundColor: '' })
+            .setOrigin(0.5)
+            .setInteractive();
+
+        restartButton.on('pointerdown', () => {
+            this.sceneManager.switchScene('MenuScene');
+        });
+    }
+}
