@@ -37,7 +37,7 @@ class GameState {
         this.maxMana = this. mana = character.mana;
 
         this.fullDeck = [...character.deck]; //Initial deck
-        this.drawPile = this.fullDeck;
+        this.drawPile = [...this.fullDeck];
         console.log("Initial deck:", this.fullDeck);
         this.shuffleDeck();
         console.log("After shuffle deck draw pile:", this.drawPile);
@@ -47,6 +47,14 @@ class GameState {
 
     startBattle(enemiesArray) {
         this.enemies = enemiesArray;
+    }
+
+    resetDeck() {
+        this.hand = [];
+        this.discardPile = [];
+        this.drawPile = this.fullDeck;
+        console.log("Reset Deck: ", this.drawPile);
+        this.shuffleDeck();
     }
 
     useHeroAbility() {
@@ -79,6 +87,7 @@ class GameState {
     }
 
     drawHand() {
+        console.log("Drawing Hand");
         while (this.hand.length < this.handLimit && this.drawPile.length > 0) {
             this.drawCard();
         }

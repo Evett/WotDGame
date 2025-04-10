@@ -8,6 +8,7 @@ import BaseScene from './BaseScene.js';
 export class BattleScene extends BaseScene {
     constructor() {
         super({ key: 'BattleScene' });
+        this.turnState = 'players';
     }
 
     preload() {
@@ -89,44 +90,30 @@ export class BattleScene extends BaseScene {
     }
 
     createEndTurnButton() {
-        const btn = this.add.text(this.cameras.main.centerX+200, this.cameras.main.centerY+300, 'End Turn', {
+        this.endTurnButton = this.add.text(this.cameras.main.centerX+200, this.cameras.main.centerY+300, 'End Turn', {
             fontSize: '20px',
             backgroundColor: '#444',
             padding: 10
         }).setInteractive();
     
-        btn.on('pointerdown', () => {
-            // Discard all cards in hand
-            gameState.discardPile.push(...gameState.hand);
-            gameState.hand = [];
-            gameState.mana = gameState.maxMana;
-            gameState.actions = gameState.maxActions;
-    
-            // Draw a new hand
-            for (let i = 0; i < 5; i++) {
-                gameState.drawCard();
+        this.endTurnButton.on('pointerdown', () => {
+            if (this.turnState === 'players' && this.allowCardPlay) {
+                this.endPlayerTurn();
             }
-    
-            this.updateHandDisplay();
-            this.updateResourceDisplay();
         });
     }
 
     startCombat() {
-        // Draw opening hand (e.g. 5 cards)
-
+        console.log("Combat Start");
         gameState.startBattle([
             EnemyLibrary.Goblin,
             EnemyLibrary.Orc
         ]);
 
-        for (let i = 0; i < 5; i++) {
-            gameState.drawCard();
-        }
-    
-        this.updateHandDisplay();
-        this.updateResourceDisplay();
         this.updateEnemyDisplay();
+
+        gameState.resetDeck();
+        this.startPlayerTurn();
     }
 
     updateResourceDisplay() {
@@ -154,5 +141,33 @@ export class BattleScene extends BaseScene {
 
             this.enemyUIs.push(enemyUI);
         });
+    }
+
+    startPlayerTurn() {
+        this.turnState = 'players';
+        this.allowCardPlay = true;
+
+        gameState.discardPile.push(...gameState.hand);
+        gameState.hand = [];
+        gameState.mana = gameState.maxMana;
+        gameState.actions = gameState.maxActions;
+        gameState.drawHand();
+
+        this.updateHandDisplay();
+
+        this.updateResourceDisplay();
+
+        this.endTurnButton.setAlpha(1);
+        this.endTurnButton.setInteractive();
+
+        console.log('Player turn started!');
+    }
+
+    endPlayerTurn() {
+        this.turnState = 'enemy';
+        this.allowCardPlay = false;
+
+        this.endTurnButton.setAlpha(0.5);
+        this.endTurnButton.disableInteractive();
     }
 }
