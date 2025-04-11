@@ -110,6 +110,8 @@ export class BattleScene extends BaseScene {
             EnemyLibrary.Orc(this)
         ]);
 
+        gameState.enemies.forEach(enemy => enemy.decideIntent());
+
         this.updateEnemyDisplay();
 
         gameState.resetDeck();
@@ -185,6 +187,7 @@ export class BattleScene extends BaseScene {
             if (index < gameState.enemies.length) {
                 const enemy = gameState.enemies[index++];
                 enemy.takeTurn(processNextEnemy, gameState);
+                this.enemyUIs.forEach(ui => ui.update());
                 this.updateResourceDisplay();
             } else {
                 this.time.delayedCall(600, () => {

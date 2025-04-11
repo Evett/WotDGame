@@ -14,9 +14,11 @@ export class MapScene extends BaseScene {
         this.add.text(x, y-250, 'Choose Your Path', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
 
         this.nodes = [
+            { x: x-400, y: y-50, type: 'reward' },
             { x: x-200, y: y, type: 'battle' },
             { x: x, y: y+50, type: 'event' },
-            { x: x+200, y: y, type: 'altar' }
+            { x: x+200, y: y, type: 'altar' },
+            { x: x+400, y: y-50, type: 'deck' }
         ];
 
         this.nodes.forEach((node, index) => {
@@ -31,9 +33,11 @@ export class MapScene extends BaseScene {
 
     getSceneType(type) {
         const sceneMap = {
+            'reward' : 'CardRewardScene',
             'battle' : 'BattleScene',
             'event' : 'EventScene',
-            'altar' : 'AltarScene'
+            'altar' : 'AltarScene',
+            'deck' : 'DeckScene'
         };
         return sceneMap[type] || 'MapScene';
     }

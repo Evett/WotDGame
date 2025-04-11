@@ -51,6 +51,29 @@ class GameState {
         console.log(`Player takes ${amount} damage. HP: ${this.health}`);
     }
 
+    playerHeal(amount) {
+        this.health += amount;
+        if (this.health > this.maxHealth) this.health = this.maxHealth;
+        console.log(`Player heals ${amount}. HP: ${this.health}`);
+    }
+
+    playerArmor(amount) {
+        this.armor += amount;
+        console.log(`Player puts on ${amount} armor. Total armor: ${this.armor}`);
+    }
+
+    summonAlly() {
+
+    }
+
+    applyPlayerBuff() {
+        
+    }
+
+    applyStatus() {
+        
+    }
+
     startBattle(enemiesArray) {
         this.enemies = enemiesArray;
     }
@@ -58,7 +81,7 @@ class GameState {
     resetDeck() {
         this.hand = [];
         this.discardPile = [];
-        this.drawPile = this.fullDeck;
+        this.drawPile = [...this.fullDeck];
         console.log("Reset Deck: ", this.drawPile);
         this.shuffleDeck();
     }
@@ -82,23 +105,40 @@ class GameState {
     }
 
     drawCard() {
-        if (this.drawPile.length === 0) {
-            this.reshuffleDiscardIntoDraw();
-        }
-        if (this.drawPile.length > 0 && this.hand.length < this.handLimit) {
+        this.drawCards(1);
+    }
+
+    drawCards(amount=1) {
+        for (let i = 0; i < amount; i++) {
+            if (this.hand.length >= this.handLimit) {
+                console.log("Hand is full.");
+                break;
+            }
+    
+            if (this.drawPile.length === 0) {
+                this.reshuffleDiscardIntoDraw();
+            }
+    
+            if (this.drawPile.length === 0) {
+                console.log("No cards left to draw.");
+                break;
+            }
+    
             const card = this.drawPile.pop();
-            console.log("You just drew this card:", card);
+            console.log("You drew:", card.name);
             this.hand.push(card);
         }
     }
-
+    
     drawHand() {
         console.log("Drawing Hand");
-        if (this.drawPile.length === 0) {
-            this.reshuffleDiscardIntoDraw();
-        }
-        while (this.hand.length < this.handLimit && this.drawPile.length > 0) {
+    
+        while (this.hand.length < this.handLimit) {
+            const beforeDraw = this.hand.length;
             this.drawCard();
+            if (this.hand.length === beforeDraw) {
+                break;
+            }
         }
     }
 
