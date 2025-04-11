@@ -18,7 +18,7 @@ export class CharacterSelectScene extends BaseScene {
         Object.keys(CharacterLibrary).forEach((charKey) => {
             const character = CharacterLibrary[charKey];
 
-            let charButton = this.add.text(x, yPos, character.name, { fontSize: '24px', backgroundColor: '#0077ff' })
+            let charButton = this.add.text(x, yPos, character.name, { fontSize: '24px', backgroundColor: '' })
                 .setOrigin(0.5)
                 .setInteractive();
 

@@ -9,9 +9,9 @@ class Card {
         this.effect = effect;                   // Function to call when played
     }
 
-    play(target, state) {
+    play(target, state, scene) {
         if (this.effect) {
-            this.effect(target, state);
+            this.effect(target, state, scene);
         }
     }
 }

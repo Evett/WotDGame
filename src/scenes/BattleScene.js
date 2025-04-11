@@ -22,6 +22,7 @@ export class BattleScene extends BaseScene {
             fontSize: '20px',
             color: '#fff'
         });
+        this.renderHand = true;
         this.createEndTurnButton();
         this.startCombat();
         this.scale.on('resize', this.resize, this);
@@ -79,7 +80,7 @@ export class BattleScene extends BaseScene {
             const renderer = new CardRenderer(this, card, xPos, yPos, gameState, (clickedCard) => {
                 const cardIndex = gameState.hand.indexOf(clickedCard);
                 if (cardIndex !== -1 && this.allowCardPlay) {
-                    gameState.playCard(cardIndex, this.selectedTarget);
+                    gameState.playCard(cardIndex, this.selectedTarget, this);
                     this.updateHandDisplay();
                     this.updateResourceDisplay();
                     this.enemyUIs.forEach(ui => ui.update());
@@ -158,7 +159,7 @@ export class BattleScene extends BaseScene {
         gameState.hand = [];
         gameState.mana = gameState.maxMana;
         gameState.actions = gameState.maxActions;
-        gameState.drawHand();
+        gameState.drawHand(this);
 
         this.updateHandDisplay();
 

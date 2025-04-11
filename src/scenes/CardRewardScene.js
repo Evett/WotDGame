@@ -15,7 +15,7 @@ export class CardRewardScene extends BaseScene {
         this.createBackground();
         this.add.text(x, 50, 'Choose a Card', { fontSize: '24px', color: '#fff' }).setOrigin(0.5);
 
-        const cardOptions = Phaser.Utils.Array.Shuffle(Object.values(CardLibrary)).slice(0, 3);
+        const cardOptions = Phaser.Utils.Array.Shuffle(Object.values(CardLibrary.cards)).slice(0, 3);
 
         this.cardUIs = [];
 
@@ -29,8 +29,7 @@ export class CardRewardScene extends BaseScene {
             const renderer = new CardRenderer(this, card, xPos, yPos, gameState, (clickedCard) => {
                 const cardIndex = cardOptions.indexOf(clickedCard);
                 if (cardIndex !== -1) {
-                    console.log("Added card to deck:", cardOptions[cardIndex]);
-                    gameState.fullDeck.push(cardOptions[cardIndex]);
+                    gameState.addCard(cardOptions[cardIndex]);
                 }
             });
             this.cardUIs.push(renderer);

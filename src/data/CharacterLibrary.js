@@ -10,10 +10,10 @@ const CharacterLibrary = {
         actions: 3,
         mana: 2,
         deck: [
-            CardLibrary.Strike,
-            CardLibrary.Strike,
-            CardLibrary.Block,
-            CardLibrary.Berserk
+            CardLibrary.cards.Strike,
+            CardLibrary.cards.Strike,
+            CardLibrary.cards.Block,
+            CardLibrary.cards.Berserk
         ],
         heroAbility: (gameState) => {
             console.log("Alaen's Summon Khan: Gain +1 Action!");
@@ -27,10 +27,10 @@ const CharacterLibrary = {
         mana: 2,
         deck: 
         [
-            CardLibrary.Strike,
-            CardLibrary.Block,
-            CardLibrary.Block,
-            CardLibrary.Berserk
+            CardLibrary.cards.Strike,
+            CardLibrary.cards.Block,
+            CardLibrary.cards.Block,
+            CardLibrary.cards.Berserk
         ],
         heroAbility: (gameState) => {
             console.log("Hassan's Shadow Step: Gain temporary Evasion!");
@@ -43,10 +43,10 @@ const CharacterLibrary = {
         mana: 3,
         deck: 
         [
-            CardLibrary.Strike,
-            CardLibrary.Strike,
-            CardLibrary.Berserk,
-            CardLibrary.Berserk
+            CardLibrary.cards.Strike,
+            CardLibrary.cards.Strike,
+            CardLibrary.cards.Berserk,
+            CardLibrary.cards.Berserk
         ],
         heroAbility: (gameState) => {
             console.log("Marcus's Arcane Boost: Restore 1 Action!");
@@ -60,10 +60,10 @@ const CharacterLibrary = {
         mana: 1,
         deck: 
         [
-            CardLibrary.Strike,
-            CardLibrary.Block,
-            CardLibrary.Berserk,
-            CardLibrary.Berserk
+            CardLibrary.cards.Strike,
+            CardLibrary.cards.Block,
+            CardLibrary.cards.Berserk,
+            CardLibrary.cards.Berserk
         ],
         heroAbility: (gameState) => {
             console.log("Mohef's Precision: Your next attack deals double damage!");
@@ -76,10 +76,10 @@ const CharacterLibrary = {
         mana: 1,
         deck: 
         [
-            CardLibrary.Strike,
-            CardLibrary.Strike,
-            CardLibrary.Block,
-            CardLibrary.Block
+            CardLibrary.cards.Strike,
+            CardLibrary.cards.Strike,
+            CardLibrary.cards.Block,
+            CardLibrary.cards.Block
         ],
         heroAbility: (gameState) => {
             console.log("Nephereta's Blessing: Heal 5 HP!");
@@ -93,10 +93,10 @@ const CharacterLibrary = {
         mana: 2,
         deck: 
         [
-            CardLibrary.Strike,
-            CardLibrary.Strike,
-            CardLibrary.Strike,
-            CardLibrary.Block
+            CardLibrary.cards.Strike,
+            CardLibrary.cards.Strike,
+            CardLibrary.cards.Strike,
+            CardLibrary.cards.Block
         ],
         heroAbility: (gameState) => {
             console.log("Urusha's Sacrifice: Lose 5 HP, gain 2 actions.");

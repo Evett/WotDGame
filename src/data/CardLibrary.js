@@ -2,7 +2,7 @@ import Card from './Card.js';
 
 const createCard = (options) => new Card(options);
 
-const CardLibrary = {
+const cards = {
     Strike: createCard({
         name: "Strike",
         actionCost: 1,
@@ -155,8 +155,8 @@ const CardLibrary = {
         type: "Spell",
         requiresTarget: false,
         description: "Draw 2 cards. Lose 2 HP.",
-        effect: (_, state) => {
-            state.drawCards(2);
+        effect: (_, state, scene) => {
+            state.drawCards(2, scene);
             state.playerTakeDamage(2);
         }
     }),
@@ -234,11 +234,16 @@ const CardLibrary = {
         type: "Skill",
         requiresTarget: false,
         description: "Lose 5 HP. Draw 3 cards.",
-        effect: (_, state) => {
+        effect: (_, state, scene) => {
             state.playerTakeDamage(5);
-            state.drawCards(3);
+            state.drawCards(3, scene);
         }
     }),
+};
+
+const CardLibrary = {
+    cards,
+    getRandom: () => Phaser.Utils.Array.GetRandom(Object.values(cards)),
 };
 
 export default CardLibrary;
