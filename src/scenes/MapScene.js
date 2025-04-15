@@ -18,7 +18,8 @@ export class MapScene extends BaseScene {
             { x: x-200, y: y, type: 'battle' },
             { x: x, y: y+50, type: 'event' },
             { x: x+200, y: y, type: 'altar' },
-            { x: x+400, y: y-50, type: 'deck' }
+            { x: x+400, y: y-50, type: 'deck' },
+            { x: x +600, y, type: 'restsite' }
         ];
 
         this.nodes.forEach((node, index) => {
@@ -37,7 +38,8 @@ export class MapScene extends BaseScene {
             'battle' : 'BattleScene',
             'event' : 'EventScene',
             'altar' : 'AltarScene',
-            'deck' : 'DeckScene'
+            'deck' : 'DeckScene',
+            'restsite' : 'RestSiteScene'
         };
         return sceneMap[type] || 'MapScene';
     }

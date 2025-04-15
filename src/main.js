@@ -8,6 +8,7 @@ import { DeckScene } from './scenes/DeckScene';
 import { CharacterSelectScene } from './scenes/CharacterSelectScene';
 import { GameOverScene } from './scenes/GameOverScene';
 import { CardRewardScene } from './scenes/CardRewardScene';
+import { RestSiteScene } from './scenes/RestSiteScene';
 import Phaser from 'phaser';
 
 const config = {
@@ -32,7 +33,8 @@ const config = {
         DeckScene,
         CharacterSelectScene,
         GameOverScene,
-        CardRewardScene
+        CardRewardScene,
+        RestSiteScene
     ]
 };
 

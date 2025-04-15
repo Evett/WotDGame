@@ -9,6 +9,7 @@ const cards = {
         manaCost: 0,
         type: "Attack",
         requiresTarget: true,
+        isOncePerDay: false,
         description: "Deal 6 damage.",
         effect: (target, state) => {
             if (target) {
@@ -23,6 +24,7 @@ const cards = {
         manaCost: 1,
         type: "Skill",
         requiresTarget: false,
+        isOncePerDay: false,
         description: "Gain 5 armor.",
         effect: (target, state) => {
             state.armor = (state.armor || 0) + 5;
@@ -35,6 +37,7 @@ const cards = {
         manaCost: 1,
         type: "Power",
         requiresTarget: false,
+        isOncePerDay: false,
         description: "Next attack deals double damage.",
         effect: (target, state) => {
             state.nextAttackBonus *= 2;
@@ -47,6 +50,7 @@ const cards = {
         manaCost: 1,
         type: "Attack",
         requiresTarget: true,
+        isOncePerDay: false,
         description: "Deal 8 damage. Double if enemy is Evil.",
         effect: (target, state) => {
             if (target) {
@@ -63,6 +67,7 @@ const cards = {
         manaCost: 2,
         type: "Skill",
         requiresTarget: false,
+        isOncePerDay: false,
         description: "Heal 10 HP.",
         effect: (_, state) => {
             state.playerHeal(10);
@@ -75,6 +80,7 @@ const cards = {
         manaCost: 1,
         type: "Skill",
         requiresTarget: false,
+        isOncePerDay: false,
         description: "Gain 8 armor.",
         effect: (_, state) => {
             state.playerArmor(8);
@@ -87,6 +93,7 @@ const cards = {
         manaCost: 2,
         type: "Spell",
         requiresTarget: false,
+        isOncePerDay: false,
         description: "Summon an elemental ally that attacks for 4 damage each turn.",
         effect: (_, state) => {
             state.summonAlly({ name: "Lesser Elemental", damage: 4, duration: 3 });
@@ -99,6 +106,7 @@ const cards = {
         manaCost: 0,
         type: "Attack",
         requiresTarget: true,
+        isOncePerDay: false,
         description: "Your Eidolon deals 5 damage.",
         effect: (target, state) => {
             if (target && state.hasEidolon) {
@@ -113,6 +121,7 @@ const cards = {
         manaCost: 3,
         type: "Spell",
         requiresTarget: true,
+        isOncePerDay: false,
         description: "Stun a non-boss enemy for 1 turn.",
         effect: (target, state) => {
             if (target && !target.isBoss) {
@@ -129,6 +138,7 @@ const cards = {
         manaCost: 1,
         type: "Attack",
         requiresTarget: true,
+        isOncePerDay: false,
         description: "Deal 10 damage. Take 3 damage.",
         effect: (target, state) => {
             if (target) {
@@ -144,6 +154,7 @@ const cards = {
         manaCost: 1,
         type: "Skill",
         requiresTarget: false,
+        isOncePerDay: false,
         description: "Gain +2 attack damage for 2 turns.",
         effect: (_, state) => {
             state.applyPlayerBuff("AttackBonus", 2, 2);
@@ -156,6 +167,7 @@ const cards = {
         manaCost: 1,
         type: "Spell",
         requiresTarget: false,
+        isOncePerDay: false,
         description: "Draw 2 cards. Lose 2 HP.",
         effect: (_, state, scene) => {
             state.drawCards(2, scene);
@@ -169,6 +181,7 @@ const cards = {
         manaCost: 1,
         type: "Spell",
         requiresTarget: true,
+        isOncePerDay: false,
         description: "Deal 6 damage that can't miss.",
         effect: (target, state) => {
             if (target) {
@@ -183,6 +196,7 @@ const cards = {
         manaCost: 3,
         type: "Spell",
         requiresTarget: false,
+        isOncePerDay: true,
         description: "Deal 10 damage to all enemies.",
         effect: (_, state) => {
             state.enemies.forEach(e => e.takeDamage(10));
@@ -195,6 +209,7 @@ const cards = {
         manaCost: 1,
         type: "Spell",
         requiresTarget: false,
+        isOncePerDay: false,
         description: "Gain 6 armor. Negate the next attack.",
         effect: (_, state) => {
             state.playerArmor(6);
@@ -208,6 +223,7 @@ const cards = {
         manaCost: 1,
         type: "Attack",
         requiresTarget: true,
+        isOncePerDay: false,
         description: "Deal 7 damage. Heal for half.",
         effect: (target, state) => {
             if (target) {
@@ -223,6 +239,7 @@ const cards = {
         manaCost: 2,
         type: "Skill",
         requiresTarget: false,
+        isOncePerDay: false,
         description: "Gain 2 strength for 2 turns.",
         effect: (_, state) => {
             state.applyPlayerBuff("Strength", 2, 2);
@@ -235,6 +252,7 @@ const cards = {
         manaCost: 0,
         type: "Skill",
         requiresTarget: false,
+        isOncePerDay: false,
         description: "Lose 5 HP. Draw 3 cards.",
         effect: (_, state, scene) => {
             state.playerTakeDamage(5);

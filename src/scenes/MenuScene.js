@@ -57,7 +57,7 @@ export class MenuScene extends BaseScene {
         });
 
         quitButton.on('pointerdown', () => {
-            console.log('Why you tryna quit a browser game kek'); // Later, integrate actual game exit logic
+            console.log('Why you tryna quit a browser game kek');
         });
     }
 }

@@ -23,6 +23,7 @@ class GameState {
         this.handLimit = 6;
         this.armor = 0;
         this.nextAttackBonus = 1;
+        this.removedUntilRest = [];
 
         this.enemies = [];
 
@@ -184,6 +185,16 @@ class GameState {
                 console.log("No target selected!");
                 return;
             }
+
+            if (card.isOncePerDay) {
+                const handIndex = gameState.hand.findIndex(c => c.id === card.id);
+                if (handIndex !== -1) {
+                    const [removedCard] = gameState.hand.splice(index, 1);
+                    gameState.removedUntilRest.push(removedCard);
+                    console.log("Daily card removed from deck", removedCard);
+                    return;
+                }
+            }
     
             // Deduct cost
             this.actions -= card.actionCost;
@@ -214,6 +225,12 @@ class GameState {
     
     temporaryEffectReset() {
         this.nextAttackBonus = 1;
+    }
+
+    restoreDailyCards() {
+        console.log("Restored daily cards");
+        this.fullDeck.push(...this.removedUntilRest);
+        this.removedUntilRest = [];
     }
 
     isDead() {
