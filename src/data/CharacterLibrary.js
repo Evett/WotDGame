@@ -13,7 +13,13 @@ const CharacterLibrary = {
             CardLibrary.cards.Strike,
             CardLibrary.cards.Strike,
             CardLibrary.cards.Block,
-            CardLibrary.cards.Berserk
+            CardLibrary.cards.Block,
+            CardLibrary.cards.Block,
+            CardLibrary.cards.EidolonStrike,
+            CardLibrary.cards.EidolonStrike,
+            CardLibrary.cards.Berserk,
+            CardLibrary.cards.PlanarBinding,
+            CardLibrary.cards.SummonLesserElemental
         ],
         heroAbility: (gameState) => {
             console.log("Alaen's Summon Khan: Gain +1 Action!");
@@ -28,9 +34,15 @@ const CharacterLibrary = {
         deck: 
         [
             CardLibrary.cards.Strike,
+            CardLibrary.cards.Strike,
             CardLibrary.cards.Block,
             CardLibrary.cards.Block,
-            CardLibrary.cards.Berserk
+            CardLibrary.cards.Block,
+            CardLibrary.cards.EidolonStrike,
+            CardLibrary.cards.EidolonStrike,
+            CardLibrary.cards.Berserk,
+            CardLibrary.cards.PlanarBinding,
+            CardLibrary.cards.SummonLesserElemental
         ],
         heroAbility: (gameState) => {
             console.log("Hassan's Shadow Step: Gain temporary Evasion!");
@@ -45,8 +57,14 @@ const CharacterLibrary = {
         [
             CardLibrary.cards.Strike,
             CardLibrary.cards.Strike,
-            CardLibrary.cards.Berserk,
-            CardLibrary.cards.Berserk
+            CardLibrary.cards.Block,
+            CardLibrary.cards.MagicMissile,
+            CardLibrary.cards.MagicMissile,
+            CardLibrary.cards.MagicMissile,
+            CardLibrary.cards.Fireball,
+            CardLibrary.cards.Shield,
+            CardLibrary.cards.Shield,
+            CardLibrary.cards.Shield,
         ],
         heroAbility: (gameState) => {
             console.log("Marcus's Arcane Boost: Restore 1 Action!");
@@ -61,9 +79,15 @@ const CharacterLibrary = {
         deck: 
         [
             CardLibrary.cards.Strike,
+            CardLibrary.cards.Strike,
+            CardLibrary.cards.Strike,
             CardLibrary.cards.Block,
+            CardLibrary.cards.Block,
+            CardLibrary.cards.BloodFury,
+            CardLibrary.cards.BloodFury,
             CardLibrary.cards.Berserk,
-            CardLibrary.cards.Berserk
+            CardLibrary.cards.RagingHowl,
+            CardLibrary.cards.ArcaneBloodline
         ],
         heroAbility: (gameState) => {
             console.log("Mohef's Precision: Your next attack deals double damage!");
@@ -79,7 +103,13 @@ const CharacterLibrary = {
             CardLibrary.cards.Strike,
             CardLibrary.cards.Strike,
             CardLibrary.cards.Block,
-            CardLibrary.cards.Block
+            CardLibrary.cards.Block,
+            CardLibrary.cards.Block,
+            CardLibrary.cards.SmiteEvil,
+            CardLibrary.cards.SmiteEvil,
+            CardLibrary.cards.LayOnHands,
+            CardLibrary.cards.DivineShield,
+            CardLibrary.cards.DivineShield
         ],
         heroAbility: (gameState) => {
             console.log("Nephereta's Blessing: Heal 5 HP!");
@@ -95,8 +125,14 @@ const CharacterLibrary = {
         [
             CardLibrary.cards.Strike,
             CardLibrary.cards.Strike,
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Block
+            CardLibrary.cards.Berserk,
+            CardLibrary.cards.Block,
+            CardLibrary.cards.Block,
+            CardLibrary.cards.Block,
+            CardLibrary.cards.SacredStrike,
+            CardLibrary.cards.SacredStrike,
+            CardLibrary.cards.BlessingOfWar,
+            CardLibrary.cards.Sacrifice
         ],
         heroAbility: (gameState) => {
             console.log("Urusha's Sacrifice: Lose 5 HP, gain 2 actions.");

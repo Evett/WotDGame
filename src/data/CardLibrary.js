@@ -80,7 +80,7 @@ const cards = {
             state.playerArmor(8);
         }
     }),
-    //Summoner cards
+    //Summoner 1 cards
     SummonLesserElemental: createCard({
         name: "Summon Lesser Elemental",
         actionCost: 1,
@@ -120,6 +120,8 @@ const cards = {
             }
         }
     }),
+    //Summoner 2 cards
+    //todo
     //Bloodrager cards
     BloodFury: createCard({
         name: "Blood Fury",
@@ -151,7 +153,7 @@ const cards = {
     ArcaneBloodline: createCard({
         name: "Arcane Bloodline",
         actionCost: 0,
-        manaCost: 2,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: false,
         description: "Draw 2 cards. Lose 2 HP.",
