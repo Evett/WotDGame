@@ -2,6 +2,7 @@ import SceneManager from '../SceneManager';
 import BaseScene from './BaseScene';
 import gameState from '../GameState.js';
 import EventLibrary from '../data/EventLibrary.js';
+import EventTags from '../data/EventTags.js';
 
 export class EventScene extends BaseScene {
     constructor() {
@@ -16,7 +17,7 @@ export class EventScene extends BaseScene {
         this.sceneManager = new SceneManager(this);
         this.createBackground();
 
-        const event = EventLibrary.getRandom();
+        const event = EventLibrary.getRandomMatching(event => gameState.health > 10 || !event.tags.includes(EventTags.RISKY));
 
         console.log("Starting event:", event);
 

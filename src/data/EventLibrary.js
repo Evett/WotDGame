@@ -1,17 +1,8 @@
 import Event from './Event.js';
 import CardLibrary from './CardLibrary.js';
+import EventTags from './EventTags.js';
 
 const createEvent = (options) => new Event(options);
-
-const EventTags = {
-    HEALING: "healing",
-    GOLD: "gold",
-    RISKY: "risky",
-    CARD: "card",
-    COMBAT: "combat",
-    SAFE: "safe",
-    NEUTRAL: "neutral"
-}
 
 const events = {
     LostMerchant: createEvent( {
@@ -75,7 +66,7 @@ const EventLibrary = {
         return Phaser.Utils.Array.GetRandom(filtered);
     }
     //Usage: EventLibrary.getRandomMatching(event => event.tags.included(EventTags.HEALING) || event.tags.included(EventTags.SAFE));
-    //Usage with other filter: EventLibrary.getRandomMatching(event => state.health > 10 || !eventtags.includes(EventTags.RISKY));
+    //Usage with other filter: EventLibrary.getRandomMatching(event => gameState.health > 10 || !event.tags.includes(EventTags.RISKY));
 };
 
 export default EventLibrary;
