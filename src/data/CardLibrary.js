@@ -264,6 +264,10 @@ const cards = {
 const CardLibrary = {
     cards,
     getRandom: () => Phaser.Utils.Array.GetRandom(Object.values(cards)),
+    getRandomCards(amount = 1) {
+        const randomCards = Phaser.Utils.Array.Shuffle(Object.values(cards)).slice(0, amount);
+        return randomCards;
+    }
 };
 
 export default CardLibrary;

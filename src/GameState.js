@@ -83,6 +83,17 @@ class GameState {
         console.log(`After gaining ${amount} gold, you have ${this.gold} gold.`);
     }
 
+    loseGold(amount) {
+        if (this.gold >= amount) {
+            this.gold -= amount;
+            console.log(`After losing ${amount} gold, you have ${this.gold} gold.`);
+            return true;
+        }
+        
+        console.log('Not enough money!');
+        return false;
+    }
+
     startBattle(enemiesArray) {
         this.enemies = enemiesArray;
     }

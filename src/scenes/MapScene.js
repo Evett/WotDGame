@@ -14,6 +14,7 @@ export class MapScene extends BaseScene {
         this.add.text(x, y-250, 'Choose Your Path', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
 
         this.nodes = [
+            { x: x-600, y: y, type: 'shop' },
             { x: x-400, y: y-50, type: 'reward' },
             { x: x-200, y: y, type: 'battle' },
             { x: x, y: y+50, type: 'event' },
@@ -34,6 +35,7 @@ export class MapScene extends BaseScene {
 
     getSceneType(type) {
         const sceneMap = {
+            'shop' : 'ShopScene',
             'reward' : 'CardRewardScene',
             'battle' : 'BattleScene',
             'event' : 'EventScene',

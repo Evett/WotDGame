@@ -1,5 +1,5 @@
 class CardRenderer {
-    constructor(scene, card, x, y, gameState, onClick = () => {}) {
+    constructor(scene, card, x, y, gameState, onClick = () => {}, options = {}) {
         this.scene = scene;
         this.card = card;
         this.x = x;
@@ -7,12 +7,13 @@ class CardRenderer {
         this.gameState = gameState;
         this.onClick = onClick;
         this.container = null;
+        this.goldCost = options.goldCost;
 
         this.render();
     }
 
     render() {
-        const { scene, card, x, y, gameState } = this;
+        const { scene, card, x, y, gameState, options } = this;
         const width = 100;
         const height = 150;
 
@@ -36,6 +37,15 @@ class CardRenderer {
         }).setOrigin(0.5);
         this.container.add(descText);
 
+        if (this.goldCost) {
+            const goldCost = scene.add.text(0, height, `${this.goldCost} gold`,{
+                fontSize: '12px', 
+                color: '#ff0',
+                fontFamily: 'Arial' 
+            }).setOrigin(0.5);
+            this.container.add(goldCost);
+        }
+
         const costParts = [];
         if (card.actionCost > 0) costParts.push(`${card.actionCost}A`);
         if (card.manaCost > 0) costParts.push(`${card.manaCost}M`);
@@ -48,7 +58,7 @@ class CardRenderer {
         background.setInteractive();
         background.on('pointerover', () => background.setFillStyle(0x444444));
         background.on('pointerout', () => background.setFillStyle(0x2c2c2c));
-        if (gameState.actions < card.actionCost || gameState.mana < card.manaCost) {
+        if (!this.goldCost && (gameState.actions < card.actionCost || gameState.mana < card.manaCost)) {
             background.setAlpha(0.5);
         }
         background.on('pointerdown', () => {
