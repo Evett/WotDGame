@@ -4,19 +4,14 @@ class Enemy {
         this.name = options.name;
         this.maxHealth = options.maxHealth;
         this.health = options.maxHealth;
+        this.intents = options.intents;
         this.isAlive = true;
 
         this.intent = null;
     }
 
     decideIntent() {
-        const possibleIntents = [
-            { type: 'attack', damage: 6 },
-            { type: 'block', amount: 5 },
-            { type: 'buff', effect: 'strength' }
-        ];
-
-        const choice = Phaser.Math.RND.pick(possibleIntents);
+        const choice = Phaser.Math.RND.pick(this.intents);
         this.intent = choice;
 
         if (choice.type === 'attack') {

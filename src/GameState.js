@@ -12,7 +12,7 @@ class GameState {
         this.mana = 3;
         this.deck = [];
         this.gold = 50;
-        this.relics = [];
+        this.magicItems = [];
         this.currentNode = null;
 
         //Deck management
@@ -59,6 +59,12 @@ class GameState {
     playerArmor(amount) {
         this.armor += amount;
         console.log(`Player puts on ${amount} armor. Total armor: ${this.armor}`);
+    }
+
+    gainHealth(amount) {
+        this.maxHealth += amount;
+        this.health += amount;
+        console.log(`Player gains ${amount}. HP: ${this.maxHealth}`)
     }
 
     summonAlly() {
@@ -249,6 +255,14 @@ class GameState {
             return true;
         }
         return false;
+    }
+
+    runItemTriggers(triggerName, ...args) {
+        this.magicItems.forEach(item => {
+            if (item.triggers && item.triggers[triggerName]) {
+                item.triggers[triggerName](this, ...args);
+            }
+        });
     }
 
 }
