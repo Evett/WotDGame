@@ -1,5 +1,5 @@
 class MagicItemRenderer extends Phaser.GameObjects.Container {
-    constructor(scene, x, y, item, onClick = null) {
+    constructor(scene, x, y, item, onClick = () => {}) {
         super(scene, x, y);
 
         this.scene = scene;
@@ -27,7 +27,7 @@ class MagicItemRenderer extends Phaser.GameObjects.Container {
 
         if (onClick) {
             this.setInteractive(new Phaser.Geom.Rectangle(-90, -50, 180, 100), Phaser.Geom.Rectangle.Contains);
-            this.on('pointerdown', () => onClick(item));
+            this.on('pointerdown', () => onClick(this.item));
             this.on('pointerover', () => bg.setStrokeStyle(2, 0xffff00));
             this.on('pointerout', () => bg.setStrokeStyle(2, 0xffffff));
         }

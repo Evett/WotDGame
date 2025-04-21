@@ -79,6 +79,23 @@ class GameState {
         
     }
 
+    addMagicItem(item) {
+        console.log("Checking if has item:", item);
+        if (!this.hasMagicItem(item.id)) {
+            this.magicItems.push(item);
+            console.log("Added magic item to inventory:", item.name);
+            return true;
+        }
+        console.log("Already has item:", item.name);
+        return false;
+    }
+
+    hasMagicItem(itemId) {
+        console.log("All magic items when checking", this.magicItems);
+        console.log(itemId);
+        return this.magicItems.some(item => item.id === itemId);
+    }
+
     addCard(card) {
         this.fullDeck.push(card);
         console.log("Added card to deck:", card);
@@ -258,13 +275,23 @@ class GameState {
     }
 
     runItemTriggers(triggerName, ...args) {
+        console.log("Running triggers for", triggerName);
         this.magicItems.forEach(item => {
             if (item.triggers && item.triggers[triggerName]) {
+                console.log("Running trigger for item:", item);
                 item.triggers[triggerName](this, ...args);
             }
         });
     }
 
+    useMagicItem(itemIndex, target = null, scene) {
+        if (itemIndex >= 0 && itemIndex < this.magicItems.length) {
+            const magicItem = this.magicItems[itemIndex];
+            
+            magicItem.effect(target, this, scene);
+            console.log("You just used this magic item:", magicItem);
+        }
+    }
 }
 
 const gameState = new GameState();

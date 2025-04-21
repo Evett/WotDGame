@@ -4,6 +4,7 @@ const createMagicItem = (options) => new MagicItem(options);
 
 const magicItems = {
     AmuletOfVitality: createMagicItem({
+        id: "amulet_of_vitality",
         name: "Amulet of Vitality",
         description: "Start each battle with +5 max health.",
         type: "passive",
@@ -16,15 +17,15 @@ const magicItems = {
     }),
 
     WandOfFire: createMagicItem({
+        id: "wand_of_fire",
         name: "Wand of Fire",
         description: "Deal 10 damage to a random enemy. Usable once per combat.",
         type: "usable",
         isUsed: false,
-        effect: (state, enemies) => {
-            if (this.isUsed) return;
-            const target = enemies[Math.floor(Math.random() * enemies.length)];
-            target.takeDamage(10);
-            this.isUsed = true;
+        effect: (_, state, scene) => {
+            const randomTarget = state.enemies[Math.floor(Math.random() * state.enemies.length)];
+            console.log("Target takes 10 damage from Wand of Fire:", randomTarget);
+            randomTarget.takeDamage(10);
         }
     })
 };

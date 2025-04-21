@@ -3,6 +3,7 @@ import SceneManager from '../SceneManager';
 import CardRenderer from '../renderers/CardRenderer.js';
 import EnemyRenderer from '../renderers/EnemyRenderer.js';
 import EnemyLibrary from '../data/EnemyLibrary.js';
+import MagicItemRenderer from '../renderers/MagicItemRenderer.js';
 import BaseScene from './BaseScene.js';
 
 export class BattleScene extends BaseScene {
@@ -116,6 +117,7 @@ export class BattleScene extends BaseScene {
         this.updateEnemyDisplay();
 
         gameState.resetDeck();
+        gameState.runItemTriggers("onBattleStart");
         this.startPlayerTurn();
     }
 
@@ -162,7 +164,7 @@ export class BattleScene extends BaseScene {
         gameState.drawHand(this);
 
         this.updateHandDisplay();
-
+        this.updateUsableMagicItemDisplay();
         this.updateResourceDisplay();
 
         this.endTurnButton.setAlpha(1);
@@ -198,5 +200,28 @@ export class BattleScene extends BaseScene {
         };
 
         processNextEnemy();
+    }
+
+    updateUsableMagicItemDisplay() {
+        if (this.usableItemUIs) {
+            this.usableItemUIs.forEach(t => t.destroy());
+        }
+
+        this.usableItemUIs = [];
+
+        gameState.magicItems.forEach((item, index) => {
+            const x = 100;
+            const y = 550 + index*100;
+        
+            const renderer = new MagicItemRenderer(this, x, y, item, (clickedItem) => {
+                const itemIndex = gameState.magicItems.indexOf(clickedItem);
+                if (itemIndex !== -1 && item.type === "usable") {
+                    gameState.useMagicItem(itemIndex, this.selectedTarget, this);
+                    this.updateUsableMagicItemDisplay();
+                    this.updateEnemyDisplay();
+                }
+            });
+            this.usableItemUIs.push(renderer);
+        });
     }
 }

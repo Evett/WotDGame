@@ -2,6 +2,7 @@ import SceneManager from '../SceneManager';
 import BaseScene from './BaseScene';
 import MagicItemLibrary from '../data/MagicItemLibrary';
 import MagicItemRenderer from '../renderers/MagicItemRenderer';
+import gameState from '../GameState';
 
 export class AltarScene extends BaseScene {
     constructor() {
@@ -29,7 +30,10 @@ export class AltarScene extends BaseScene {
             const xPos = 100 + (index % 9) * 180;
             const yPos = 150 + Math.floor(index / 9) * 220;
             new MagicItemRenderer(this, xPos, yPos, item, (selectedItem) => {
-                console.log("Selected item:", selectedItem.name);
+                const itemIndex = sampleItems.indexOf(selectedItem);
+                if (itemIndex !== -1) {
+                    gameState.addMagicItem(sampleItems[itemIndex]);
+                }
                 // Maybe purchase or preview logic here
             });
         });

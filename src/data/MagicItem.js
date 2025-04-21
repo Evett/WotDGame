@@ -1,14 +1,21 @@
 class MagicItem {
-    constructor({ name, description, type, effect, isUsed = false, triggers = {} }) {
+    constructor({ id, name, description, type, effect, isUsed = false, triggers = {} }) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.type = type;
         this.effect = effect;
-        this.triggers = triggers;
         this.isUsed = isUsed;
+        this.triggers = triggers;
     }
 
-    use(scene, effect) {
+    use(target, state, scene) {
+        if(this.effect && !this.used) {
+            this.effect(target, state, scene);
+            this.isUsed = true;
+            return;
+        }
+        console.log("Item already used this combat:", this);
     }
 }
 
