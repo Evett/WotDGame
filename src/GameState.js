@@ -288,8 +288,7 @@ class GameState {
         if (itemIndex >= 0 && itemIndex < this.magicItems.length) {
             const magicItem = this.magicItems[itemIndex];
             
-            magicItem.effect(target, this, scene);
-            console.log("You just used this magic item:", magicItem);
+            magicItem.use(target, this, scene);
         }
     }
 }

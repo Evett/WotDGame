@@ -10,9 +10,10 @@ class MagicItem {
     }
 
     use(target, state, scene) {
-        if(this.effect && !this.used) {
+        if(this.effect && !this.isUsed) {
             this.effect(target, state, scene);
             this.isUsed = true;
+            console.log("You just used this magic item:", this);
             return;
         }
         console.log("Item already used this combat:", this);
