@@ -15,7 +15,7 @@ export class CardRewardScene extends BaseScene {
         this.createBackground();
         this.add.text(x, 50, 'Choose a Card', { fontSize: '24px', color: '#fff' }).setOrigin(0.5);
 
-        const cardOptions = Phaser.Utils.Array.Shuffle(Object.values(CardLibrary.cards)).slice(0, 3);
+        const cardOptions = Phaser.Utils.Array.Shuffle(Object.values(CardLibrary.cards[gameState.characterClass])).slice(0, 3);
 
         this.cardUIs = [];
 

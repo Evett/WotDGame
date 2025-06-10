@@ -6,20 +6,21 @@ const createCharacter = (options) => new Character(options);
 const CharacterLibrary = {
     Alaen: createCharacter({
         name: "Alaen",
+        characterClass: "Soulbound",
         health: 120,
         actions: 3,
         mana: 2,
         deck: [
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.EidolonStrike,
-            CardLibrary.cards.EidolonStrike,
-            CardLibrary.cards.Berserk,
-            CardLibrary.cards.PlanarBinding,
-            CardLibrary.cards.SummonLesserElemental
+            CardLibrary.cards.Common.Strike,
+            CardLibrary.cards.Common.Strike,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Summoner.EidolonStrike,
+            CardLibrary.cards.Summoner.EidolonStrike,
+            CardLibrary.cards.Common.Berserk,
+            CardLibrary.cards.Summoner.PlanarBinding,
+            CardLibrary.cards.Summoner.SummonLesserElemental
         ],
         heroAbility: (gameState) => {
             console.log("Alaen's Summon Khan: Gain +1 Action!");
@@ -28,21 +29,22 @@ const CharacterLibrary = {
     }),
     Hassan: createCharacter({
         name: "Hassan",
+        characterClass: "Summoner",
         health: 90,
         actions: 4,
         mana: 2,
         deck: 
         [
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.EidolonStrike,
-            CardLibrary.cards.EidolonStrike,
-            CardLibrary.cards.Berserk,
-            CardLibrary.cards.PlanarBinding,
-            CardLibrary.cards.SummonLesserElemental
+            CardLibrary.cards.Common.Strike,
+            CardLibrary.cards.Common.Strike,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Summoner.EidolonStrike,
+            CardLibrary.cards.Summoner.EidolonStrike,
+            CardLibrary.cards.Common.Berserk,
+            CardLibrary.cards.Summoner.PlanarBinding,
+            CardLibrary.cards.Summoner.SummonLesserElemental
         ],
         heroAbility: (gameState) => {
             console.log("Hassan's Shadow Step: Gain temporary Evasion!");
@@ -50,21 +52,22 @@ const CharacterLibrary = {
 }),
     Marcus: createCharacter({
         name: "Marcus",
+        characterClass: "Wizard",
         health: 80,
         actions: 3,
         mana: 3,
         deck: 
         [
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.MagicMissile,
-            CardLibrary.cards.MagicMissile,
-            CardLibrary.cards.MagicMissile,
-            CardLibrary.cards.Fireball,
-            CardLibrary.cards.Shield,
-            CardLibrary.cards.Shield,
-            CardLibrary.cards.Shield,
+            CardLibrary.cards.Common.Strike,
+            CardLibrary.cards.Common.Strike,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Wizard.MagicMissile,
+            CardLibrary.cards.Wizard.MagicMissile,
+            CardLibrary.cards.Wizard.MagicMissile,
+            CardLibrary.cards.Wizard.Fireball,
+            CardLibrary.cards.Wizard.Shield,
+            CardLibrary.cards.Wizard.Shield,
+            CardLibrary.cards.Wizard.Shield,
         ],
         heroAbility: (gameState) => {
             console.log("Marcus's Arcane Boost: Restore 1 Action!");
@@ -73,21 +76,22 @@ const CharacterLibrary = {
     }),
     Mohef: createCharacter({
         name: "Mohef",
+        characterClass: "Bloodrager",
         health: 100,
         actions: 4,
         mana: 1,
         deck: 
         [
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.BloodFury,
-            CardLibrary.cards.BloodFury,
-            CardLibrary.cards.Berserk,
-            CardLibrary.cards.RagingHowl,
-            CardLibrary.cards.ArcaneBloodline
+            CardLibrary.cards.Common.Strike,
+            CardLibrary.cards.Common.Strike,
+            CardLibrary.cards.Common.Strike,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Bloodrager.BloodFury,
+            CardLibrary.cards.Bloodrager.BloodFury,
+            CardLibrary.cards.Common.Berserk,
+            CardLibrary.cards.Bloodrager.RagingHowl,
+            CardLibrary.cards.Bloodrager.ArcaneBloodline
         ],
         heroAbility: (gameState) => {
             console.log("Mohef's Precision: Your next attack deals double damage!");
@@ -95,21 +99,22 @@ const CharacterLibrary = {
     }),
     Nephereta: createCharacter({
         name: "Nephereta",
+        characterClass: "Paladin",
         health: 110,
         actions: 3,
         mana: 1,
         deck: 
         [
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.SmiteEvil,
-            CardLibrary.cards.SmiteEvil,
-            CardLibrary.cards.LayOnHands,
-            CardLibrary.cards.DivineShield,
-            CardLibrary.cards.DivineShield
+            CardLibrary.cards.Common.Strike,
+            CardLibrary.cards.Common.Strike,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Paladin.SmiteEvil,
+            CardLibrary.cards.Paladin.SmiteEvil,
+            CardLibrary.cards.Paladin.LayOnHands,
+            CardLibrary.cards.Paladin.DivineShield,
+            CardLibrary.cards.Paladin.DivineShield
         ],
         heroAbility: (gameState) => {
             console.log("Nephereta's Blessing: Heal 5 HP!");
@@ -118,21 +123,22 @@ const CharacterLibrary = {
     }),
     Urusha: createCharacter({
         name: "Urusha",
+        characterClass: "Warpriest",
         health: 85,
         actions: 3,
         mana: 2,
         deck: 
         [
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Strike,
-            CardLibrary.cards.Berserk,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.Block,
-            CardLibrary.cards.SacredStrike,
-            CardLibrary.cards.SacredStrike,
-            CardLibrary.cards.BlessingOfWar,
-            CardLibrary.cards.Sacrifice
+            CardLibrary.cards.Common.Strike,
+            CardLibrary.cards.Common.Strike,
+            CardLibrary.cards.Common.Berserk,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Common.Block,
+            CardLibrary.cards.Warpriest.SacredStrike,
+            CardLibrary.cards.Warpriest.SacredStrike,
+            CardLibrary.cards.Warpriest.BlessingOfWar,
+            CardLibrary.cards.Warpriest.Sacrifice
         ],
         heroAbility: (gameState) => {
             console.log("Urusha's Sacrifice: Lose 5 HP, gain 2 actions.");

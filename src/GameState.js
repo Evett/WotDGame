@@ -28,10 +28,12 @@ class GameState {
         this.enemies = [];
 
         this.character = null;
+        this.characterClass = null;
     }
 
     setCharacter(character) {
         this.character = character;
+        this.characterClass = character.characterClass;
         this.health = character.health;
         this.maxHealth = character.health;
         this.maxActions = this.actions = character.actions;

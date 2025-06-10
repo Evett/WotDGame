@@ -15,7 +15,7 @@ export class ShopScene extends BaseScene {
         this.createBackground();
         this.add.text(x, 50, 'Shop', { fontSize: '24px', color: '#fff' }).setOrigin(0.5);
 
-        this.cardPool = CardLibrary.getRandomCards(5);
+        this.cardPool = CardLibrary.getRandomCardsForClass(gameState.characterClass, 5);
         this.updateShopDisplay();
 
         let returnToMapButton = this.add.text(x, y, 'Return to Map', { fontSize: '24px', backgroundColor: '' })
