@@ -10,6 +10,7 @@ import { GameOverScene } from './scenes/GameOverScene';
 import { CardRewardScene } from './scenes/CardRewardScene';
 import { RestSiteScene } from './scenes/RestSiteScene';
 import { ShopScene } from './scenes/ShopScene';
+import { UpgradeScene } from './scenes/UpgradeScene';
 import Phaser from 'phaser';
 
 const config = {
@@ -36,7 +37,8 @@ const config = {
         GameOverScene,
         CardRewardScene,
         RestSiteScene,
-        ShopScene
+        ShopScene,
+        UpgradeScene
     ]
 };
 
