@@ -12,11 +12,14 @@ const cards = {
             requiresTarget: true,
             isOncePerDay: false,
             description: "Deal 6 damage.",
-            effect: (target, state) => {
+            upgradedDescription: "Deal 9 damage.",
+            effect: (target, state, card) => {
+                const damage = card.upgraded ? 9 : 6;
                 if (target) {
-                    target.takeDamage(6 * state.nextAttackBonus);
+                    target.takeDamage(damage * state.nextAttackBonus);
                 }
-            }
+            },
+            upgraded: false
         }),
 
         Block: createCard({
@@ -27,9 +30,12 @@ const cards = {
             requiresTarget: false,
             isOncePerDay: false,
             description: "Gain 5 armor.",
-            effect: (target, state) => {
-                state.armor = (state.armor || 0) + 5;
-            }
+            upgradedDescription: "Gain 8 armor.",
+            effect: (target, state, card) => {
+                const armor = card.upgraded ? 8 : 5;
+                state.armor = (state.armor || 0) + armor;
+            },
+            upgraded: false
         }),
 
         Berserk: createCard({

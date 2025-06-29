@@ -29,7 +29,7 @@ class CardRenderer {
         }).setOrigin(0.5, 0);
         this.container.add(nameText);
 
-        const descText = scene.add.text(0, 0, card.description, {
+        const descText = scene.add.text(0, 0, card.getDescription(), {
             fontSize: '12px',
             color: '#aaaaaa',
             wordWrap: { width: width - 20 },

@@ -12,16 +12,32 @@ export default class BaseScene extends Phaser.Scene {
             .setDepth(-100);
 
         this.scale.on('resize', this.onResize, this);
+
+        this.time.delayedCall(0, () => {
+            if (this.scene.isActive() && this.background && typeof this.background.setSize === 'function') {
+                this.onResize(this.scale.gameSize);
+            } else {
+                console.warn(`[DelayedResize] Skipped resize: scene inactive or background not ready in ${this.scene.key}`);
+            }
+        });
+        this.events.once('shutdown', this.cleanupResizeListener, this);
+        this.events.once('destroy', this.cleanupResizeListener, this);  
+    }
+
+    cleanupResizeListener() {
+        this.scale.off('resize', this.onResize, this);
     }
 
     onResize(gameSize) {
         const { width, height } = gameSize;
 
-        if (this.background) {
-            this.background.setSize(width, height);
+        if (!this.background || typeof this.background.setSize !== 'function') {
+            console.warn(`[onResize] Skipped in ${this.scene.key} — background missing or not a Rectangle`);
+            return;
         }
-
-        this.relayout?.(); // optional hook for child scenes
+        
+        this.background.setSize(width, height);
+        this.relayout?.();
     }
 
     getCenter() {

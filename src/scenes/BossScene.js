@@ -9,9 +9,9 @@ export class BossScene extends BaseScene {
     }
 
     create() {
-        const { x, y } = this.getCenter(this);
         this.sceneManager = new SceneManager(this);
         this.createBackground();
+        const { x, y } = this.getCenter();
 
         // Title
         this.add.text(x, y, 'BossScene', {

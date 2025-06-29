@@ -8,9 +8,9 @@ export class MapScene extends BaseScene {
     }
 
     create() {
-        const { x, y } = this.getCenter(this);
         this.sceneManager = new SceneManager(this);
         this.createBackground();
+        const { x, y } = this.getCenter();
         this.add.text(x, y-250, 'Choose Your Path', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
 
         this.nodes = [

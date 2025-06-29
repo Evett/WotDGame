@@ -16,9 +16,9 @@ export class BattleScene extends BaseScene {
     }
 
     create() {
-        const { x, y } = this.getCenter(this);
         this.sceneManager = new SceneManager(this);
         this.createBackground();
+        const { x, y } = this.getCenter();
         this.resourceText = this.add.text(x+500, 10, '', {
             fontSize: '20px',
             color: '#fff'

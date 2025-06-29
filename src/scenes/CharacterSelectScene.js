@@ -9,9 +9,9 @@ export class CharacterSelectScene extends BaseScene {
     }
 
     create() {
-        const { x, y } = this.getCenter(this);
         this.sceneManager = new SceneManager(this);
         this.createBackground();
+        const { x, y } = this.getCenter();
         this.add.text(x, y-200, 'Choose Your Character', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
 
         let yPos = y-100;

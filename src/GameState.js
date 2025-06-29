@@ -46,6 +46,10 @@ class GameState {
         console.log("After shuffle deck draw pile:", this.drawPile);
     }
 
+    getDeck() {
+        return this.fullDeck;
+    }
+
     playerTakeDamage(amount) {
         this.health -= amount;
         if (this.health < 0) this.health = 0;
@@ -237,7 +241,7 @@ class GameState {
             this.mana -= card.manaCost;
 
             this.hand.splice(index, 1)[0];
-            card.play(target, this, scene);
+            card.play(target, this, card, scene);
             if (card.type === "Attack") {
                 this.temporaryEffectReset();
             }

@@ -13,9 +13,9 @@ export class EventScene extends BaseScene {
     }
 
     create() {
-        const { x, y } = this.getCenter(this);
         this.sceneManager = new SceneManager(this);
         this.createBackground();
+        const { x, y } = this.getCenter();
 
         const event = EventLibrary.getRandomMatching(event => gameState.health > 10 || !event.tags.includes(EventTags.RISKY));
 

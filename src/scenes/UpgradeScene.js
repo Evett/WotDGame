@@ -8,10 +8,9 @@ export class UpgradeScene extends BaseScene {
     }
 
     create() {
-        const { x, y } = this.getCenter(this);
-
         this.sceneManager = new SceneManager(this);
         this.createBackground();
+        const { x, y } = this.getCenter();
         this.add.text(x, 50, 'UpgradeScene', { fontSize: '24px', color: '#fff' }).setOrigin(0.5);
 
         this.add.text(x, y, 'Upgrade a Card', {
@@ -19,7 +18,7 @@ export class UpgradeScene extends BaseScene {
             color: '#ccffcc'
         }).setOrigin(0.5);
 
-        const upgradableCards = gameState.deck.filter(card => !card.upgraded);
+        const upgradableCards = gameState.getDeck().filter(card => !card.upgraded);
 
         if (upgradableCards.length === 0) {
             this.add.text(x, y-100, 'No cards can be upgraded.', {
@@ -42,8 +41,7 @@ export class UpgradeScene extends BaseScene {
             container.add([bg, name, desc]);
 
             bg.on('pointerdown', () => {
-                card.upgraded = true;
-                // You can also update card.effect or card.description here
+                card.upgrade();
                 this.scene.start('RestSiteScene');
             });
         });
