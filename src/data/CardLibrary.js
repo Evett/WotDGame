@@ -4,7 +4,7 @@ const createCard = (options) => new Card(options);
 
 const cards = {
     Common: {
-        Strike: createCard({
+        Strike: () => createCard({
             name: "Strike",
             actionCost: 1,
             manaCost: 0,
@@ -22,7 +22,7 @@ const cards = {
             upgraded: false
         }),
 
-        Block: createCard({
+        Block: () => createCard({
             name: "Block",
             actionCost: 0,
             manaCost: 1,
@@ -38,7 +38,7 @@ const cards = {
             upgraded: false
         }),
 
-        Berserk: createCard({
+        Berserk: () => createCard({
             name: "Berserk",
             actionCost: 1,
             manaCost: 1,
@@ -53,7 +53,7 @@ const cards = {
     },
 
     Paladin: {
-        SmiteEvil: createCard({
+        SmiteEvil: () => createCard({
             name: "Smite Evil",
             actionCost: 1,
             manaCost: 1,
@@ -70,7 +70,7 @@ const cards = {
             }
         }),
         
-        LayOnHands: createCard({
+        LayOnHands: () => createCard({
             name: "Lay on Hands",
             actionCost: 1,
             manaCost: 2,
@@ -83,7 +83,7 @@ const cards = {
             }
         }),
         
-        DivineShield: createCard({
+        DivineShield: () => createCard({
             name: "Divine Shield",
             actionCost: 1,
             manaCost: 1,
@@ -98,7 +98,7 @@ const cards = {
     },
 
     Summoner: {
-        SummonLesserElemental: createCard({
+        SummonLesserElemental: () => createCard({
             name: "Summon Lesser Elemental",
             actionCost: 1,
             manaCost: 2,
@@ -111,7 +111,7 @@ const cards = {
             }
         }),
         
-        EidolonStrike: createCard({
+        EidolonStrike: () => createCard({
             name: "Eidolon Strike",
             actionCost: 1,
             manaCost: 0,
@@ -126,7 +126,7 @@ const cards = {
             }
         }),
         
-        PlanarBinding: createCard({
+        PlanarBinding: () => createCard({
             name: "Planar Binding",
             actionCost: 2,
             manaCost: 3,
@@ -145,7 +145,7 @@ const cards = {
     Soulbound : {},
     
     Bloodrager: {
-        BloodFury: createCard({
+        BloodFury: () => createCard({
             name: "Blood Fury",
             actionCost: 1,
             manaCost: 1,
@@ -161,7 +161,7 @@ const cards = {
             }
         }),
         
-        RagingHowl: createCard({
+        RagingHowl: () => createCard({
             name: "Raging Howl",
             actionCost: 1,
             manaCost: 1,
@@ -174,7 +174,7 @@ const cards = {
             }
         }),
         
-        ArcaneBloodline: createCard({
+        ArcaneBloodline: () => createCard({
             name: "Arcane Bloodline",
             actionCost: 0,
             manaCost: 1,
@@ -190,7 +190,7 @@ const cards = {
     },
     
     Wizard: {
-        MagicMissile: createCard({
+        MagicMissile: () => createCard({
             name: "Magic Missile",
             actionCost: 1,
             manaCost: 1,
@@ -205,7 +205,7 @@ const cards = {
             }
         }),
         
-        Fireball: createCard({
+        Fireball: () => createCard({
             name: "Fireball",
             actionCost: 2,
             manaCost: 3,
@@ -218,7 +218,7 @@ const cards = {
             }
         }),
         
-        Shield: createCard({
+        Shield: () => createCard({
             name: "Shield",
             actionCost: 1,
             manaCost: 1,
@@ -234,7 +234,7 @@ const cards = {
     },
     
     Warpriest: {
-        SacredStrike: createCard({
+        SacredStrike: () => createCard({
             name: "Sacred Strike",
             actionCost: 1,
             manaCost: 1,
@@ -250,7 +250,7 @@ const cards = {
             }
         }),
         
-        BlessingOfWar: createCard({
+        BlessingOfWar: () => createCard({
             name: "Blessing of War",
             actionCost: 1,
             manaCost: 2,
@@ -263,7 +263,7 @@ const cards = {
             }
         }),
         
-        Sacrifice: createCard({
+        Sacrifice: () => createCard({
             name: "Sacrifice",
             actionCost: 1,
             manaCost: 0,
@@ -281,17 +281,19 @@ const cards = {
 
 const CardLibrary = {
     cards,
-    getRandom: () => Phaser.Utils.Array.GetRandom(Object.values(cards.Common)),
+    getRandom: () => Phaser.Utils.Array.GetRandom(Object.values(cards.Common))(),
     getRandomCards(amount = 1) {
-        const randomCards = Phaser.Utils.Array.Shuffle(Object.values(cards.Common)).slice(0, amount);
-        return randomCards;
+        return Phaser.Utils.Array.Shuffle(Object.values(cards.Common))
+            .slice(0, amount)
+            .map(factory => factory());
     },
     getCardsForClass(characterClass) {
-        return cards.characterClass;
+        return Object.values(cards[characterClass]).map(factory => factory());
     },
     getRandomCardsForClass(characterClass, amount = 1) {
-        const randomCards = Phaser.Utils.Array.Shuffle(Object.values(cards[characterClass])).slice(0, amount);
-        return randomCards;
+        return Phaser.Utils.Array.Shuffle(Object.values(cards[characterClass]))
+            .slice(0, amount)
+            .map(factory => factory());
     }
 };
 

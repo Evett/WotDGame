@@ -29,13 +29,12 @@ export default class BaseScene extends Phaser.Scene {
     }
 
     onResize(gameSize) {
-        const { width, height } = gameSize;
-
-        if (!this.background || typeof this.background.setSize !== 'function') {
-            console.warn(`[onResize] Skipped in ${this.scene.key} — background missing or not a Rectangle`);
+        if (!this.scene || !this.scene.isActive() || !this.background || !this.background.setSize) {
+            console.warn(`[onResize] Skipping resize: Scene inactive or background missing for ${this.scene?.key}`);
             return;
         }
-        
+
+        const { width, height } = gameSize;
         this.background.setSize(width, height);
         this.relayout?.();
     }

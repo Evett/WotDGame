@@ -3,6 +3,8 @@ import CardLibrary from './CardLibrary.js'
 
 const createCharacter = (options) => new Character(options);
 
+const repeat = (fn, times) => Array.from({ length: times }, fn);
+
 const CharacterLibrary = {
     Alaen: createCharacter({
         name: "Alaen",
@@ -11,16 +13,12 @@ const CharacterLibrary = {
         actions: 3,
         mana: 2,
         deck: [
-            CardLibrary.cards.Common.Strike,
-            CardLibrary.cards.Common.Strike,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Summoner.EidolonStrike,
-            CardLibrary.cards.Summoner.EidolonStrike,
-            CardLibrary.cards.Common.Berserk,
-            CardLibrary.cards.Summoner.PlanarBinding,
-            CardLibrary.cards.Summoner.SummonLesserElemental
+            ...repeat(() => CardLibrary.cards.Common.Strike(), 2),
+            ...repeat(() => CardLibrary.cards.Common.Block(), 3),
+            ...repeat(() => CardLibrary.cards.Summoner.EidolonStrike(), 2),
+            CardLibrary.cards.Common.Berserk(),
+            CardLibrary.cards.Summoner.PlanarBinding(),
+            CardLibrary.cards.Summoner.SummonLesserElemental()
         ],
         heroAbility: (gameState) => {
             console.log("Alaen's Summon Khan: Gain +1 Action!");
@@ -35,16 +33,12 @@ const CharacterLibrary = {
         mana: 2,
         deck: 
         [
-            CardLibrary.cards.Common.Strike,
-            CardLibrary.cards.Common.Strike,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Summoner.EidolonStrike,
-            CardLibrary.cards.Summoner.EidolonStrike,
-            CardLibrary.cards.Common.Berserk,
-            CardLibrary.cards.Summoner.PlanarBinding,
-            CardLibrary.cards.Summoner.SummonLesserElemental
+            ...repeat(() => CardLibrary.cards.Common.Strike(), 2),
+            ...repeat(() => CardLibrary.cards.Common.Block(), 3),
+            ...repeat(() => CardLibrary.cards.Summoner.EidolonStrike(), 2),
+            CardLibrary.cards.Common.Berserk(),
+            CardLibrary.cards.Summoner.PlanarBinding(),
+            CardLibrary.cards.Summoner.SummonLesserElemental()
         ],
         heroAbility: (gameState) => {
             console.log("Hassan's Shadow Step: Gain temporary Evasion!");
@@ -58,16 +52,11 @@ const CharacterLibrary = {
         mana: 3,
         deck: 
         [
-            CardLibrary.cards.Common.Strike,
-            CardLibrary.cards.Common.Strike,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Wizard.MagicMissile,
-            CardLibrary.cards.Wizard.MagicMissile,
-            CardLibrary.cards.Wizard.MagicMissile,
-            CardLibrary.cards.Wizard.Fireball,
-            CardLibrary.cards.Wizard.Shield,
-            CardLibrary.cards.Wizard.Shield,
-            CardLibrary.cards.Wizard.Shield,
+            ...repeat(() => CardLibrary.cards.Common.Strike(), 2),
+            ...repeat(() => CardLibrary.cards.Wizard.MagicMissile(), 3),
+            ...repeat(() => CardLibrary.cards.Wizard.Shield(), 3),
+            CardLibrary.cards.Common.Block(),
+            CardLibrary.cards.Wizard.Fireball()
         ],
         heroAbility: (gameState) => {
             console.log("Marcus's Arcane Boost: Restore 1 Action!");
@@ -82,16 +71,12 @@ const CharacterLibrary = {
         mana: 1,
         deck: 
         [
-            CardLibrary.cards.Common.Strike,
-            CardLibrary.cards.Common.Strike,
-            CardLibrary.cards.Common.Strike,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Bloodrager.BloodFury,
-            CardLibrary.cards.Bloodrager.BloodFury,
-            CardLibrary.cards.Common.Berserk,
-            CardLibrary.cards.Bloodrager.RagingHowl,
-            CardLibrary.cards.Bloodrager.ArcaneBloodline
+            ...repeat(() => CardLibrary.cards.Common.Strike(), 3),
+            ...repeat(() => CardLibrary.cards.Common.Block(), 2),
+            ...repeat(() => CardLibrary.cards.Bloodrager.BloodFury(), 2),
+            CardLibrary.cards.Common.Berserk(),
+            CardLibrary.cards.Bloodrager.RagingHowl(),
+            CardLibrary.cards.Bloodrager.ArcaneBloodline()
         ],
         heroAbility: (gameState) => {
             console.log("Mohef's Precision: Your next attack deals double damage!");
@@ -105,16 +90,11 @@ const CharacterLibrary = {
         mana: 1,
         deck: 
         [
-            CardLibrary.cards.Common.Strike,
-            CardLibrary.cards.Common.Strike,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Paladin.SmiteEvil,
-            CardLibrary.cards.Paladin.SmiteEvil,
-            CardLibrary.cards.Paladin.LayOnHands,
-            CardLibrary.cards.Paladin.DivineShield,
-            CardLibrary.cards.Paladin.DivineShield
+            ...repeat(() => CardLibrary.cards.Common.Strike(), 2),
+            ...repeat(() => CardLibrary.cards.Common.Block(), 3),
+            ...repeat(() => CardLibrary.cards.Paladin.SmiteEvil(), 2),
+            ...repeat(() => CardLibrary.cards.Paladin.DivineShield(), 2),
+            CardLibrary.cards.Paladin.LayOnHands()
         ],
         heroAbility: (gameState) => {
             console.log("Nephereta's Blessing: Heal 5 HP!");
@@ -129,14 +109,10 @@ const CharacterLibrary = {
         mana: 2,
         deck: 
         [
-            CardLibrary.cards.Common.Strike,
-            CardLibrary.cards.Common.Strike,
+            ...repeat(() => CardLibrary.cards.Common.Strike(), 2),
+            ...repeat(() => CardLibrary.cards.Common.Block(), 3),
+            ...repeat(() => CardLibrary.cards.Warpriest.SacredStrike(), 2),
             CardLibrary.cards.Common.Berserk,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Common.Block,
-            CardLibrary.cards.Warpriest.SacredStrike,
-            CardLibrary.cards.Warpriest.SacredStrike,
             CardLibrary.cards.Warpriest.BlessingOfWar,
             CardLibrary.cards.Warpriest.Sacrifice
         ],

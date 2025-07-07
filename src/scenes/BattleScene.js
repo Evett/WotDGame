@@ -26,7 +26,6 @@ export class BattleScene extends BaseScene {
         this.renderHand = true;
         this.createEndTurnButton();
         this.startCombat();
-        this.scale.on('resize', this.resize, this);
         this.add.text(x, y-300, `Battling as: ${gameState.character.name}`, { fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
         console.log("Hand on entering battle:", gameState.hand);
 
@@ -53,15 +52,6 @@ export class BattleScene extends BaseScene {
         returnToMapButton.on('pointerdown', () => {
             this.sceneManager.switchScene('MapScene');
         });
-    }
-
-    resize (gameSize, baseSize, displaySize, resolution) {
-        const width = gameSize.width;
-        const height = gameSize.height;
-
-        this.cameras.resize(width, height);
-
-        this.bg.setSize(width, height);
     }
 
     updateHandDisplay() {

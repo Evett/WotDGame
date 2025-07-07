@@ -15,8 +15,8 @@ export class ShopScene extends BaseScene {
         const { x, y } = this.getCenter();
         this.add.text(x, 50, 'Shop', { fontSize: '24px', color: '#fff' }).setOrigin(0.5);
 
-        this.cardPool = CardLibrary.getRandomCardsForClass(gameState.characterClass, 5);
-        this.updateShopDisplay();
+        const cardOptions = CardLibrary.getRandomCardsForClass(gameState.characterClass, 5);
+        this.updateShopDisplay(cardOptions);
 
         let returnToMapButton = this.add.text(x, y, 'Return to Map', { fontSize: '24px', backgroundColor: '' })
             .setOrigin(0.5)
@@ -27,7 +27,7 @@ export class ShopScene extends BaseScene {
         });
     }
 
-    updateShopDisplay() {
+    updateShopDisplay(cardOptions) {
         if (this.cardUIs) {
             this.cardUIs.forEach(t => t.destroy());
         }
@@ -42,15 +42,15 @@ export class ShopScene extends BaseScene {
         }).setOrigin(0.5);
 
         const spacing = 120;
-        const startX = this.cameras.main.centerX - ((this.cardPool.length - 1) * spacing) / 2;
+        const startX = this.cameras.main.centerX - ((cardOptions.length - 1) * spacing) / 2;
 
-        this.cardPool.forEach((card, index) => {
+        cardOptions.forEach((card, index) => {
             const xPos = startX + index * spacing;
             const yPos = this.cameras.main.centerY * 0.3;
             const cardCost = Phaser.Math.Between(10, 40);
 
             const renderer = new CardRenderer(this, card, xPos, yPos, gameState, (clickedCard) => {
-                const cardIndex = this.cardPool.indexOf(clickedCard);
+                const cardIndex = cardOptions.indexOf(clickedCard);
                 if (cardIndex !== -1 && gameState.loseGold(cardCost)) {
                     gameState.addCard(card);
                     this.updateShopDisplay();
