@@ -21,6 +21,7 @@ class Card {
     getDescription() {
         return this.upgraded ? this.upgradedDescription : this.description;
     }
+    
     upgrade() {
         this.upgraded = true;
     }
