@@ -1,5 +1,6 @@
 import SceneManager from '../SceneManager';
 import BaseScene from './BaseScene';
+import { io } from 'socket.io-client';
 
 export class MenuScene extends BaseScene {
     constructor() {
@@ -10,6 +11,39 @@ export class MenuScene extends BaseScene {
     }
 
     create() {
+        
+        this.socket = io('http://localhost:3000'); // Use your deployed server URL in production
+
+        const lobbyId = 'room1';
+        const playerName = 'Player1'; // Replace with user input later
+
+        this.socket.emit('join-lobby', { lobbyId, playerName });
+
+        this.socket.on('player-list', (players) => {
+            console.log('Current players in lobby:', players);
+        });
+
+        this.socket.on('lobby-full', () => {
+            alert('Lobby is full!');
+        });
+
+        this.socket.on('start-game', ({ players }) => {
+            console.log('Game starting with:', players);
+            this.scene.start('GameScene', {
+                socket: this.socket,
+                players,
+                playerName,
+                lobbyId
+            });
+        });
+
+        // Start game button
+        this.add.text(100, 100, 'Start Game', { fill: '#fff' })
+            .setInteractive()
+            .on('pointerdown', () => {
+                this.socket.emit('start-game', { lobbyId });
+            });
+
         this.sceneManager = new SceneManager(this);
         this.createBackground();
         const { x, y } = this.getCenter();
