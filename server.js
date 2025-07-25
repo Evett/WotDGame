@@ -2,9 +2,14 @@
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
     origin: 'http://localhost:5173', // Allow Vite
@@ -13,14 +18,22 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-  console.log('Socket connected:', socket.id);
+  console.log('User connected:', socket.id);
 
   socket.on('disconnect', () => {
-    console.log('Socket disconnected:', socket.id);
+    console.log('User disconnected:', socket.id);
   });
 });
 
-const PORT = 3000;
+
+app.use(express.static(path.join(__dirname, 'client', 'dist')));
+
+// Fallback for SPA routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+});
+
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Socket.IO server running at http://localhost:${PORT}`);
+  console.log(`Server listening on http://localhost:${PORT}`);
 });

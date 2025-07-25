@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "concurrently \"vite\" \"node server.js\"",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "buildClient": "cd client && npm install && npm run build",
+    "start": "node server.js"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",
