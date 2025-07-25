@@ -1,16 +1,16 @@
-import { MenuScene } from '../../src/scenes/MenuScene';
-import { MapScene } from '../../src/scenes/MapScene';
-import { BattleScene } from '../../src/scenes/BattleScene';
-import { EventScene } from '../../src/scenes/EventScene';
-import { BossScene } from '../../src/scenes/BossScene';
-import { AltarScene } from '../../src/scenes/AltarScene';
-import { DeckScene } from '../../src/scenes/DeckScene';
-import { CharacterSelectScene } from '../../src/scenes/CharacterSelectScene';
-import { GameOverScene } from '../../src/scenes/GameOverScene';
-import { CardRewardScene } from '../../src/scenes/CardRewardScene';
-import { RestSiteScene } from '../../src/scenes/RestSiteScene';
-import { ShopScene } from '../../src/scenes/ShopScene';
-import { UpgradeScene } from '../../src/scenes/UpgradeScene';
+import { MenuScene } from '../src/scenes/MenuScene';
+import { MapScene } from '../src/scenes/MapScene';
+import { BattleScene } from '../src/scenes/BattleScene';
+import { EventScene } from '../src/scenes/EventScene';
+import { BossScene } from '../src/scenes/BossScene';
+import { AltarScene } from '../src/scenes/AltarScene';
+import { DeckScene } from '../src/scenes/DeckScene';
+import { CharacterSelectScene } from '../src/scenes/CharacterSelectScene';
+import { GameOverScene } from '../src/scenes/GameOverScene';
+import { CardRewardScene } from '../src/scenes/CardRewardScene';
+import { RestSiteScene } from '../src/scenes/RestSiteScene';
+import { ShopScene } from '../src/scenes/ShopScene';
+import { UpgradeScene } from '../src/scenes/UpgradeScene';
 import Phaser from 'phaser';
 
 const config = {
