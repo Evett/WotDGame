@@ -39,7 +39,10 @@ const config = {
         RestSiteScene,
         ShopScene,
         UpgradeScene
-    ]
+    ],
+    dom: {
+        createContainer: true
+    }
 };
 
 new Phaser.Game(config);
