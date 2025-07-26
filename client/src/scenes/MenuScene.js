@@ -16,7 +16,7 @@ export class MenuScene extends BaseScene {
         this.createBackground();
         const { x, y } = this.getCenter();
         
-        this.socket = io('http://localhost:3000'); // Use your deployed server URL in production
+        this.socket = io();
 
         const lobbyId = 'room1';
         const playerName = 'Player1'; // Replace with user input later
