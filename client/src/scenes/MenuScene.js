@@ -31,10 +31,6 @@ export class MenuScene extends BaseScene {
         this.add.text(x - 150, y - 130, 'Lobby ID:', { fontSize: '20px', color: '#ffffff' }).setOrigin(0, 0.5);
         this.lobbyIdInput = this.add.dom(x + 50, y - 130, 'input', 'width: 200px; height: 24px');
 
-        // Max Players Input
-        this.add.text(x - 150, y - 80, 'Max Players:', { fontSize: '20px', color: '#ffffff' }).setOrigin(0, 0.5);
-        this.maxPlayersInput = this.add.dom(x + 50, y - 80, 'input', 'width: 50px; height: 24px');
-
         // Join Button
         const joinButton = this.add.text(x, y - 20, 'Join Lobby', {
             fontSize: '24px',
@@ -46,7 +42,7 @@ export class MenuScene extends BaseScene {
         joinButton.on('pointerdown', () => {
             const nickname = this.nicknameInput.node.value.trim();
             const lobbyId = this.lobbyIdInput.node.value.trim();
-            const maxPlayers = parseInt(this.maxPlayersInput.node.value.trim()) || 4;
+            const maxPlayers = 6;
 
             if (!nickname || !lobbyId) return alert('Please enter nickname and lobby ID.');
 
@@ -54,7 +50,7 @@ export class MenuScene extends BaseScene {
             this.lobbyId = lobbyId;
             this.maxPlayers = maxPlayers;
 
-            this.socket.emit('join-lobby', { lobbyId, playerName: nickname, maxPlayers });
+            this.socket.emit('join-lobby', { lobbyId, playerName: nickname });
         });
 
         // Player List Display
@@ -65,7 +61,7 @@ export class MenuScene extends BaseScene {
 
         // Ready Toggle
         this.ready = false;
-        const readyButton = this.add.text(x, y + 180, 'Not Ready', {
+        const readyButton = this.add.text(x, y + 300, 'Not Ready', {
             fontSize: '24px',
             backgroundColor: '#ff8800',
             padding: { x: 20, y: 10 },
@@ -75,22 +71,22 @@ export class MenuScene extends BaseScene {
         readyButton.on('pointerdown', () => {
             this.ready = !this.ready;
             readyButton.setText(this.ready ? 'Ready!' : 'Not Ready');
-            this.socket.emit('player-ready', { lobbyId: this.lobbyId, playerName: this.nickname, ready: this.ready });
+            this.socket.emit('toggle-ready', { lobbyId: this.lobbyId });
         });
 
         // Chat UI
-        this.chatMessages = this.add.text(x - 250, y + 240, '', {
+        this.chatMessages = this.add.text(x - 250, y + 500, '', {
             fontSize: '16px',
             color: '#ffffff',
             wordWrap: { width: 500 }
         }).setOrigin(0, 1);
 
-        this.chatInput = this.add.dom(x, y + 260, 'input', 'width: 400px; height: 24px');
+        this.chatInput = this.add.dom(x, y + 480, 'input', 'width: 400px; height: 24px');
 
         this.input.keyboard.on('keydown-ENTER', () => {
             const msg = this.chatInput.node.value.trim();
             if (msg) {
-                this.socket.emit('chat-message', { lobbyId: this.lobbyId, playerName: this.nickname, message: msg });
+                this.socket.emit('chat-message', { lobbyId: this.lobbyId, name: this.nickname, message: msg });
                 this.chatInput.node.value = '';
             }
         });
@@ -114,8 +110,8 @@ export class MenuScene extends BaseScene {
             });
         });
 
-        this.socket.on('chat-message', ({ playerName, message }) => {
-            this.chatMessages.text += `\n${playerName}: ${message}`;
+        this.socket.on('chat-message', ({ name, message }) => {
+            this.chatMessages.text += `\n${name}: ${message}`;
         });
     }
 }

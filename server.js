@@ -25,10 +25,9 @@ io.on('connection', (socket) => {
     let lobby = lobbies.get(lobbyId);
 
     if (!lobby) {
-      // Create new lobby
       lobby = {
         players: [],
-        maxPlayers: 6, // default, could be sent from client
+        maxPlayers: 6,
         chat: [],
       };
       lobbies.set(lobbyId, lobby);
