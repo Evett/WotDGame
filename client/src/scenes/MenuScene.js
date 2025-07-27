@@ -43,13 +43,11 @@ export class MenuScene extends BaseScene {
         joinButton.on('pointerdown', () => {
             const nickname = this.nicknameInput.node.value.trim();
             const lobbyId = this.lobbyIdInput.node.value.trim();
-            const maxPlayers = 6;
 
             if (!nickname || !lobbyId) return alert('Please enter nickname and lobby ID.');
 
             this.nickname = nickname;
             this.lobbyId = lobbyId;
-            this.maxPlayers = maxPlayers;
 
             if (this.alreadyJoined) return;
             this.socket.emit('join-lobby', { lobbyId, playerName: nickname });

@@ -27,7 +27,7 @@ io.on('connection', (socket) => {
     if (!lobby) {
       lobby = {
         players: [],
-        maxPlayers: 6,
+        maxPlayers: 2,
         chat: [],
         characters: {}
       };
