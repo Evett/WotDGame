@@ -29,6 +29,7 @@ io.on('connection', (socket) => {
         players: [],
         maxPlayers: 6,
         chat: [],
+        characters: {}
       };
       lobbies.set(lobbyId, lobby);
     }
@@ -75,6 +76,31 @@ io.on('connection', (socket) => {
       lobby.chat.push(chat);
       io.to(lobbyId).emit('chat-message', chat);
     }
+  });
+
+  socket.on('advance-scene', ({ lobbyId, scene }) => {
+    const lobby = lobbies[lobbyId];
+    if (lobby) {
+      lobby.players.forEach(p => {
+        io.to(p.id).emit('advance-scene', scene);
+      });
+    }
+  });
+
+  socket.on('select-character', ({ lobbyId, playerId, characterKey }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby) return;
+
+    const alreadyChosen = Object.values(lobby.characters).includes(characterKey);
+    if (alreadyChosen) return;
+
+    lobby.characters[playerId] = characterKey;
+
+    io.to(lobbyId).emit('character-selected', {
+      playerId,
+      characterKey,
+      allSelected: Object.keys(lobby.characters).length === lobby.players.length
+    });
   });
 
   socket.on('disconnect', () => {

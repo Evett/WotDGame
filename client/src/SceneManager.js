@@ -8,9 +8,16 @@ class SceneManager {
     switchScene(targetScene, data = {}) {
         console.log(`Switching to ${targetScene} with data:`, data);
 
-        Object.assign(gameState, data); 
+        // Separate gameplay state from transient multiplayer/session data
+        const { character, deck, playerStats, ...transient } = data;
 
-        this.scene.scene.start(targetScene, { gameState });
+        // Merge only long term game data into gameState
+        if (character || deck || playerStats) {
+            Object.assign(gameState, { character, deck, playerStats });
+        }
+
+        // Pass everything directly
+        this.scene.scene.start(targetScene, { ...transient, gameState });
     }
 }
 

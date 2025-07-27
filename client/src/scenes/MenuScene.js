@@ -75,13 +75,13 @@ export class MenuScene extends BaseScene {
         });
 
         // Chat UI
-        this.chatMessages = this.add.text(x - 250, y + 500, '', {
+        this.chatMessages = this.add.text(.2*x, y + 500, '', {
             fontSize: '16px',
             color: '#ffffff',
             wordWrap: { width: 500 }
         }).setOrigin(0, 1);
 
-        this.chatInput = this.add.dom(x, y + 480, 'input', 'width: 400px; height: 24px');
+        this.chatInput = this.add.dom(x, y + 400, 'input', 'width: 400px; height: 24px');
 
         this.input.keyboard.on('keydown-ENTER', () => {
             const msg = this.chatInput.node.value.trim();
