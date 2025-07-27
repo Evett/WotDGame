@@ -34,6 +34,11 @@ io.on('connection', (socket) => {
       lobbies.set(lobbyId, lobby);
     }
 
+    if (lobby.players.find(p => p.id === socket.id)) {
+      socket.emit('error-message', 'You have already joined this lobby.');
+      return;
+    }
+
     if (lobby.players.length >= lobby.maxPlayers) {
       socket.emit('lobby-full');
       return;
@@ -90,6 +95,11 @@ io.on('connection', (socket) => {
   socket.on('select-character', ({ lobbyId, playerId, characterKey }) => {
     const lobby = lobbies.get(lobbyId);
     if (!lobby) return;
+
+    if (lobby.characters[playerId]) {
+      socket.emit('error-message', 'You already selected a character.');
+      return;
+    }
 
     const alreadyChosen = Object.values(lobby.characters).includes(characterKey);
     if (alreadyChosen) return;

@@ -62,6 +62,7 @@ export class CharacterSelectScene extends BaseScene {
             // If you are the one who selected it, store it
             if (playerId === this.socket.id) {
                 gameState.setCharacter(CharacterLibrary[characterKey]);
+                Object.values(this.characterButtons).forEach(btn => btn.disabled = true);
             }
 
             if (allSelected) {
