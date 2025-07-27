@@ -16,6 +16,7 @@ export class MenuScene extends BaseScene {
         this.createBackground();
         const { x, y } = this.getCenter();
         this.socket = io();
+        this.alreadyJoined = false;
 
         // Title
         this.add.text(x, y-250, 'Wars of the Defeated', {
