@@ -51,9 +51,9 @@ export class MenuScene extends BaseScene {
             this.lobbyId = lobbyId;
             this.maxPlayers = maxPlayers;
 
-            if (alreadyJoined) return;
+            if (this.alreadyJoined) return;
             this.socket.emit('join-lobby', { lobbyId, playerName: nickname });
-            alreadyJoined = true;
+            this.alreadyJoined = true;
         });
 
         // Player List Display
