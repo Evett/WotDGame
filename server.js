@@ -20,20 +20,29 @@ const lobbies = new Map();
 const playerSessions = new Map();
 
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
 
   const playerId = socket.handshake.auth.playerId;
   if (!playerId) {
-      socket.disconnect();
-      return;
+    console.warn('Connection rejected: no playerId');
+    socket.disconnect();
+    return;
   }
+
+  console.log(`User connected: ${socket.id} (playerId: ${playerId})`);
 
   // Reconnect or new session
   const existing = playerSessions.get(playerId);
   if (existing) {
-      existing.socketId = socket.id; // Update socket ID
-      socket.join(existing.lobbyId);
-      socket.emit('resync', existing); // Send back session info
+    existing.socketId = socket.id;
+    socket.join(existing.lobbyId);
+
+    const lobby = lobbies.get(existing.lobbyId);
+    const player = lobby?.players.find(p => p.id === existing.socketId);
+
+    socket.emit('reconnected', {
+      lobbyId: existing.lobbyId,
+      playerData: player || { name: 'Unknown', id: socket.id },
+    });
   }
 
   socket.on('join-lobby', ({ lobbyId, playerName }) => {
@@ -45,7 +54,6 @@ io.on('connection', (socket) => {
         maxPlayers: 2,
         chat: [],
         characters: {},
-        gameState: {},
         currentScene: null
       };
       lobbies.set(lobbyId, lobby);
@@ -66,9 +74,10 @@ io.on('connection', (socket) => {
 
     playerSessions.set(socket.handshake.auth.playerId, {
       socketId: socket.id,
-      playerId: socket.handshake.auth.playerId,
-      lobbyId,
-      name: playerName
+      scene: 'MenuScene', 
+      gameState: {},       
+      character: null,
+      lobbyId: lobbyId,
     });
 
     socket.join(lobbyId);
@@ -76,14 +85,16 @@ io.on('connection', (socket) => {
   });
 
   socket.on('request-sync', ({ playerId, lobbyId }) => {
+    const session = playerSessions.get(playerId);
     const lobby = lobbies.get(lobbyId);
+    console.log(`User session sync request: ${session} for lobby: ${lobby})`)
     if (!lobby) return;
 
     const player = lobby.players.find(p => p.id === socket.id);
     if (!player) return;
 
     socket.emit('resync-data', {
-      gameState: lobby.gameState,
+      gameState: session.gameState,
       playerData: player,
       scene: lobby.currentScene || 'MenuScene'
     });
@@ -115,7 +126,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('advance-scene', ({ lobbyId, scene }) => {
-    const lobby = lobbies[lobbyId];
+    const lobby = lobbies.get(lobbyId);
     if (lobby) {
       lobby.currentScene = scene;
       lobby.players.forEach(p => {
@@ -146,11 +157,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    const token = socket.playerToken;
-    if (token && players.has(token)) {
-      players.get(token).socket = null;
-    }
-    console.log('User disconnected:', socket.id);
+    console.log(`User disconnected: ${socket.id} (playerId: ${playerId})`);
     /*for (const [lobbyId, lobby] of lobbies.entries()) {
       lobby.players = lobby.players.filter(p => p.id !== socket.id);
       io.to(lobbyId).emit('player-list', lobby.players);

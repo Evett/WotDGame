@@ -34,12 +34,13 @@ export class MenuScene extends BaseScene {
 
         // --- Trigger request-sync on reconnect (edit existing "reconnected" handler) ---
         this.socket.on('reconnected', (data) => {
+            console.log(`Attempting to reconnect with data: ${data}`);
             if (data.lobbyId) {
                 this.lobbyId = data.lobbyId;
                 this.nickname = data.playerData.name;
                 this.socket.emit('request-sync', {
-                playerId: getOrCreatePlayerId(),
-                lobbyId: this.lobbyId
+                    playerId: getOrCreatePlayerId(),
+                    lobbyId: this.lobbyId
                 });
                 this.alreadyJoined = true;
             }
