@@ -1,5 +1,6 @@
 import SceneManager from '../SceneManager';
 import BaseScene from './BaseScene';
+import { getOrCreatePlayerId } from '../utils/playerId';
 import { io } from 'socket.io-client';
 
 export class MenuScene extends BaseScene {
@@ -15,8 +16,34 @@ export class MenuScene extends BaseScene {
         this.sceneManager = new SceneManager(this);
         this.createBackground();
         const { x, y } = this.getCenter();
-        this.socket = io();
+        this.socket = io({ auth: { playerId: getOrCreatePlayerId() } });
         this.alreadyJoined = false;
+
+        this.socket.on('resync-data', ({ gameState, playerData, scene }) => {
+            Object.assign(gameStateInstance, gameState);
+            gameStateInstance.currentPlayer = playerData;
+
+            this.sceneManager.switchScene(scene, {
+                socket: this.socket,
+                gameState: gameStateInstance,
+                lobbyId: this.lobbyId,
+                playerId: playerData.id,
+                playerName: playerData.name
+            });
+        });
+
+        // --- Trigger request-sync on reconnect (edit existing "reconnected" handler) ---
+        this.socket.on('reconnected', (data) => {
+            if (data.lobbyId) {
+                this.lobbyId = data.lobbyId;
+                this.nickname = data.playerData.name;
+                this.socket.emit('request-sync', {
+                playerId: getOrCreatePlayerId(),
+                lobbyId: this.lobbyId
+                });
+                this.alreadyJoined = true;
+            }
+        });
 
         // Title
         this.add.text(x, y-250, 'Wars of the Defeated', {

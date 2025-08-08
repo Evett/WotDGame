@@ -17,9 +17,24 @@ const io = new Server(server, {
 });
 
 const lobbies = new Map();
+const playerSessions = new Map();
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
+
+  const playerId = socket.handshake.auth.playerId;
+  if (!playerId) {
+      socket.disconnect();
+      return;
+  }
+
+  // Reconnect or new session
+  const existing = playerSessions.get(playerId);
+  if (existing) {
+      existing.socketId = socket.id; // Update socket ID
+      socket.join(existing.lobbyId);
+      socket.emit('resync', existing); // Send back session info
+  }
 
   socket.on('join-lobby', ({ lobbyId, playerName }) => {
     let lobby = lobbies.get(lobbyId);
@@ -29,7 +44,9 @@ io.on('connection', (socket) => {
         players: [],
         maxPlayers: 2,
         chat: [],
-        characters: {}
+        characters: {},
+        gameState: {},
+        currentScene: null
       };
       lobbies.set(lobbyId, lobby);
     }
@@ -47,15 +64,29 @@ io.on('connection', (socket) => {
     const player = { id: socket.id, name: playerName, ready: false };
     lobby.players.push(player);
 
+    playerSessions.set(socket.handshake.auth.playerId, {
+      socketId: socket.id,
+      playerId: socket.handshake.auth.playerId,
+      lobbyId,
+      name: playerName
+    });
+
     socket.join(lobbyId);
     io.to(lobbyId).emit('player-list', lobby.players);
   });
 
-  socket.on('set-max-players', ({ lobbyId, maxPlayers }) => {
+  socket.on('request-sync', ({ playerId, lobbyId }) => {
     const lobby = lobbies.get(lobbyId);
-    if (lobby) {
-      lobby.maxPlayers = Math.min(maxPlayers, 6);
-    }
+    if (!lobby) return;
+
+    const player = lobby.players.find(p => p.id === socket.id);
+    if (!player) return;
+
+    socket.emit('resync-data', {
+      gameState: lobby.gameState,
+      playerData: player,
+      scene: lobby.currentScene || 'MenuScene'
+    });
   });
 
   socket.on('toggle-ready', ({ lobbyId }) => {
@@ -86,6 +117,7 @@ io.on('connection', (socket) => {
   socket.on('advance-scene', ({ lobbyId, scene }) => {
     const lobby = lobbies[lobbyId];
     if (lobby) {
+      lobby.currentScene = scene;
       lobby.players.forEach(p => {
         io.to(p.id).emit('advance-scene', scene);
       });
@@ -114,14 +146,19 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    for (const [lobbyId, lobby] of lobbies.entries()) {
+    const token = socket.playerToken;
+    if (token && players.has(token)) {
+      players.get(token).socket = null;
+    }
+    console.log('User disconnected:', socket.id);
+    /*for (const [lobbyId, lobby] of lobbies.entries()) {
       lobby.players = lobby.players.filter(p => p.id !== socket.id);
       io.to(lobbyId).emit('player-list', lobby.players);
       if (lobby.players.length === 0) {
         lobbies.delete(lobbyId);
       }
     }
-    console.log('User disconnected:', socket.id);
+    console.log('User disconnected:', socket.id);*/
   });
 });
 
