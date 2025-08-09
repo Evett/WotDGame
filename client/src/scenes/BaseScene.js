@@ -9,6 +9,7 @@ export default class BaseScene extends Phaser.Scene {
     }
 
     create() {
+        this.sceneManager = new SceneManager(this);
         this.socket.on('resync', ({ lobbyId, playerData, lobby }) => {
             console.log('Resynced:', lobbyId, playerData);
 
@@ -16,7 +17,12 @@ export default class BaseScene extends Phaser.Scene {
             gameState.playerId = playerId;
             gameState.scene = playerData.gameState.scene || 'MenuScene';
 
-            this.scene.start(gameState.scene, { gameState, lobby });
+            this.sceneManager.switchScene(gameState.scene, {
+                socket: this.socket,
+                players: lobby.players,
+                playerName: this.nickname,
+                lobbyId: gameState.lobbyId
+            });
         });
 
         this.time.delayedCall(500, () => {

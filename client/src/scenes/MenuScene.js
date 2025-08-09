@@ -14,7 +14,6 @@ export class MenuScene extends BaseScene {
     }
 
     showScene() {
-        this.sceneManager = new SceneManager(this);
         this.createBackground();
         const { x, y } = this.getCenter();
         this.alreadyJoined = false;
