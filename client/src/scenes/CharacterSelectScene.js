@@ -8,15 +8,14 @@ export class CharacterSelectScene extends BaseScene {
         super({ key: 'CharacterSelectScene' });
     }
 
-    create(data) {
+    create() {
+        super.create();
+    }
+
+    showScene() {
         this.sceneManager = new SceneManager(this);
         this.createBackground();
         const { x, y } = this.getCenter();
-
-        this.socket = data.socket;
-        this.lobbyId = data.lobbyId;
-        this.playerName = data.playerName;
-        this.players = data.players;
 
         this.selectedCharacters = {};
         this.characterButtons = {};
