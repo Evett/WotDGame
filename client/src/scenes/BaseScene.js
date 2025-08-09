@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { socket, playerId } from '../socket.js';
+import gameState from '../GameState';
 
 export default class BaseScene extends Phaser.Scene {
     constructor(key) {

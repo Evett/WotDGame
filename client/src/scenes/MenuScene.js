@@ -1,6 +1,5 @@
 import SceneManager from '../SceneManager';
 import BaseScene from './BaseScene';
-import { io } from 'socket.io-client';
 
 export class MenuScene extends BaseScene {
     constructor() {
@@ -18,7 +17,6 @@ export class MenuScene extends BaseScene {
         this.sceneManager = new SceneManager(this);
         this.createBackground();
         const { x, y } = this.getCenter();
-        let socket = io({ auth: { playerId: getOrCreatePlayerId() }, autoConnect: true });
         this.alreadyJoined = false;
 
         socket.on('reconnected', ({ lobbyId, playerData }) => {

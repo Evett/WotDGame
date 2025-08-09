@@ -142,9 +142,18 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    session.socketId = null;
-    session.lastSeen = Date.now();
-    console.log(`Player ${playerId} disconnected (soft hold for reconnect)`);
+    console.log('User disconnected:', socket.id);
+
+    const playerIdFromSession = [...playerSessions.entries()]
+      .find(([_, s]) => s.socketId === socket.id)?.[0];
+
+    if (playerIdFromSession) {
+      const session = playerSessions.get(playerIdFromSession);
+      if (session) {
+        session.socketId = null;
+        playerSessions.set(playerIdFromSession, session);
+      }
+    }
   });
 });
 
