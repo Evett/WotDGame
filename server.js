@@ -66,7 +66,7 @@ io.on('connection', (socket) => {
     playerSessions.set(playerId, {
       ...playerSessions.get(playerId),
       lobbyId,
-      gameState: { scene: 'LobbyScene' }, // default scene
+      gameState: { scene: 'MenuScene' }, // default scene
     });
 
     socket.join(lobbyId);
@@ -115,7 +115,7 @@ io.on('connection', (socket) => {
   });
 
   // === Select Character ===
-  socket.on('select-character', ({ lobbyId, characterKey }) => {
+  socket.on('select-character', ({ lobbyId, playerId, characterKey }) => {
     const lobby = lobbies.get(lobbyId);
     if (!lobby) return;
 
