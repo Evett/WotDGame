@@ -5,10 +5,11 @@ import gameState from '../GameState';
 export default class BaseScene extends Phaser.Scene {
     constructor(key) {
         super(key);
+        this.socket = socket;
     }
 
     create() {
-        socket.on('resync', ({ lobbyId, playerData, lobby }) => {
+        this.socket.on('resync', ({ lobbyId, playerData, lobby }) => {
             console.log('Resynced:', lobbyId, playerData);
 
             gameState.lobbyId = lobbyId;

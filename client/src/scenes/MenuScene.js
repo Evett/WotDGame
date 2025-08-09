@@ -19,7 +19,7 @@ export class MenuScene extends BaseScene {
         const { x, y } = this.getCenter();
         this.alreadyJoined = false;
 
-        socket.on('reconnected', ({ lobbyId, playerData }) => {
+        this.socket.on('reconnected', ({ lobbyId, playerData }) => {
             console.log('Reconnected to lobby:', lobbyId, playerData);
 
             // Restore local game state
