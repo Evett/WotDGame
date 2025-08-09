@@ -16,50 +16,63 @@ const io = new Server(server, {
   },
 });
 
-const lobbies = new Map();
-const playerSessions = new Map();
+const lobbies = new Map(); // lobbyId -> { players: [], chat: [], characters: {}, maxPlayers }
+const playerSessions = new Map(); // playerId -> { playerId, socketId, lobbyId, name, gameState, lastSeen }
 
+// === Connection Handling ===
 io.on('connection', (socket) => {
-
   const playerId = socket.handshake.auth.playerId;
   if (!playerId) {
-    console.warn('Connection rejected: no playerId');
+    console.log(`Rejected connection: missing playerId`);
     socket.disconnect();
     return;
   }
 
-  console.log(`User connected: ${socket.id} (playerId: ${playerId})`);
+  let session = playerSessions.get(playerId);
 
-  // Reconnect or new session
-  const existing = playerSessions.get(playerId);
-  if (existing) {
-    existing.socketId = socket.id;
-    socket.join(existing.lobbyId);
-
-    const lobby = lobbies.get(existing.lobbyId);
-    const player = lobby?.players.find(p => p.id === existing.socketId);
+  if (session) {
+    // Reconnect
+    session.socketId = socket.id;
+    session.lastSeen = Date.now();
+    socket.join(session.lobbyId);
+    console.log(`Player ${playerId} reconnected to lobby ${session.lobbyId}`);
 
     socket.emit('reconnected', {
-      lobbyId: existing.lobbyId,
-      playerData: player || { name: 'Unknown', id: socket.id },
+      lobbyId: session.lobbyId,
+      playerData: {
+        name: session.name,
+        gameState: session.gameState,
+      },
     });
+
+    // Tell others they're back
+    if (session.lobbyId && lobbies.has(session.lobbyId)) {
+      io.to(session.lobbyId).emit('player-list', lobbies.get(session.lobbyId).players);
+    }
+  } else {
+    // New session (not in a lobby yet)
+    session = {
+      playerId,
+      socketId: socket.id,
+      lobbyId: null,
+      name: null,
+      gameState: {},
+      lastSeen: Date.now(),
+    };
+    playerSessions.set(playerId, session);
+    console.log(`New player connected: ${playerId}`);
   }
 
+  // === Join Lobby ===
   socket.on('join-lobby', ({ lobbyId, playerName }) => {
     let lobby = lobbies.get(lobbyId);
-
     if (!lobby) {
-      lobby = {
-        players: [],
-        maxPlayers: 2,
-        chat: [],
-        characters: {},
-        currentScene: null
-      };
+      lobby = { players: [], maxPlayers: 2, chat: [], characters: {} };
       lobbies.set(lobbyId, lobby);
     }
 
-    if (lobby.players.find(p => p.id === socket.id)) {
+    // Prevent duplicate join
+    if (lobby.players.find((p) => p.playerId === playerId)) {
       socket.emit('error-message', 'You have already joined this lobby.');
       return;
     }
@@ -69,105 +82,101 @@ io.on('connection', (socket) => {
       return;
     }
 
-    const player = { id: socket.id, name: playerName, ready: false };
-    lobby.players.push(player);
+    const playerData = { playerId, name: playerName, ready: false };
+    lobby.players.push(playerData);
 
-    playerSessions.set(socket.handshake.auth.playerId, {
-      socketId: socket.id,
-      scene: 'MenuScene', 
-      gameState: {},       
-      character: null,
-      lobbyId: lobbyId,
-    });
+    // Update session
+    session.name = playerName;
+    session.lobbyId = lobbyId;
 
     socket.join(lobbyId);
     io.to(lobbyId).emit('player-list', lobby.players);
   });
 
-  socket.on('request-sync', ({ playerId, lobbyId }) => {
-    const session = playerSessions.get(playerId);
-    const lobby = lobbies.get(lobbyId);
-    console.log(`User session sync request: ${session} for lobby: ${lobby})`)
-    if (!lobby) return;
-
-    const player = lobby.players.find(p => p.id === socket.id);
-    if (!player) return;
-
-    socket.emit('resync-data', {
-      gameState: session.gameState,
-      playerData: player,
-      scene: lobby.currentScene || 'MenuScene'
-    });
-  });
-
+  // === Toggle Ready ===
   socket.on('toggle-ready', ({ lobbyId }) => {
     const lobby = lobbies.get(lobbyId);
     if (!lobby) return;
 
-    const player = lobby.players.find(p => p.id === socket.id);
+    const player = lobby.players.find((p) => p.playerId === playerId);
     if (player) {
       player.ready = !player.ready;
       io.to(lobbyId).emit('player-list', lobby.players);
 
-      const allReady = lobby.players.length > 0 && lobby.players.every(p => p.ready);
+      const allReady = lobby.players.length > 0 && lobby.players.every((p) => p.ready);
       if (allReady && lobby.players.length === lobby.maxPlayers) {
         io.to(lobbyId).emit('start-game', { players: lobby.players });
       }
     }
   });
 
+  // === Chat ===
   socket.on('chat-message', ({ lobbyId, name, message }) => {
-    const chat = { name, message };
+    const chatMsg = { name, message };
     const lobby = lobbies.get(lobbyId);
     if (lobby) {
-      lobby.chat.push(chat);
-      io.to(lobbyId).emit('chat-message', chat);
+      lobby.chat.push(chatMsg);
+      io.to(lobbyId).emit('chat-message', chatMsg);
     }
   });
 
+  // === Advance Scene ===
   socket.on('advance-scene', ({ lobbyId, scene }) => {
-    const lobby = lobbies.get(lobbyId);
-    if (lobby) {
-      lobby.currentScene = scene;
-      lobby.players.forEach(p => {
-        io.to(p.id).emit('advance-scene', scene);
-      });
-    }
-  });
-
-  socket.on('select-character', ({ lobbyId, playerId, characterKey }) => {
     const lobby = lobbies.get(lobbyId);
     if (!lobby) return;
 
+    // Save to each player's gameState
+    lobby.players.forEach((p) => {
+      const ps = playerSessions.get(p.playerId);
+      if (ps) ps.gameState.scene = scene;
+    });
+
+    io.to(lobbyId).emit('advance-scene', scene);
+  });
+
+  // === Select Character ===
+  socket.on('select-character', ({ lobbyId, characterKey }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby) return;
+
+    // Already chosen a character?
     if (lobby.characters[playerId]) {
       socket.emit('error-message', 'You already selected a character.');
       return;
     }
 
+    // Character already taken?
     const alreadyChosen = Object.values(lobby.characters).includes(characterKey);
     if (alreadyChosen) return;
 
     lobby.characters[playerId] = characterKey;
 
+    // Save in gameState
+    session.gameState.characterKey = characterKey;
+
     io.to(lobbyId).emit('character-selected', {
       playerId,
       characterKey,
-      allSelected: Object.keys(lobby.characters).length === lobby.players.length
+      allSelected: Object.keys(lobby.characters).length === lobby.players.length,
     });
   });
 
   socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.id} (playerId: ${playerId})`);
-    /*for (const [lobbyId, lobby] of lobbies.entries()) {
-      lobby.players = lobby.players.filter(p => p.id !== socket.id);
-      io.to(lobbyId).emit('player-list', lobby.players);
-      if (lobby.players.length === 0) {
-        lobbies.delete(lobbyId);
-      }
-    }
-    console.log('User disconnected:', socket.id);*/
+    session.socketId = null;
+    session.lastSeen = Date.now();
+    console.log(`Player ${playerId} disconnected (soft hold for reconnect)`);
   });
 });
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, session] of playerSessions.entries()) {
+    if (!session.socketId && now - session.lastSeen > 300000) { // 5 min
+      console.log(`Cleaning up session for player ${id}`);
+      playerSessions.delete(id);
+    }
+  }
+}, 60000);
 
 app.use(express.static(path.join(__dirname, 'client', 'dist')));
 

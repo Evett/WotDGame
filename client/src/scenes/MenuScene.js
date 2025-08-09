@@ -16,33 +16,23 @@ export class MenuScene extends BaseScene {
         this.sceneManager = new SceneManager(this);
         this.createBackground();
         const { x, y } = this.getCenter();
-        this.socket = io({ auth: { playerId: getOrCreatePlayerId() } });
+        let socket = io({ auth: { playerId: getOrCreatePlayerId() }, autoConnect: true });
         this.alreadyJoined = false;
 
-        this.socket.on('resync-data', ({ gameState, playerData, scene }) => {
-            Object.assign(gameStateInstance, gameState);
-            gameStateInstance.currentPlayer = playerData;
+        socket.on('reconnected', ({ lobbyId, playerData }) => {
+            console.log('Reconnected to lobby:', lobbyId, playerData);
 
-            this.sceneManager.switchScene(scene, {
-                socket: this.socket,
-                gameState: gameStateInstance,
-                lobbyId: this.lobbyId,
-                playerId: playerData.id,
-                playerName: playerData.name
-            });
-        });
+            // Restore local game state
+            gameState = playerData.gameState;
 
-        // --- Trigger request-sync on reconnect (edit existing "reconnected" handler) ---
-        this.socket.on('reconnected', (data) => {
-            console.log(`Attempting to reconnect with data: ${data}`);
-            if (data.lobbyId) {
-                this.lobbyId = data.lobbyId;
-                this.nickname = data.playerData.name;
-                this.socket.emit('request-sync', {
-                    playerId: getOrCreatePlayerId(),
+            // Jump directly to the saved scene if one exists
+            if (gameState.scene) {
+                this.sceneManager.switchScene(gameState.scene, {
+                    socket: this.socket,
+                    players,
+                    playerName: this.nickname,
                     lobbyId: this.lobbyId
                 });
-                this.alreadyJoined = true;
             }
         });
 
