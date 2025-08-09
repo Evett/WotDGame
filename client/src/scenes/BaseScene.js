@@ -1,8 +1,31 @@
 import Phaser from 'phaser';
+import { socket, playerId } from '../socket.js';
 
 export default class BaseScene extends Phaser.Scene {
     constructor(key) {
         super(key);
+    }
+
+    create() {
+        socket.on('resync', ({ lobbyId, playerData, lobby }) => {
+            console.log('Resynced:', lobbyId, playerData);
+
+            gameState.lobbyId = lobbyId;
+            gameState.playerId = playerId;
+            gameState.scene = playerData.gameState.scene || 'MenuScene';
+
+            this.scene.start(gameState.scene, { gameState, lobby });
+        });
+
+        this.time.delayedCall(500, () => {
+            if (!gameState.scene) {
+                this.showScene();
+            }
+        });
+    }
+
+    showScene() {
+        console.log('BaseScene showScene does nothing');
     }
 
     createBackground(color = 0x1d1d1d) {

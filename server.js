@@ -21,73 +21,53 @@ const playerSessions = new Map(); // playerId -> { playerId, socketId, lobbyId, 
 
 // === Connection Handling ===
 io.on('connection', (socket) => {
-  const playerId = socket.handshake.auth.playerId;
+  const playerId = socket.handshake.auth?.playerId;
   if (!playerId) {
-    console.log(`Rejected connection: missing playerId`);
     socket.disconnect();
     return;
   }
 
-  let session = playerSessions.get(playerId);
+  console.log('User connected:', socket.id, 'playerId:', playerId);
 
-  if (session) {
-    // Reconnect
+  // If session exists → reconnect
+  if (playerSessions.has(playerId)) {
+    const session = playerSessions.get(playerId);
     session.socketId = socket.id;
-    session.lastSeen = Date.now();
-    socket.join(session.lobbyId);
-    console.log(`Player ${playerId} reconnected to lobby ${session.lobbyId}`);
+    playerSessions.set(playerId, session);
 
-    socket.emit('reconnected', {
-      lobbyId: session.lobbyId,
-      playerData: {
-        name: session.name,
-        gameState: session.gameState,
-      },
-    });
-
-    // Tell others they're back
     if (session.lobbyId && lobbies.has(session.lobbyId)) {
-      io.to(session.lobbyId).emit('player-list', lobbies.get(session.lobbyId).players);
+      socket.join(session.lobbyId);
+      socket.emit('resync', {
+        lobbyId: session.lobbyId,
+        playerData: session,
+        lobby: lobbies.get(session.lobbyId),
+      });
     }
   } else {
-    // New session (not in a lobby yet)
-    session = {
-      playerId,
-      socketId: socket.id,
-      lobbyId: null,
-      name: null,
-      gameState: {},
-      lastSeen: Date.now(),
-    };
-    playerSessions.set(playerId, session);
-    console.log(`New player connected: ${playerId}`);
+    // New session
+    playerSessions.set(playerId, { socketId: socket.id, lobbyId: null, gameState: {} });
   }
 
-  // === Join Lobby ===
+  // Join lobby
   socket.on('join-lobby', ({ lobbyId, playerName }) => {
     let lobby = lobbies.get(lobbyId);
     if (!lobby) {
-      lobby = { players: [], maxPlayers: 2, chat: [], characters: {} };
+      lobby = { players: [], maxPlayers: 2, characters: {} };
       lobbies.set(lobbyId, lobby);
     }
 
-    // Prevent duplicate join
-    if (lobby.players.find((p) => p.playerId === playerId)) {
-      socket.emit('error-message', 'You have already joined this lobby.');
-      return;
-    }
+    // Avoid double join
+    if (lobby.players.find(p => p.playerId === playerId)) return;
 
-    if (lobby.players.length >= lobby.maxPlayers) {
-      socket.emit('lobby-full');
-      return;
-    }
+    const player = { id: socket.id, playerId, name: playerName, ready: false };
+    lobby.players.push(player);
 
-    const playerData = { playerId, name: playerName, ready: false };
-    lobby.players.push(playerData);
-
-    // Update session
-    session.name = playerName;
-    session.lobbyId = lobbyId;
+    // Save in session
+    playerSessions.set(playerId, {
+      ...playerSessions.get(playerId),
+      lobbyId,
+      gameState: { scene: 'LobbyScene' }, // default scene
+    });
 
     socket.join(lobbyId);
     io.to(lobbyId).emit('player-list', lobby.players);

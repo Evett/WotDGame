@@ -1,6 +1,5 @@
 import SceneManager from '../SceneManager';
 import BaseScene from './BaseScene';
-import { getOrCreatePlayerId } from '../utils/playerId';
 import { io } from 'socket.io-client';
 
 export class MenuScene extends BaseScene {
@@ -12,7 +11,10 @@ export class MenuScene extends BaseScene {
     }
 
     create() {
+        super.create();
+    }
 
+    showScene() {
         this.sceneManager = new SceneManager(this);
         this.createBackground();
         const { x, y } = this.getCenter();
