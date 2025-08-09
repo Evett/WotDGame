@@ -9,27 +9,8 @@ export default class BaseScene extends Phaser.Scene {
     }
 
     create() {
-        this.sceneManager = new SceneManager(this);
-        this.socket.on('resync', ({ lobbyId, playerData, lobby }) => {
-            console.log('Resynced:', lobbyId, playerData);
-
-            gameState.lobbyId = lobbyId;
-            gameState.playerId = playerId;
-            gameState.scene = playerData.gameState.scene || 'MenuScene';
-
-            this.sceneManager.switchScene(gameState.scene, {
-                socket: this.socket,
-                players: lobby.players,
-                playerName: this.nickname,
-                lobbyId: gameState.lobbyId
-            });
-        });
-
-        this.time.delayedCall(500, () => {
-            if (!gameState.scene) {
-                this.showScene();
-            }
-        });
+        this.socket = socket;
+        this.gameState = gameState;
     }
 
     showScene() {

@@ -1,79 +1,76 @@
+// src/scenes/CharacterSelectScene.js
 import gameState from '../GameState.js';
 import CharacterLibrary from '../data/CharacterLibrary.js';
 import SceneManager from '../SceneManager.js';
-import BaseScene from './BaseScene.js';
+import BaseScene from './BaseScene';
+import { playerId } from '../socket.js';
 
 export class CharacterSelectScene extends BaseScene {
-    constructor() {
-        super({ key: 'CharacterSelectScene' });
-    }
+  constructor() {
+    super({ key: 'CharacterSelectScene' });
+  }
 
-    create() {
-        super.create();
-    }
+  create() {
+    super.create();
+    this.sceneManager = new SceneManager(this);
+    this.showScene();
+  }
 
-    showScene() {
-        this.createBackground();
-        const { x, y } = this.getCenter();
+  showScene() {
+    this.createBackground();
+    const { x, y } = this.getCenter();
 
-        this.selectedCharacters = {};
-        this.characterButtons = {};
+    this.selectedCharacters = {};
+    this.characterButtons = {};
 
-        this.add.text(x, y-200, 'Choose Your Character', {
-            fontSize: '32px',
-            color: '#ffffff'
-        }).setOrigin(0.5);
+    this.add.text(x, y - 200, 'Choose Your Character', { fontSize: '32px', color: '#fff' }).setOrigin(0.5);
 
-        let yPos = y - 100;
-        Object.keys(CharacterLibrary).forEach((charKey) => {
-            const character = CharacterLibrary[charKey];
+    let yPos = y - 100;
+    Object.keys(CharacterLibrary).forEach((charKey) => {
+      const character = CharacterLibrary[charKey];
 
-            const button = this.add.text(x, yPos, character.name, {
-                fontSize: '24px',
-                backgroundColor: '#333',
-                padding: { x: 10, y: 5 },
-                color: '#ffffff'
-            }).setOrigin(0.5).setInteractive();
+      const button = this.add.text(x, yPos, character.name, {
+        fontSize: '24px', backgroundColor: '#333', padding: { x: 10, y: 5 }, color: '#fff'
+      }).setOrigin(0.5).setInteractive();
 
-            button.on('pointerdown', () => {
-                if (button.disabled) return;
-                this.socket.emit('select-character', {
-                    lobbyId: this.lobbyId,
-                    playerId: this.socket.id,
-                    characterKey: charKey
-                });
-            });
+      button.on('pointerdown', () => {
+        if (button.disabled) return;
+        // emit persistent playerId so server knows who requested
+        this.socket.emit('select-character', { lobbyId: this.lobbyId, characterKey: charKey, requesterPlayerId: playerId });
+      });
 
-            this.characterButtons[charKey] = button;
-            yPos += 50;
+      this.characterButtons[charKey] = button;
+      yPos += 50;
+    });
+
+    // Listen for character selections
+    this.socket.on('character-selected', ({ playerId: chosenBy, characterKey, allSelected }) => {
+      this.selectedCharacters[chosenBy] = characterKey;
+
+      const button = this.characterButtons[characterKey];
+      if (button) {
+        button.setStyle({ backgroundColor: '#555' });
+        button.disabled = true;
+      }
+
+      // If this selection is yours, set your gameState
+      if (chosenBy === playerId) {
+        gameState.setCharacter(CharacterLibrary[characterKey]);
+        // disable all your buttons so you can't pick again
+        Object.values(this.characterButtons).forEach(btn => btn.disabled = true);
+      }
+
+      if (allSelected) {
+        this.time.delayedCall(500, () => {
+          this.sceneManager.switchScene('MapScene', {
+            socket: this.socket,
+            players: null,
+            playerId,
+            lobbyId: this.lobbyId,
+            characters: this.selectedCharacters
+          });
         });
-
-        this.socket.on('character-selected', ({ playerId, characterKey, allSelected }) => {
-            this.selectedCharacters[playerId] = characterKey;
-
-            const button = this.characterButtons[characterKey];
-            if (button) {
-                button.setStyle({ backgroundColor: '#555' });
-                button.disabled = true;
-            }
-
-            // If you are the one who selected it, store it
-            if (playerId === this.socket.id) {
-                gameState.setCharacter(CharacterLibrary[characterKey]);
-                Object.values(this.characterButtons).forEach(btn => btn.disabled = true);
-            }
-
-            if (allSelected) {
-                this.time.delayedCall(500, () => {
-                    this.sceneManager.switchScene('MapScene', {
-                        socket: this.socket,
-                        players: this.players,
-                        playerId: this.socket.id,
-                        lobbyId: this.lobbyId,
-                        characters: this.selectedCharacters
-                    });
-                });
-            }
-        });
-    }
+      }
+    });
+  }
 }
