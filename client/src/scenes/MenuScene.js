@@ -44,7 +44,6 @@ export class MenuScene extends BaseScene {
       if (sceneToGo) {
         // switch to the scene the server says we're in
         this.sceneManager.switchScene(sceneToGo, {
-          socket: this.socket,
           lobby,
           playerId,
           playerName: this.nickname

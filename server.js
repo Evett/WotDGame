@@ -58,6 +58,7 @@ io.on('connection', (socket) => {
   socket.on('request-sync', ({ lobbyId }) => {
     const s = playerSessions.get(playerId);
     const lobby = lobbies.get(lobbyId);
+    console.log(`Player: ${playerId} trying to resync session ${s}`)
     if (!s) return;
     socket.emit('resync-data', {
       gameState: s.gameState || {},
@@ -68,6 +69,7 @@ io.on('connection', (socket) => {
 
   // Join a lobby
   socket.on('join-lobby', ({ lobbyId, playerName }) => {
+    console.log(`Player: ${playerId} joining lobby: ${lobbyId}`);
     if (!lobbyId) return;
 
     let lobby = lobbies.get(lobbyId);
@@ -107,6 +109,7 @@ io.on('connection', (socket) => {
 
   // Toggle ready
   socket.on('toggle-ready', ({ lobbyId }) => {
+    console.log(`Toggling ready check.`);
     const lobby = lobbies.get(lobbyId);
     if (!lobby) return;
     const player = lobby.players.find(p => p.playerId === playerId);
@@ -131,6 +134,7 @@ io.on('connection', (socket) => {
 
   // Advance scene for lobby — saves scene into each player's session.gameState
   socket.on('advance-scene', ({ lobbyId, scene }) => {
+    console.log(`Advancing to scene: ${scene}`);
     const lobby = lobbies.get(lobbyId);
     if (!lobby) return;
     lobby.currentScene = scene;
@@ -148,6 +152,7 @@ io.on('connection', (socket) => {
   // Player-side full gameState update (client should emit when deck/HP/etc. change)
   socket.on('update-game-state', ({ gameState }) => {
     const ps = playerSessions.get(playerId);
+    console.log(`Updating gameState: ${gameState} for player ${playerId} in session ${ps}`);
     if (ps) {
       ps.gameState = gameState;
       ps.lastSeen = Date.now();
@@ -157,6 +162,7 @@ io.on('connection', (socket) => {
 
   // Select character (persistent playerId)
   socket.on('select-character', ({ lobbyId, characterKey, requesterPlayerId }) => {
+    console.log(`Player ${playerId} selecting character ${characterKey}`);
     const lobby = lobbies.get(lobbyId);
     if (!lobby) return;
 

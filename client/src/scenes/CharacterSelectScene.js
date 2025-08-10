@@ -10,9 +10,12 @@ export class CharacterSelectScene extends BaseScene {
     super({ key: 'CharacterSelectScene' });
   }
 
-  create() {
+  create(data) {
     super.create();
     this.sceneManager = new SceneManager(this);
+    this.lobbyId = data.lobbyId;
+    this.playerName = data.playerName;
+    this.players = data.players;
     this.showScene();
   }
 
@@ -35,7 +38,6 @@ export class CharacterSelectScene extends BaseScene {
 
       button.on('pointerdown', () => {
         if (button.disabled) return;
-        // emit persistent playerId so server knows who requested
         this.socket.emit('select-character', { lobbyId: this.lobbyId, characterKey: charKey, requesterPlayerId: playerId });
       });
 
