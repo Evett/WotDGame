@@ -72,7 +72,7 @@ io.on('connection', (socket) => {
 
     let lobby = lobbies.get(lobbyId);
     if (!lobby) {
-      lobby = { players: [], maxPlayers: 6, characters: {}, chat: [], currentScene: null };
+      lobby = { players: [], maxPlayers: 2, characters: {}, chat: [], currentScene: null };
       lobbies.set(lobbyId, lobby);
     }
 
