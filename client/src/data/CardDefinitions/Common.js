@@ -45,8 +45,10 @@ export default {
         requiresTarget: false,
         isOncePerDay: false,
         description: "Next attack deals double damage.",
+        upgradedDescription: "Next attack deals triple damage.",
         effect: (target, state) => {
-            state.nextAttackBonus *= 2;
-        }
+            state.nextAttackBonus *= card.upgraded ? 3 : 2;
+        },
+        upgraded: false
     })
 };

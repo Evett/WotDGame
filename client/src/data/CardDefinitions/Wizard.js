@@ -11,11 +11,13 @@ export default {
         requiresTarget: true,
         isOncePerDay: false,
         description: "Deal 6 damage that can't miss.",
+        upgradedDescription: "Deal 10 damage that can't miss",
         effect: (target, state) => {
             if (target) {
                 target.takeTrueDamage(6);
             }
-        }
+        },
+        upgraded: false
     }),
     
     Fireball: () => createCard({
@@ -26,9 +28,11 @@ export default {
         requiresTarget: false,
         isOncePerDay: true,
         description: "Deal 10 damage to all enemies.",
+        upgradedDescription: "Deal 16 damage to all enemies.",
         effect: (_, state) => {
             state.enemies.forEach(e => e.takeDamage(10));
-        }
+        },
+        upgraded: false
     }),
     
     Shield: () => createCard({
@@ -39,9 +43,11 @@ export default {
         requiresTarget: false,
         isOncePerDay: false,
         description: "Gain 6 armor. Negate the next attack.",
+        upgradedDescription: "Gain 9 armor. Negate the next attack.",
         effect: (_, state) => {
             state.playerArmor(6);
             state.applyStatus("Shielded", 1);
-        }
+        },
+        upgraded: false
     })
 }

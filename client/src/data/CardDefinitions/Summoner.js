@@ -11,9 +11,11 @@ export default {
         requiresTarget: false,
         isOncePerDay: false,
         description: "Summon an elemental ally that attacks for 4 damage each turn.",
+        upgradedDescription: "Summon an elemental ally that attacks for 6 damage each turn.",
         effect: (_, state) => {
             state.summonAlly({ name: "Lesser Elemental", damage: 4, duration: 3 });
-        }
+        },
+        upgraded: false
     }),
     
     EidolonStrike: () => createCard({
@@ -24,11 +26,13 @@ export default {
         requiresTarget: true,
         isOncePerDay: false,
         description: "Your Eidolon deals 5 damage.",
+        upgradedDescription: "Your Eidolon deals 9 damage.",
         effect: (target, state) => {
             if (target && state.hasEidolon) {
                 target.takeDamage(5 * state.nextAttackBonus);
             }
-        }
+        },
+        upgraded: false
     }),
     
     PlanarBinding: () => createCard({
@@ -39,10 +43,12 @@ export default {
         requiresTarget: true,
         isOncePerDay: false,
         description: "Stun a non-boss enemy for 1 turn.",
+        upgradedDescription: "Stun an enemy for 1 turn.",
         effect: (target, state) => {
             if (target && !target.isBoss) {
                 target.applyStatus("Stunned", 1);
             }
-        }
+        },
+        upgraded: false
     })
 }

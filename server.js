@@ -36,6 +36,7 @@ io.on('connection', (socket) => {
     session.socketId = socket.id;
     session.lastSeen = Date.now();
     playerSessions.set(playerId, session);
+    console.log(`PlayerSessions reconnecting: ${playerSessions}`);
 
     if (session.lobbyId && lobbies.has(session.lobbyId)) {
       socket.join(session.lobbyId);
@@ -52,10 +53,12 @@ io.on('connection', (socket) => {
     // New session skeleton; will be populated on join-lobby
     session = { playerId, socketId: socket.id, lobbyId: null, name: null, gameState: {}, lastSeen: Date.now() };
     playerSessions.set(playerId, session);
+    console.log(`New PlayerSessions: ${playerSessions}`);
   }
 
   // Client requests a full sync of their state (used after reconnected)
   socket.on('request-sync', ({ lobbyId }) => {
+    console.log(`PlayerSessions request-sync: ${playerSessions}`);
     const s = playerSessions.get(playerId);
     const lobby = lobbies.get(lobbyId);
     console.log(`Player: ${playerId} trying to resync session ${s}`)
@@ -101,6 +104,7 @@ io.on('connection', (socket) => {
     session.name = playerName;
     session.lastSeen = Date.now();
     playerSessions.set(playerId, session);
+    console.log(`PlayerSessions updated: ${playerSessions}`);
 
     socket.join(lobbyId);
     io.to(lobbyId).emit('player-list', lobby.players);
@@ -144,6 +148,7 @@ io.on('connection', (socket) => {
         ps.gameState = ps.gameState || {};
         ps.gameState.scene = scene;
         playerSessions.set(p.playerId, ps);
+        console.log(`PlayerSessions advancing scene: ${playerSessions}`);
       }
     });
     io.to(lobbyId).emit('advance-scene', scene);
