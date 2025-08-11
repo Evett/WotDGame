@@ -36,7 +36,7 @@ io.on('connection', (socket) => {
     session.socketId = socket.id;
     session.lastSeen = Date.now();
     playerSessions.set(playerId, session);
-    console.log(`PlayerSessions reconnecting: ${[...playerSessions.entries()]}`);
+    console.log("PlayerSessions reconnecting:", [...playerSessions.entries()]);
 
     if (session.lobbyId && lobbies.has(session.lobbyId)) {
       socket.join(session.lobbyId);
@@ -53,13 +53,13 @@ io.on('connection', (socket) => {
     // New session skeleton; will be populated on join-lobby
     session = { playerId, socketId: socket.id, lobbyId: null, name: null, gameState: {}, lastSeen: Date.now() };
     playerSessions.set(playerId, session);
-    console.log(`New PlayerSessions: ${[...playerSessions.entries()]}`);
+    console.log("New PlayerSessions:", [...playerSessions.entries()]);
 
   }
 
   // Client requests a full sync of their state (used after reconnected)
   socket.on('request-sync', ({ lobbyId }) => {
-    console.log(`PlayerSessions request-sync: ${[...playerSessions.entries()]}`);
+    console.log("PlayerSessions request-sync:", [...playerSessions.entries()]);
     const s = playerSessions.get(playerId);
     const lobby = lobbies.get(lobbyId);
     console.log(`Player: ${playerId} trying to resync session ${s}`)
@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
     session.name = playerName;
     session.lastSeen = Date.now();
     playerSessions.set(playerId, session);
-    console.log(`PlayerSessions updated: ${[...playerSessions.entries()]}`);
+    console.log("PlayerSessions updated:", [...playerSessions.entries()]);
 
     socket.join(lobbyId);
     io.to(lobbyId).emit('player-list', lobby.players);
@@ -149,7 +149,7 @@ io.on('connection', (socket) => {
         ps.gameState = ps.gameState || {};
         ps.gameState.scene = scene;
         playerSessions.set(p.playerId, ps);
-        console.log(`PlayerSessions advancing scene: ${[...playerSessions.entries()]}`);
+        console.log("PlayerSessions advancing scene:", [...playerSessions.entries()]);
       }
     });
     io.to(lobbyId).emit('advance-scene', scene);
@@ -158,7 +158,8 @@ io.on('connection', (socket) => {
   // Player-side full gameState update (client should emit when deck/HP/etc. change)
   socket.on('update-game-state', ({ gameState }) => {
     const ps = playerSessions.get(playerId);
-    console.log(`Updating gameState: ${gameState} for player ${playerId} in session ${[...playerSessions.entries()]}`);
+    console.log(`Updating gameState: ${gameState} for player ${playerId}`);
+    console.log("In PlayerSessions:", [...playerSessions.entries()]);
     if (ps) {
       ps.gameState = gameState;
       ps.lastSeen = Date.now();
@@ -191,7 +192,7 @@ io.on('connection', (socket) => {
       ps.gameState = ps.gameState || {};
       ps.gameState.characterKey = characterKey;
       playerSessions.set(requesterPlayerId, ps);
-      console.log(`PlayerSessions selecting character ${[...playerSessions.entries()]}`);
+      console.log("PlayerSessions selecting character:", [...playerSessions.entries()]);
     }
 
     io.to(lobbyId).emit('character-selected', {
