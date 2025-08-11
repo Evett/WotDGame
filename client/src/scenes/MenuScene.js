@@ -11,22 +11,13 @@ export class MenuScene extends BaseScene {
 
   create() {
     super.create();
-    this.sceneManager = new SceneManager(this);
+    this.sceneManager = new SceneManager(this, this.socket, this.lobbyId);
     this.createBackground();
     const { x, y } = this.getCenter();
 
     this.alreadyJoined = false;
     this.lobbyId = null;
     this.nickname = '';
-
-    // If server tells us we reconnected to a lobby, request full sync
-    this.socket.on('reconnected', ({ lobbyId, name }) => {
-      this.lobbyId = lobbyId;
-      this.nickname = name;
-      // ask server for saved gameState & lobby info
-      this.socket.emit('request-sync', { lobbyId });
-      this.alreadyJoined = true;
-    });
 
     // server responds with full state (session + lobby info)
     this.socket.on('resync-data', ({ gameState: serverGameState, session, lobby, sceneToGo }) => {
@@ -37,14 +28,13 @@ export class MenuScene extends BaseScene {
       if (session) {
         this.lobbyId = session.lobbyId;
         this.nickname = session.name;
+        this.sceneManager.setLobby(session.lobbyId);
       }
 
       // If server says we are mid-scene, jump there
       if (sceneToGo) {
         this.sceneManager.switchScene(sceneToGo, {
-          socket: this.socket,
           gameState,
-          lobbyId: this.lobbyId,
           playerId: session?.playerId,
           playerName: this.nickname
         });
@@ -56,9 +46,7 @@ export class MenuScene extends BaseScene {
         (lobby && lobby.currentScene) ||
         'MenuScene';
       this.sceneManager.switchScene(fallbackScene, {
-        socket: this.socket,
         gameState,
-        lobbyId: this.lobbyId,
         playerId: session?.playerId,
         playerName: this.nickname
       });
@@ -130,7 +118,8 @@ export class MenuScene extends BaseScene {
     });
 
     this.socket.on('start-game', ({ players }) => {
-      this.sceneManager.switchScene('CharacterSelectScene', { socket: this.socket, players, playerId, lobbyId: this.lobbyId });
+      this.sceneManager.setLobby(lobbyId);
+      this.sceneManager.switchScene('CharacterSelectScene', { gameState, players, playerId, lobbyId: this.lobbyId, socket: this.socket });
     });
   }
 }

@@ -58,6 +58,7 @@ export class CharacterSelectScene extends BaseScene {
       // If this selection is yours, set your gameState
       if (chosenBy === playerId) {
         gameState.setCharacter(CharacterLibrary[characterKey]);
+        this.socket.emit('update-game-state', { gameState });
         // disable all your buttons so you can't pick again
         Object.values(this.characterButtons).forEach(btn => btn.disabled = true);
       }
@@ -69,7 +70,8 @@ export class CharacterSelectScene extends BaseScene {
             players: null,
             playerId,
             lobbyId: this.lobbyId,
-            characters: this.selectedCharacters
+            characters: this.selectedCharacters,
+            gameState
           });
         });
       }

@@ -36,30 +36,40 @@ io.on('connection', (socket) => {
     session.socketId = socket.id;
     session.lastSeen = Date.now();
     playerSessions.set(playerId, session);
-    console.log("PlayerSessions reconnecting:", [...playerSessions.entries()]);
+    console.log("PlayerSession reconnecting:", session);
 
     if (session.lobbyId && lobbies.has(session.lobbyId)) {
       socket.join(session.lobbyId);
-      // Inform the client they reconnected
-      socket.emit('reconnected', {
-        lobbyId: session.lobbyId,
-        name: session.name,
-      });
-      // also send an updated player list so client UI refreshes
       const lobby = lobbies.get(session.lobbyId);
+
+      // Immediately tell the client to jump to the current scene
+      socket.emit('resync-data', {
+          gameState: session.gameState || {},
+          session: {
+              playerId: session.playerId,
+              name: session.name,
+              lobbyId: session.lobbyId
+          },
+          lobby: {
+              players: lobby.players,
+              characters: lobby.characters,
+              currentScene: lobby.currentScene
+          },
+          sceneToGo: lobby.currentScene || session.gameState.scene || null
+      });
+
+      // Also update the player list so UI refreshes
       io.to(session.lobbyId).emit('player-list', lobby.players);
     }
   } else {
     // New session skeleton; will be populated on join-lobby
     session = { playerId, socketId: socket.id, lobbyId: null, name: null, gameState: {}, lastSeen: Date.now() };
     playerSessions.set(playerId, session);
-    console.log("New PlayerSessions:", [...playerSessions.entries()]);
+    console.log("New PlayerSessions:", session);
 
   }
 
   socket.on('request-sync', ({ lobbyId }) => {
-    console.log("PlayerSessions request-sync:", [...playerSessions.entries()]);
-
     const s = playerSessions.get(playerId);
     const lobby = lobbies.get(lobbyId);
     console.log(`Player: ${playerId} trying to resync session`, s);
@@ -148,6 +158,14 @@ io.on('connection', (socket) => {
 
     const allReady = lobby.players.length > 0 && lobby.players.every(p => p.ready);
     if (allReady && lobby.players.length === lobby.maxPlayers) {
+      lobby.currentScene = 'CharacterSelectScene';
+      lobby.players.forEach(p => {
+        const ps = playerSessions.get(p.playerId);
+        if (ps) {
+          ps.gameState.scene = 'CharacterSelectScene';
+          playerSessions.set(p.playerId, ps);
+        }
+      });
       io.to(lobbyId).emit('start-game', { players: lobby.players });
     }
   });
