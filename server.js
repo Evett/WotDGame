@@ -74,6 +74,7 @@ io.on('connection', (socket) => {
     } else if (s.gameState && s.gameState.scene) {
       sceneToGo = s.gameState.scene;
     }
+    console.log(`SceneToGo for resync: ${sceneToGo}`);
 
     socket.emit('resync-data', {
       gameState: s.gameState || {},
