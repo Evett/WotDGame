@@ -119,7 +119,7 @@ export class MenuScene extends BaseScene {
 
     this.socket.on('start-game', ({ players }) => {
       this.sceneManager.setLobby(this.lobbyId);
-      this.sceneManager.switchScene('CharacterSelectScene', { gameState, players, playerId, lobbyId: this.lobbyId, socket: this.socket });
+      this.sceneManager.switchScene('CharacterSelectScene', { gameState, players, playerId });
     });
   }
 }

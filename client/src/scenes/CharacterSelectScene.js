@@ -12,10 +12,10 @@ export class CharacterSelectScene extends BaseScene {
 
   create(data) {
     super.create();
-    this.sceneManager = new SceneManager(this);
     this.lobbyId = data.lobbyId;
     this.playerName = data.playerName;
     this.players = data.players;
+    this.sceneManager = new SceneManager(this, this.socket, this.lobbyId);
     this.showScene();
   }
 
@@ -65,12 +65,9 @@ export class CharacterSelectScene extends BaseScene {
 
       if (allSelected) {
         this.time.delayedCall(500, () => {
+          this.sceneManager.setLobby(this.lobbyId);
           this.sceneManager.switchScene('MapScene', {
-            socket: this.socket,
-            players: null,
             playerId,
-            lobbyId: this.lobbyId,
-            characters: this.selectedCharacters,
             gameState
           });
         });
