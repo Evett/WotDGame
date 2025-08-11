@@ -57,19 +57,42 @@ io.on('connection', (socket) => {
 
   }
 
-  // Client requests a full sync of their state (used after reconnected)
   socket.on('request-sync', ({ lobbyId }) => {
     console.log("PlayerSessions request-sync:", [...playerSessions.entries()]);
+
     const s = playerSessions.get(playerId);
     const lobby = lobbies.get(lobbyId);
-    console.log(`Player: ${playerId} trying to resync session ${s}`)
+    console.log(`Player: ${playerId} trying to resync session`, s);
+
     if (!s) return;
+
+    // Try to figure out the scene from multiple sources
+    let sceneToGo = null;
+
+    if (lobby && lobby.currentScene) {
+      sceneToGo = lobby.currentScene;
+    } else if (s.gameState && s.gameState.scene) {
+      sceneToGo = s.gameState.scene;
+    }
+
     socket.emit('resync-data', {
       gameState: s.gameState || {},
-      session: { playerId: s.playerId, name: s.name, lobbyId: s.lobbyId },
-      lobby: lobby ? { players: lobby.players, characters: lobby.characters, currentScene: lobby.currentScene } : null
+      session: {
+        playerId: s.playerId,
+        name: s.name,
+        lobbyId: s.lobbyId
+      },
+      lobby: lobby
+        ? {
+            players: lobby.players,
+            characters: lobby.characters,
+            currentScene: lobby.currentScene
+          }
+        : null,
+      sceneToGo
     });
   });
+
 
   // Join a lobby
   socket.on('join-lobby', ({ lobbyId, playerName }) => {
@@ -146,7 +169,6 @@ io.on('connection', (socket) => {
     lobby.players.forEach(p => {
       const ps = playerSessions.get(p.playerId);
       if (ps) {
-        ps.gameState = ps.gameState || {};
         ps.gameState.scene = scene;
         playerSessions.set(p.playerId, ps);
         console.log("PlayerSessions advancing scene:", [...playerSessions.entries()]);
