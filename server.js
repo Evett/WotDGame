@@ -129,7 +129,7 @@ io.on('connection', (socket) => {
     session.name = playerName;
     session.lastSeen = Date.now();
     playerSessions.set(playerId, session);
-    console.log("PlayerSessions updated:", [...playerSessions.entries()]);
+    console.log("PlayerSession updated:", session);
 
     socket.join(lobbyId);
     io.to(lobbyId).emit('player-list', lobby.players);
@@ -172,7 +172,7 @@ io.on('connection', (socket) => {
       if (ps) {
         ps.gameState.scene = scene;
         playerSessions.set(p.playerId, ps);
-        console.log("PlayerSessions advancing scene:", [...playerSessions.entries()]);
+        console.log("PlayerSession advancing scene:", ps);
       }
     });
     io.to(lobbyId).emit('advance-scene', scene);
@@ -182,7 +182,7 @@ io.on('connection', (socket) => {
   socket.on('update-game-state', ({ gameState }) => {
     const ps = playerSessions.get(playerId);
     console.log(`Updating gameState: ${gameState} for player ${playerId}`);
-    console.log("In PlayerSessions:", [...playerSessions.entries()]);
+    console.log("In PlayerSession:", ps);
     if (ps) {
       ps.gameState = gameState;
       ps.lastSeen = Date.now();
@@ -215,7 +215,7 @@ io.on('connection', (socket) => {
       ps.gameState = ps.gameState || {};
       ps.gameState.characterKey = characterKey;
       playerSessions.set(requesterPlayerId, ps);
-      console.log("PlayerSessions selecting character:", [...playerSessions.entries()]);
+      console.log("PlayerSession selecting character:", ps);
     }
 
     io.to(lobbyId).emit('character-selected', {
