@@ -112,9 +112,9 @@ const CharacterLibrary = {
             ...repeat(() => CardLibrary.cards.Common.Strike(), 2),
             ...repeat(() => CardLibrary.cards.Common.Block(), 3),
             ...repeat(() => CardLibrary.cards.Warpriest.SacredStrike(), 2),
-            CardLibrary.cards.Common.Berserk,
-            CardLibrary.cards.Warpriest.BlessingOfWar,
-            CardLibrary.cards.Warpriest.Sacrifice
+            CardLibrary.cards.Common.Berserk(),
+            CardLibrary.cards.Warpriest.BlessingOfWar(),
+            CardLibrary.cards.Warpriest.Sacrifice()
         ],
         heroAbility: (gameState) => {
             console.log("Urusha's Sacrifice: Lose 5 HP, gain 2 actions.");
