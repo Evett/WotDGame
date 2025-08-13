@@ -37,10 +37,8 @@ export class MapScene extends BaseScene {
 
         this.add.text(x, y - 250, 'Map - Choose Your Next Path', { fontSize: '32px', color: '#fff' }).setOrigin(0.5);
 
-        // Example map choices
-        const choices = Phaser.Utils.Array.Shuffle(Object.values(this.getOptions() || {})).slice(0, 3)
         let offsetY = y - 50;
-        choices.forEach(choice => {
+        this.mapChoices.forEach(choice => {
             const btn = this.add.text(x, offsetY, choice, {
                 fontSize: '24px', backgroundColor: '#333', padding: { x: 10, y: 5 }, color: '#fff'
             }).setOrigin(0.5).setInteractive();
