@@ -185,6 +185,14 @@ io.on('connection', (socket) => {
     const lobby = lobbies.get(lobbyId);
     if (!lobby) return;
     lobby.currentScene = scene;
+
+    if (scene === 'MapScene') {
+      const allOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
+      const shuffled = Phaser.Utils.Array.Shuffle([...allOptions]);
+      lobby.mapChoices = shuffled.slice(0, 3);
+      lobby.mapVotes = {};
+    }
+
     lobby.players.forEach(p => {
       const ps = playerSessions.get(p.playerId);
       if (ps) {
@@ -193,7 +201,9 @@ io.on('connection', (socket) => {
         console.log("PlayerSession advancing scene:", ps);
       }
     });
-    io.to(lobbyId).emit('advance-scene', scene);
+    io.to(lobbyId).emit('advance-scene', scene, {
+      choices: lobby.mapChoices || []
+    });
   });
 
   // Player-side full gameState update (client should emit when deck/HP/etc. change)
@@ -245,9 +255,8 @@ io.on('connection', (socket) => {
 
   socket.on('map-choice', ({ lobbyId, playerId, choice }) => {
     const lobby = lobbies.get(lobbyId);
-    if (!lobby) return;
+    if (!lobby || !lobby.mapChoices.includes(choice)) return;
 
-    lobby.mapVotes = lobby.mapVotes || {};
     lobby.mapVotes[playerId] = choice;
 
     // Count votes
@@ -256,59 +265,38 @@ io.on('connection', (socket) => {
       voteCounts[c] = (voteCounts[c] || 0) + 1;
     });
 
-    // Check if any choice has majority
-    const majority = Math.floor(lobby.players.length / 2) + 1;
+    const majority = Math.ceil(lobby.players.length / 2);
     let winningChoice = null;
-    for (const [scene, count] of Object.entries(voteCounts)) {
+
+    for (const [opt, count] of Object.entries(voteCounts)) {
       if (count >= majority) {
-        winningChoice = scene;
+        winningChoice = opt;
         break;
       }
     }
 
-    // If no majority yet and not everyone voted, wait
-    if (!winningChoice && Object.keys(lobby.mapVotes).length < lobby.players.length) {
-      io.to(lobbyId).emit('map-vote-update', {
-        votes: lobby.mapVotes,
-        voteCounts
+    // Broadcast vote updates
+    io.to(lobbyId).emit('map-vote-update', { votes: lobby.mapVotes });
+
+    // If we have a winner, move to that scene
+    if (winningChoice) {
+      // Here you decide what scene to load for the choice
+      const nextScene = choiceToScene(winningChoice);
+
+      lobby.currentScene = nextScene;
+      lobby.mapChoices = [];
+      lobby.mapVotes = {};
+
+      lobby.players.forEach(p => {
+        const ps = playerSessions.get(p.playerId);
+        if (ps) {
+          ps.gameState.scene = nextScene;
+          playerSessions.set(p.playerId, ps);
+        }
       });
-      return;
+
+      io.to(lobbyId).emit('advance-scene', nextScene);
     }
-
-    // Decide winner (if majority early or tie after all votes)
-    if (!winningChoice) {
-      const sorted = Object.entries(voteCounts).sort((a, b) => b[1] - a[1]);
-      winningChoice = sorted[0][0]; // pick top voted
-    }
-
-    const sceneMap = {
-        'Shop' : 'ShopScene',
-        'Reward' : 'CardRewardScene',
-        'Battle' : 'BattleScene',
-        'Event' : 'EventScene',
-        'Altar' : 'AltarScene',
-        'Deck' : 'DeckScene',
-        'Rest' : 'RestSiteScene'
-    };
-    
-    winningChoice = sceneMap[type] || 'MapScene';
-
-    console.log(`Lobby ${lobbyId} majority picked: ${winningChoice}`);
-
-    // Clear votes
-    lobby.mapVotes = {};
-
-    // Save and advance scene
-    lobby.currentScene = winningChoice;
-    lobby.players.forEach(p => {
-      const ps = playerSessions.get(p.playerId);
-      if (ps) {
-        ps.gameState.scene = winningChoice;
-        playerSessions.set(p.playerId, ps);
-      }
-    });
-
-    io.to(lobbyId).emit('advance-scene', winningChoice);
   });
 
   // Battle turns
@@ -337,6 +325,19 @@ io.on('connection', (socket) => {
       playerSessions.set(playerId, ps);
     }
   });
+
+  function choiceToScene(choice) {
+    switch (choice) {
+      case 'Battle': return 'BattleScene';
+      case 'Event': return 'EventScene';
+      case 'Rest': return 'RestScene';
+      case 'Shop': return 'ShopScene';
+      case 'Reward': return 'RewardScene';
+      case 'Altar': return 'AltarScene';
+      case 'Deck': return 'DeckScene';
+      default: return 'MapScene';
+    }
+  }
 });
 
 // Cleanup sessions not reconnected within X ms

@@ -1,6 +1,7 @@
 import gameState from '../GameState';
 import SceneManager from '../SceneManager';
 import BaseScene from './BaseScene';
+import { playerId } from '../socket.js';
 
 export class MapScene extends BaseScene {
     constructor() {
@@ -13,7 +14,20 @@ export class MapScene extends BaseScene {
         this.playerName = data.playerName;
         this.players = data.players;
         this.sceneManager = new SceneManager(this, this.socket, this.lobbyId);
+        this.mapChoices = data.choices || [];
+        this.votes = {};
+
         this.showScene();
+
+        this.socket.on('map-vote-update', ({ votes }) => {
+            this.votes = votes;
+            this.updateVoteDisplay();
+        });
+
+        this.socket.on('advance-scene', (nextScene) => {
+            this.sceneManager.setLobby(this.lobbyId);
+            this.sceneManager.switchScene(nextScene, { gameState, players: this.players, playerId });
+        });
     }
 
     showScene() {
@@ -35,6 +49,7 @@ export class MapScene extends BaseScene {
                 if (!this.choiceMade) {
                     this.choiceMade = true;
                     this.socket.emit('map-choice', { lobbyId: this.lobbyId, playerId, choice });
+                    btn.setStyle({ backgroundColor: '#555' });
                 }
             });
 
@@ -80,5 +95,14 @@ export class MapScene extends BaseScene {
 
     getOptions() {
         return ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
+    }
+
+    updateVoteDisplay() {
+        for (const location of this.locations) {
+            const count = this.voteCounts[location] || 0;
+            if (this.voteTexts[location]) {
+                this.voteTexts[location].setText(count);
+            }
+        }
     }
 }
