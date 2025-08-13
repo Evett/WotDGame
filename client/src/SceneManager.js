@@ -5,28 +5,6 @@ class SceneManager {
         this.scene = scene;
         this.socket = socket;
         this.lobbyId = lobbyId;
-        this.socket.off('advance-scene');
-        this.socket.on('advance-scene', (sceneName, payload = {}) => {
-            console.log(`[SceneManager] Server approved scene change to ${sceneName}`, payload);
-
-            // Merge persistent game data
-            const { character, deck, playerStats, ...transient } = payload;
-            if (character || deck || playerStats) {
-                Object.assign(gameState, { character, deck, playerStats });
-            }
-
-            gameState.scene = sceneName;
-
-            const nextSceneData = {
-                ...payload,
-                gameState,
-                playerId: payload.playerId || gameState.playerId,
-                lobbyId: this.lobbyId,
-                socket: this.socket
-            };
-
-            this.scene.scene.start(sceneName, nextSceneData);
-        });
     }
 
     setLobby(lobbyId) {
@@ -34,21 +12,35 @@ class SceneManager {
     }
 
     switchScene(targetScene, data = {}) {
-        if (!this.lobbyId) {
-            console.error('[SceneManager] Cannot switch scene without a lobbyId!');
-            return;
+        console.log(`Switching to ${targetScene} with data:`, data);
+
+        if (this.socket && this.lobbyId) {
+            this.socket.emit('advance-scene', {
+                lobbyId: this.lobbyId,
+                scene: targetScene
+            });
         }
 
-        console.log(`[SceneManager] Requesting scene change to ${targetScene}`, data);
+        // Separate gameplay state from transient multiplayer/session data
+        const { character, deck, playerStats, ...transient } = data;
 
-        this.socket.emit('advance-scene', {
+        // Merge only long term game data into gameState
+        if (character || deck || playerStats) {
+            Object.assign(gameState, { character, deck, playerStats });
+        }
+
+        gameState.scene = targetScene;
+
+        const nextSceneData = {
+            ...data,
+            gameState,
+            playerId: data.playerId || gameState.playerId,
             lobbyId: this.lobbyId,
-            scene: targetScene
-        });
+            socket: this.socket
+        };
 
-        // Store transient data so we can merge when server responds
-        // This ensures non-persistent data like "players" or "playerId" gets passed
-        this._pendingData = data;
+        // Pass everything directly
+        this.scene.scene.start(targetScene, nextSceneData);
     }
 }
 

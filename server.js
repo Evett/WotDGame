@@ -294,7 +294,7 @@ io.on('connection', (socket) => {
         }
       });
 
-      io.to(lobbyId).emit('advance-scene', { scene: nextScene, payload: {} });
+      io.to(lobbyId).emit('all-map-choices-read', nextScene);
     }
   });
 

@@ -19,10 +19,9 @@ export class MenuScene extends BaseScene {
     this.lobbyId = null;
     this.nickname = '';
 
-    this.socket.off('advance-scene');
-    this.socket.off('resync-data');
     // server responds with full state (session + lobby info)
     this.socket.on('resync-data', ({ gameState: serverGameState, session, lobby, sceneToGo }) => {
+      // Merge server game state into our local gameState singleton
       if (serverGameState) {
         Object.assign(gameState, serverGameState);
       }
@@ -32,20 +31,16 @@ export class MenuScene extends BaseScene {
         this.sceneManager.setLobby(session.lobbyId);
       }
 
-      const sceneName = sceneToGo || (serverGameState && serverGameState.scene) || (lobby && lobby.currentScene) || 'MenuScene';
-      const sceneData = {
+      const targetScene = sceneToGo ||
+        (serverGameState && serverGameState.scene) ||
+        (lobby && lobby.currentScene) ||
+        'MenuScene';
+
+      this.sceneManager.switchScene(targetScene, {
         gameState,
         playerId: session?.playerId,
-        playerName: this.nickname,
-        players: lobby?.players,
-      };
-
-      // If resyncing into MapScene, carry choices so everyone sees the same 3
-      if (sceneName === 'MapScene') {
-        sceneData.choices = lobby?.mapChoices || [];
-      }
-
-      this.sceneManager.switchScene(sceneName, sceneData);
+        playerName: this.nickname
+      });
     });
 
     // Build UI

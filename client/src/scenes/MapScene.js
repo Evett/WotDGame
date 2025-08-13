@@ -15,37 +15,13 @@ export class MapScene extends BaseScene {
         this.players = data.players;
         this.sceneManager = new SceneManager(this, this.socket, this.lobbyId);
         this.mapChoices = data.choices || [];
-        this.votes = {};           
-        this.buttons = {};        
-        this.voteLabels = {};      
-        this.choiceMade = false;
+        this.votes = {};
 
         this.showScene();
-
-        this.socket.off('map-vote-update');
-        this.socket.off('advance-scene');
 
         this.socket.on('map-vote-update', ({ votes }) => {
             this.votes = votes;
             this.updateVoteDisplay();
-        });
-
-        this.socket.on('advance-scene', ({ scene, payload }) => {
-            if (scene !== 'MapScene') {
-            this.sceneManager.setLobby(this.lobbyId);
-            this.sceneManager.switchScene(scene, {
-                gameState,
-                players: this.players,
-                playerId,
-                lobbyId: this.lobbyId,
-                ...payload
-            });
-            }
-        });
-
-        this.events.once('shutdown', () => {
-            this.socket.off('map-vote-update');
-            this.socket.off('advance-scene');
         });
     }
 
@@ -70,11 +46,6 @@ export class MapScene extends BaseScene {
                 }
             });
 
-            const label = this.add.text(x + 160, offsetY, '0', { fontSize: '20px', color: '#fff' }).setOrigin(0, 0.5);
-
-            this.buttons[choice] = btn;
-            this.voteLabels[choice] = label;
-
             offsetY += 50;
         });
 
@@ -98,15 +69,11 @@ export class MapScene extends BaseScene {
     }
 
     updateVoteDisplay() {
-        const counts = {};
-        Object.values(this.votes).forEach(c => counts[c] = (counts[c] || 0) + 1);
-
-        for (const choice of this.mapChoices) {
-            const n = counts[choice] || 0;
-            if (this.voteLabels[choice]) this.voteLabels[choice].setText(String(n));
+        for (const location of this.locations) {
+            const count = this.voteCounts[location] || 0;
+            if (this.voteTexts[location]) {
+                this.voteTexts[location].setText(count);
+            }
         }
-
-        const totalVotes = Object.keys(this.votes).length;
-        this.readyText.setText(`Votes: ${totalVotes}/${this.players?.length ?? 0}`);
     }
 }
