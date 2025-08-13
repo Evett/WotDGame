@@ -192,6 +192,7 @@ io.on('connection', (socket) => {
       const shuffled = shuffleArray(allOptions);
       lobby.mapChoices = shuffled.slice(0, 3);
       lobby.mapVotes = {};
+      console.log("Map choices: ", lobby.mapChoices);
     }
 
     lobby.players.forEach(p => {
