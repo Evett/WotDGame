@@ -64,10 +64,6 @@ export class MapScene extends BaseScene {
         });
     }
 
-    getOptions() {
-        return ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
-    }
-
     updateVoteDisplay() {
         for (const location of this.locations) {
             const count = this.voteCounts[location] || 0;

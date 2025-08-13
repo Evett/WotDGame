@@ -15,13 +15,27 @@ class SceneManager {
         console.log(`Switching to ${targetScene} with data:`, data);
 
         if (this.socket && this.lobbyId) {
+            this.socket.once('scene-data', ({ scene, data: serverData }) => {
+                const mergedData = {
+                    ...data,
+                    ...serverData,
+                    gameState,
+                    playerId: data.playerId || gameState.playerId,
+                    lobbyId: this.lobbyId,
+                    socket: this.socket
+                };
+                    console.log(`Starting ${scene} with data:`, mergedData);
+                    this.scene.scene.start(scene, mergedData);
+            });
+
+            // Tell server to advance
             this.socket.emit('advance-scene', {
                 lobbyId: this.lobbyId,
                 scene: targetScene
             });
         }
 
-        // Separate gameplay state from transient multiplayer/session data
+        /*// Separate gameplay state from transient multiplayer/session data
         const { character, deck, playerStats, ...transient } = data;
 
         // Merge only long term game data into gameState
@@ -40,7 +54,7 @@ class SceneManager {
         };
 
         // Pass everything directly
-        this.scene.scene.start(targetScene, nextSceneData);
+        this.scene.scene.start(targetScene, nextSceneData);*/
     }
 }
 

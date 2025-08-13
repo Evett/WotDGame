@@ -187,13 +187,7 @@ io.on('connection', (socket) => {
     if (!lobby) return;
     lobby.currentScene = scene;
 
-    if (scene === 'MapScene') {
-      const allOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
-      const shuffled = shuffleArray(allOptions);
-      lobby.mapChoices = shuffled.slice(0, 3);
-      lobby.mapVotes = {};
-      console.log("Map choices: ", lobby.mapChoices);
-    }
+    const sceneData = generateSceneData(scene, lobby);
 
     lobby.players.forEach(p => {
       const ps = playerSessions.get(p.playerId);
@@ -203,8 +197,34 @@ io.on('connection', (socket) => {
         console.log("PlayerSession advancing scene:", ps);
       }
     });
-    io.to(lobbyId).emit('advance-scene', { scene, payload: scene === 'MapScene' ? { choices: lobby.mapChoices || [] } : {}});
+    io.to(lobbyId).emit('scene-data', {
+        scene,
+        data: sceneData
+    });
   });
+
+  function generateSceneData(scene, lobby) {
+    switch (scene) {
+        case 'MapScene': {
+            const allOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
+            const shuffled = shuffleArray(allOptions);
+            lobby.mapChoices = shuffled.slice(0, 3);
+            lobby.mapVotes = {};
+            return { choices: lobby.mapChoices };
+        }
+        case 'BattleScene': {
+            // Example: random enemies
+            const enemies = ['Goblin', 'Orc', 'Slime'];
+            const shuffled = shuffleArray(enemies);
+            const battleEnemies = shuffled.slice(0, 2);
+            lobby.battleEnemies = battleEnemies;
+            return { enemies: battleEnemies };
+        }
+        default:
+            return {};
+    }
+}
+
 
   // Player-side full gameState update (client should emit when deck/HP/etc. change)
   socket.on('update-game-state', ({ gameState }) => {
