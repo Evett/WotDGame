@@ -53,7 +53,8 @@ io.on('connection', (socket) => {
           lobby: {
               players: lobby.players,
               characters: lobby.characters,
-              currentScene: lobby.currentScene
+              currentScene: lobby.currentScene,
+              mapChoices: lobby.mapChoices || {}
           },
           sceneToGo: lobby.currentScene || session.gameState.scene || null
       });
@@ -201,9 +202,7 @@ io.on('connection', (socket) => {
         console.log("PlayerSession advancing scene:", ps);
       }
     });
-    io.to(lobbyId).emit('advance-scene', scene, {
-      choices: lobby.mapChoices || []
-    });
+    io.to(lobbyId).emit('advance-scene', { scene, payload: scene === 'MapScene' ? { choices: lobby.mapChoices || [] } : {}});
   });
 
   // Player-side full gameState update (client should emit when deck/HP/etc. change)
@@ -295,7 +294,7 @@ io.on('connection', (socket) => {
         }
       });
 
-      io.to(lobbyId).emit('advance-scene', nextScene);
+      io.to(lobbyId).emit('advance-scene', { scene: nextScene, payload: {} });
     }
   });
 

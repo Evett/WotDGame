@@ -14,13 +14,6 @@ class SceneManager {
     switchScene(targetScene, data = {}) {
         console.log(`Switching to ${targetScene} with data:`, data);
 
-        if (this.socket && this.lobbyId) {
-            this.socket.emit('advance-scene', {
-                lobbyId: this.lobbyId,
-                scene: targetScene
-            });
-        }
-
         // Separate gameplay state from transient multiplayer/session data
         const { character, deck, playerStats, ...transient } = data;
 

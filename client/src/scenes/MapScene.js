@@ -15,18 +15,37 @@ export class MapScene extends BaseScene {
         this.players = data.players;
         this.sceneManager = new SceneManager(this, this.socket, this.lobbyId);
         this.mapChoices = data.choices || [];
-        this.votes = {};
+        this.votes = {};           
+        this.buttons = {};        
+        this.voteLabels = {};      
+        this.choiceMade = false;
 
         this.showScene();
+
+        this.socket.off('map-vote-update');
+        this.socket.off('advance-scene');
 
         this.socket.on('map-vote-update', ({ votes }) => {
             this.votes = votes;
             this.updateVoteDisplay();
         });
 
-        this.socket.on('advance-scene', (nextScene) => {
+        this.socket.on('advance-scene', ({ scene, payload }) => {
+            if (scene !== 'MapScene') {
             this.sceneManager.setLobby(this.lobbyId);
-            this.sceneManager.switchScene(nextScene, { gameState, players: this.players, playerId });
+            this.sceneManager.switchScene(scene, {
+                gameState,
+                players: this.players,
+                playerId,
+                lobbyId: this.lobbyId,
+                ...payload
+            });
+            }
+        });
+
+        this.events.once('shutdown', () => {
+            this.socket.off('map-vote-update');
+            this.socket.off('advance-scene');
         });
     }
 
@@ -51,6 +70,11 @@ export class MapScene extends BaseScene {
                 }
             });
 
+            const label = this.add.text(x + 160, offsetY, '0', { fontSize: '20px', color: '#fff' }).setOrigin(0, 0.5);
+
+            this.buttons[choice] = btn;
+            this.voteLabels[choice] = label;
+
             offsetY += 50;
         });
 
@@ -67,28 +91,6 @@ export class MapScene extends BaseScene {
             this.sceneManager.setLobby(this.lobbyId);
             this.sceneManager.switchScene(nextScene, { gameState, players: this.players, playerId });
         });
-        /*this.createBackground();
-        const { x, y } = this.getCenter();
-        this.add.text(x, y-250, 'Choose Your Path', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
-
-        this.nodes = [
-            { x: x-600, y: y, type: 'shop' },
-            { x: x-400, y: y-50, type: 'reward' },
-            { x: x-200, y: y, type: 'battle' },
-            { x: x, y: y+50, type: 'event' },
-            { x: x+200, y: y, type: 'altar' },
-            { x: x+400, y: y-50, type: 'deck' },
-            { x: x +600, y, type: 'restsite' }
-        ];
-
-        this.nodes.forEach((node, index) => {
-            let nodeGraphic = this.add.circle(node.x, node.y, 20, 0xffffff).setInteractive();
-
-            nodeGraphic.on('pointerdown', () => {
-                gameState.currentNode = node;
-                this.sceneManager.switchScene(this.getSceneType(node.type));
-            });
-        });*/
     }
 
     getOptions() {
@@ -96,11 +98,15 @@ export class MapScene extends BaseScene {
     }
 
     updateVoteDisplay() {
-        for (const location of this.locations) {
-            const count = this.voteCounts[location] || 0;
-            if (this.voteTexts[location]) {
-                this.voteTexts[location].setText(count);
-            }
+        const counts = {};
+        Object.values(this.votes).forEach(c => counts[c] = (counts[c] || 0) + 1);
+
+        for (const choice of this.mapChoices) {
+            const n = counts[choice] || 0;
+            if (this.voteLabels[choice]) this.voteLabels[choice].setText(String(n));
         }
+
+        const totalVotes = Object.keys(this.votes).length;
+        this.readyText.setText(`Votes: ${totalVotes}/${this.players?.length ?? 0}`);
     }
 }
