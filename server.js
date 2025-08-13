@@ -188,7 +188,7 @@ io.on('connection', (socket) => {
 
     if (scene === 'MapScene') {
       const allOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
-      const shuffled = Phaser.Utils.Array.Shuffle([...allOptions]);
+      const shuffled = shuffleArray(allOptions);
       lobby.mapChoices = shuffled.slice(0, 3);
       lobby.mapVotes = {};
     }
@@ -339,6 +339,15 @@ io.on('connection', (socket) => {
     }
   }
 });
+
+function shuffleArray(arr) {
+  const array = [...arr];
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
 
 // Cleanup sessions not reconnected within X ms
 setInterval(() => {
