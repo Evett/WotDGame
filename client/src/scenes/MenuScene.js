@@ -31,21 +31,12 @@ export class MenuScene extends BaseScene {
         this.sceneManager.setLobby(session.lobbyId);
       }
 
-      // If server says we are mid-scene, jump there
-      if (sceneToGo) {
-        this.sceneManager.switchScene(sceneToGo, {
-          gameState,
-          playerId: session?.playerId,
-          playerName: this.nickname
-        });
-        return;
-      }
-
-      const fallbackScene =
+      const targetScene = sceneToGo ||
         (serverGameState && serverGameState.scene) ||
         (lobby && lobby.currentScene) ||
         'MenuScene';
-      this.sceneManager.switchScene(fallbackScene, {
+
+      this.sceneManager.switchScene(targetScene, {
         gameState,
         playerId: session?.playerId,
         playerName: this.nickname

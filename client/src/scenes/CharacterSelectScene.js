@@ -66,10 +66,7 @@ export class CharacterSelectScene extends BaseScene {
       if (allSelected) {
         this.time.delayedCall(500, () => {
           this.sceneManager.setLobby(this.lobbyId);
-          this.sceneManager.switchScene('MapScene', {
-            playerId,
-            gameState
-          });
+          this.sceneManager.switchScene('MapScene', { gameState, players: this.players, playerId });
         });
       }
     });

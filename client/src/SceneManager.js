@@ -31,8 +31,16 @@ class SceneManager {
 
         gameState.scene = targetScene;
 
+        const nextSceneData = {
+            ...data,
+            gameState,
+            playerId: data.playerId || gameState.playerId,
+            lobbyId: this.lobbyId,
+            socket: this.socket
+        };
+
         // Pass everything directly
-        this.scene.scene.start(targetScene, { ...transient, socket: this.socket, lobbyId: this.lobbyId, gameState });
+        this.scene.scene.start(targetScene, nextSceneData);
     }
 }
 

@@ -10,13 +10,22 @@ export class BattleScene extends BaseScene {
     constructor() {
         super({ key: 'BattleScene' });
         this.turnState = 'players';
+        this.playerReady = false;
     }
 
     preload() {
     }
 
-    create() {
-        this.sceneManager = new SceneManager(this);
+    create(data) {
+        super.create();
+        this.lobbyId = data.lobbyId;
+        this.playerName = data.playerName;
+        this.players = data.players;
+        this.sceneManager = new SceneManager(this, this.socket, this.lobbyId);
+        this.showScene();
+    }
+
+    showScene() {
         this.createBackground();
         const { x, y } = this.getCenter();
         this.resourceText = this.add.text(x+500, 10, '', {
@@ -29,6 +38,14 @@ export class BattleScene extends BaseScene {
         this.add.text(x, y-300, `Battling as: ${gameState.character.name}`, { fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
         console.log("Hand on entering battle:", gameState.hand);
 
+        this.socket.on('battle-turn-update', (readyPlayers) => {
+            const readyCount = readyPlayers.length;
+            this.endTurnButton.setText(`End Turn (${readyCount}/6)`);
+        });
+
+        this.socket.on('battle-enemy-turn', () => {
+            this.endPlayerTurn();
+        });
 
         // Title
         this.add.text(x, 25, 'BattleScene', {
@@ -89,8 +106,9 @@ export class BattleScene extends BaseScene {
         }).setInteractive();
     
         this.endTurnButton.on('pointerdown', () => {
-            if (this.turnState === 'players' && this.allowCardPlay) {
-                this.endPlayerTurn();
+            if (!this.playerReady) {
+                this.playerReady = true;
+                this.socket.emit('battle-end-turn', { lobbyId: this.lobbyId, playerId });
             }
         });
     }
@@ -145,6 +163,7 @@ export class BattleScene extends BaseScene {
             return;
         }
         this.turnState = 'players';
+        this.playerReady = false;
         this.allowCardPlay = true;
 
         gameState.discardPile.push(...gameState.hand);

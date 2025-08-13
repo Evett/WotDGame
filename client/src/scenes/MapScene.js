@@ -7,9 +7,54 @@ export class MapScene extends BaseScene {
         super({ key: 'MapScene' });
     }
 
-    create() {
-        this.sceneManager = new SceneManager(this);
+    create(data) {
+        super.create();
+        this.lobbyId = data.lobbyId;
+        this.playerName = data.playerName;
+        this.players = data.players;
+        this.sceneManager = new SceneManager(this, this.socket, this.lobbyId);
+        this.showScene();
+    }
+
+    showScene() {
+
         this.createBackground();
+        const { x, y } = this.getCenter();
+
+        this.add.text(x, y - 250, 'Map - Choose Your Next Path', { fontSize: '32px', color: '#fff' }).setOrigin(0.5);
+
+        // Example map choices
+        const choices = Phaser.Utils.Array.Shuffle(Object.values(getOptions() || {})).slice(0, 3)
+        let offsetY = y - 50;
+        choices.forEach(choice => {
+            const btn = this.add.text(x, offsetY, choice, {
+                fontSize: '24px', backgroundColor: '#333', padding: { x: 10, y: 5 }, color: '#fff'
+            }).setOrigin(0.5).setInteractive();
+
+            btn.on('pointerdown', () => {
+                if (!this.choiceMade) {
+                    this.choiceMade = true;
+                    this.socket.emit('map-choice', { lobbyId: this.lobbyId, playerId, choice });
+                }
+            });
+
+            offsetY += 50;
+        });
+
+        this.readyText = this.add.text(x, y + 200, 'Waiting for others...', { fontSize: '20px', color: '#fff' }).setOrigin(0.5);
+
+        // Update ready state UI
+        this.socket.on('map-choice-update', (readyPlayers) => {
+            const readyCount = readyPlayers.length;
+            this.readyText.setText(`Ready: ${readyCount}/${this.players.length}`);
+        });
+
+        // All ready → move to next scene
+        this.socket.on('all-map-choices-ready', (nextScene) => {
+            this.sceneManager.setLobby(this.lobbyId);
+            this.sceneManager.switchScene(nextScene, { gameState, players: this.players, playerId });
+        });
+        /*this.createBackground();
         const { x, y } = this.getCenter();
         this.add.text(x, y-250, 'Choose Your Path', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
 
@@ -30,19 +75,10 @@ export class MapScene extends BaseScene {
                 gameState.currentNode = node;
                 this.sceneManager.switchScene(this.getSceneType(node.type));
             });
-        });
+        });*/
     }
 
-    getSceneType(type) {
-        const sceneMap = {
-            'shop' : 'ShopScene',
-            'reward' : 'CardRewardScene',
-            'battle' : 'BattleScene',
-            'event' : 'EventScene',
-            'altar' : 'AltarScene',
-            'deck' : 'DeckScene',
-            'restsite' : 'RestSiteScene'
-        };
-        return sceneMap[type] || 'MapScene';
+    getOptions() {
+        return ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
     }
 }

@@ -243,6 +243,90 @@ io.on('connection', (socket) => {
     });
   });
 
+  socket.on('map-choice', ({ lobbyId, playerId, choice }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby) return;
+
+    lobby.mapVotes = lobby.mapVotes || {};
+    lobby.mapVotes[playerId] = choice;
+
+    // Count votes
+    const voteCounts = {};
+    Object.values(lobby.mapVotes).forEach(c => {
+      voteCounts[c] = (voteCounts[c] || 0) + 1;
+    });
+
+    // Check if any choice has majority
+    const majority = Math.floor(lobby.players.length / 2) + 1;
+    let winningChoice = null;
+    for (const [scene, count] of Object.entries(voteCounts)) {
+      if (count >= majority) {
+        winningChoice = scene;
+        break;
+      }
+    }
+
+    // If no majority yet and not everyone voted, wait
+    if (!winningChoice && Object.keys(lobby.mapVotes).length < lobby.players.length) {
+      io.to(lobbyId).emit('map-vote-update', {
+        votes: lobby.mapVotes,
+        voteCounts
+      });
+      return;
+    }
+
+    // Decide winner (if majority early or tie after all votes)
+    if (!winningChoice) {
+      const sorted = Object.entries(voteCounts).sort((a, b) => b[1] - a[1]);
+      winningChoice = sorted[0][0]; // pick top voted
+    }
+
+    const sceneMap = {
+        'Shop' : 'ShopScene',
+        'Reward' : 'CardRewardScene',
+        'Battle' : 'BattleScene',
+        'Event' : 'EventScene',
+        'Altar' : 'AltarScene',
+        'Deck' : 'DeckScene',
+        'Rest' : 'RestSiteScene'
+    };
+    
+    winningChoice = sceneMap[type] || 'MapScene';
+
+    console.log(`Lobby ${lobbyId} majority picked: ${winningChoice}`);
+
+    // Clear votes
+    lobby.mapVotes = {};
+
+    // Save and advance scene
+    lobby.currentScene = winningChoice;
+    lobby.players.forEach(p => {
+      const ps = playerSessions.get(p.playerId);
+      if (ps) {
+        ps.gameState.scene = winningChoice;
+        playerSessions.set(p.playerId, ps);
+      }
+    });
+
+    io.to(lobbyId).emit('advance-scene', winningChoice);
+  });
+
+  // Battle turns
+  socket.on('battle-end-turn', ({ lobbyId, playerId }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby) return;
+
+    lobby.battleReady = lobby.battleReady || new Set();
+    lobby.battleReady.add(playerId);
+
+    io.to(lobbyId).emit('battle-turn-update', Array.from(lobby.battleReady));
+
+    if (lobby.battleReady.size === lobby.players.length) {
+        lobby.battleReady.clear();
+        io.to(lobbyId).emit('battle-enemy-turn');
+    }
+  });
+
   // Soft disconnect — keep session for reconnect
   socket.on('disconnect', () => {
     console.log(`Socket disconnected: ${socket.id} (playerId: ${playerId})`);
