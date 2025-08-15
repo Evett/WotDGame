@@ -59,6 +59,11 @@ io.on('connection', (socket) => {
           sceneToGo: lobby.currentScene || session.gameState.scene || null
       });
 
+      if (lobby.currentScene) {
+        const data = readSceneData(lobby.currentScene, lobby);
+        socket.emit('scene-data', { scene: lobby.currentScene, data });
+      }
+
       // Also update the player list so UI refreshes
       io.to(session.lobbyId).emit('player-list', lobby.players);
     }
@@ -98,11 +103,19 @@ io.on('connection', (socket) => {
         ? {
             players: lobby.players,
             characters: lobby.characters,
-            currentScene: lobby.currentScene
+            currentScene: lobby.currentScene,
+            mapChoices: lobby.mapChoices || []
           }
         : null,
       sceneToGo
     });
+
+    if (lobby.currentScene) {
+      const data = readSceneData(lobby.currentScene, lobby);
+      socket.emit('scene-data', { scene: lobby.currentScene, data });
+    }
+
+    io.to(session.lobbyId).emit('player-list', lobby.players);
   });
 
 
@@ -205,25 +218,54 @@ io.on('connection', (socket) => {
 
   function generateSceneData(scene, lobby) {
     switch (scene) {
-        case 'MapScene': {
-            const allOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
-            const shuffled = shuffleArray(allOptions);
-            lobby.mapChoices = shuffled.slice(0, 3);
-            lobby.mapVotes = {};
-            return { choices: lobby.mapChoices };
+      case 'MapScene': {
+        if (!lobby.mapChoices || !Array.isArray(lobby.mapChoices) || lobby.mapChoices.length === 0) {
+          const allOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
+          lobby.mapChoices = shuffleArray(allOptions).slice(0, 3);
         }
-        case 'BattleScene': {
-            // Example: random enemies
-            const enemies = ['Goblin', 'Orc', 'Slime'];
-            const shuffled = shuffleArray(enemies);
-            const battleEnemies = shuffled.slice(0, 2);
-            lobby.battleEnemies = battleEnemies;
-            return { enemies: battleEnemies };
+        lobby.mapVotes = lobby.mapVotes || {};
+        return { choices: lobby.mapChoices };
+      }
+      case 'BattleScene': {
+        if (!lobby.battleEnemies) {
+          const enemies = ['Goblin', 'Orc', 'Slime'];
+          lobby.battleEnemies = shuffleArray(enemies).slice(0, 2);
         }
-        default:
-            return {};
+        return { enemies: lobby.battleEnemies };
+      }
+      default:
+        return {};
     }
-}
+  }
+
+  function readSceneData(scene, lobby) {
+    switch (scene) {
+      case 'MapScene':
+        return { choices: lobby.mapChoices || [] };
+      case 'BattleScene':
+        return { enemies: lobby.battleEnemies || [] };
+      default:
+        return {};
+    }
+  }
+
+  function gotoScene(lobbyId, scene) {
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby) return;
+
+    lobby.currentScene = scene;
+    const data = generateSceneData(scene, lobby);
+
+    lobby.players.forEach(p => {
+      const ps = playerSessions.get(p.playerId);
+      if (ps) {
+        ps.gameState.scene = scene;
+        playerSessions.set(p.playerId, ps);
+      }
+    });
+
+    io.to(lobbyId).emit('scene-data', { scene, data });
+  }
 
 
   // Player-side full gameState update (client should emit when deck/HP/etc. change)
@@ -275,48 +317,25 @@ io.on('connection', (socket) => {
 
   socket.on('map-choice', ({ lobbyId, playerId, choice }) => {
     const lobby = lobbies.get(lobbyId);
-    if (!lobby || !lobby.mapChoices.includes(choice)) return;
+    if (!lobby || !lobby.mapChoices?.includes(choice)) return;
 
+    lobby.mapVotes = lobby.mapVotes || {};
     lobby.mapVotes[playerId] = choice;
 
-    // Count votes
-    const voteCounts = {};
-    Object.values(lobby.mapVotes).forEach(c => {
-      voteCounts[c] = (voteCounts[c] || 0) + 1;
-    });
-
-    const majority = Math.ceil(lobby.players.length / 2);
-    let winningChoice = null;
-
-    for (const [opt, count] of Object.entries(voteCounts)) {
-      if (count >= majority) {
-        winningChoice = opt;
-        break;
-      }
-    }
-
-    // Broadcast vote updates
+    // broadcast current votes (playerId -> choice)
     io.to(lobbyId).emit('map-vote-update', { votes: lobby.mapVotes });
 
-    // If we have a winner, move to that scene
-    if (winningChoice) {
-      // Here you decide what scene to load for the choice
-      const nextScene = choiceToScene(winningChoice);
+    // check majority
+    const majority = Math.ceil(lobby.players.length / 2);
+    const counts = {};
+    Object.values(lobby.mapVotes).forEach(c => { counts[c] = (counts[c] || 0) + 1; });
 
-      lobby.currentScene = nextScene;
-      lobby.mapChoices = [];
-      lobby.mapVotes = {};
+    const winner = Object.entries(counts).find(([_, c]) => c >= majority)?.[0];
+    if (!winner) return;
 
-      lobby.players.forEach(p => {
-        const ps = playerSessions.get(p.playerId);
-        if (ps) {
-          ps.gameState.scene = nextScene;
-          playerSessions.set(p.playerId, ps);
-        }
-      });
-
-      io.to(lobbyId).emit('all-map-choices-read', nextScene);
-    }
+    const nextScene = choiceToScene(winner);
+    // move everyone by the same server path
+    gotoScene(lobbyId, nextScene);
   });
 
   // Battle turns

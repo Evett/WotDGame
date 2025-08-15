@@ -5,6 +5,30 @@ class SceneManager {
         this.scene = scene;
         this.socket = socket;
         this.lobbyId = lobbyId;
+
+        if (this.socket) {
+            this.socket.on('scene-data', ({ scene: sceneKey, data }) => {
+                console.log(`[SceneManager] Received scene-data from server for ${sceneKey}:`, data);
+
+                // Merge into persistent gameState if relevant
+                const { character, deck, playerStats } = data;
+                if (character || deck || playerStats) {
+                    Object.assign(gameState, { character, deck, playerStats });
+                }
+                gameState.scene = sceneKey;
+
+                const nextSceneData = {
+                    ...data,
+                    gameState,
+                    playerId: gameState.playerId,
+                    lobbyId: this.lobbyId,
+                    socket: this.socket
+                };
+
+                // Start the scene using server payload
+                this.scene.scene.start(sceneKey, nextSceneData);
+            });
+        }
     }
 
     setLobby(lobbyId) {
@@ -14,47 +38,13 @@ class SceneManager {
     switchScene(targetScene, data = {}) {
         console.log(`Switching to ${targetScene} with data:`, data);
 
+        // Ask server to advance scene for everyone
         if (this.socket && this.lobbyId) {
-            this.socket.once('scene-data', ({ scene, data: serverData }) => {
-                const mergedData = {
-                    ...data,
-                    ...serverData,
-                    gameState,
-                    playerId: data.playerId || gameState.playerId,
-                    lobbyId: this.lobbyId,
-                    socket: this.socket
-                };
-                    console.log(`Starting ${scene} with data:`, mergedData);
-                    this.scene.scene.start(scene, mergedData);
-            });
-
-            // Tell server to advance
             this.socket.emit('advance-scene', {
                 lobbyId: this.lobbyId,
                 scene: targetScene
             });
         }
-
-        /*// Separate gameplay state from transient multiplayer/session data
-        const { character, deck, playerStats, ...transient } = data;
-
-        // Merge only long term game data into gameState
-        if (character || deck || playerStats) {
-            Object.assign(gameState, { character, deck, playerStats });
-        }
-
-        gameState.scene = targetScene;
-
-        const nextSceneData = {
-            ...data,
-            gameState,
-            playerId: data.playerId || gameState.playerId,
-            lobbyId: this.lobbyId,
-            socket: this.socket
-        };
-
-        // Pass everything directly
-        this.scene.scene.start(targetScene, nextSceneData);*/
     }
 }
 

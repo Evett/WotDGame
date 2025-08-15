@@ -16,6 +16,7 @@ export class MapScene extends BaseScene {
         this.sceneManager = new SceneManager(this, this.socket, this.lobbyId);
         this.mapChoices = data.choices || [];
         this.votes = {};
+        this.choiceLabels = {};
 
         this.showScene();
 
@@ -26,7 +27,6 @@ export class MapScene extends BaseScene {
     }
 
     showScene() {
-
         this.createBackground();
         const { x, y } = this.getCenter();
 
@@ -37,6 +37,9 @@ export class MapScene extends BaseScene {
             const btn = this.add.text(x, offsetY, choice, {
                 fontSize: '24px', backgroundColor: '#333', padding: { x: 10, y: 5 }, color: '#fff'
             }).setOrigin(0.5).setInteractive();
+
+            const countText = this.add.text(x + 140, offsetY, '0', { fontSize: '20px', color: '#fff' }).setOrigin(0.5);
+            this.choiceLabels[choice] = countText;
 
             btn.on('pointerdown', () => {
                 if (!this.choiceMade) {
@@ -51,25 +54,23 @@ export class MapScene extends BaseScene {
 
         this.readyText = this.add.text(x, y + 200, 'Waiting for others...', { fontSize: '20px', color: '#fff' }).setOrigin(0.5);
 
-        // Update ready state UI
-        this.socket.on('map-choice-update', (readyPlayers) => {
-            const readyCount = readyPlayers.length;
-            this.readyText.setText(`Ready: ${readyCount}/${this.players.length}`);
-        });
-
-        // All ready → move to next scene
-        this.socket.on('all-map-choices-ready', (nextScene) => {
-            this.sceneManager.setLobby(this.lobbyId);
-            this.sceneManager.switchScene(nextScene, { gameState, players: this.players, playerId });
-        });
+        this.updateVoteDisplay();
     }
 
     updateVoteDisplay() {
-        for (const location of this.mapChoices) {
-            const count = this.votes[location] || 0;
-            if (this.votes[location]) {
-                this.votes[location].setText(count);
-            }
-        }
+        const counts = {};
+        for (const c of this.mapChoices) counts[c] = 0;
+        Object.values(this.votes || {}).forEach(ch => {
+            if (counts.hasOwnProperty(ch)) counts[ch] += 1;
+        });
+
+        // update texts
+        this.mapChoices.forEach(choice => {
+            const label = this.choiceLabels[choice];
+            if (label) label.setText(String(counts[choice] || 0));
+        });
+
+        const readyCount = Object.keys(this.votes || {}).length;
+        this.readyText?.setText(`Votes: ${readyCount}/${this.players.length || 0}`);
     }
 }

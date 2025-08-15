@@ -31,6 +31,10 @@ export class MenuScene extends BaseScene {
         this.sceneManager.setLobby(session.lobbyId);
       }
 
+      if (sceneToGo) {
+        return;
+      }
+
       const targetScene = sceneToGo ||
         (serverGameState && serverGameState.scene) ||
         (lobby && lobby.currentScene) ||
