@@ -61,7 +61,7 @@ io.on('connection', (socket) => {
 
       if (lobby.currentScene) {
         const data = readSceneData(lobby.currentScene, lobby);
-        socket.emit('scene-data', { scene: lobby.currentScene, data });
+        socket.emit('scene-data', { scene: lobby.currentScene, data, players: lobby.players });
       }
 
       // Also update the player list so UI refreshes
@@ -112,7 +112,7 @@ io.on('connection', (socket) => {
 
     if (lobby.currentScene) {
       const data = readSceneData(lobby.currentScene, lobby);
-      socket.emit('scene-data', { scene: lobby.currentScene, data });
+      socket.emit('scene-data', { scene: lobby.currentScene, data, players: lobby.players });
     }
 
     io.to(session.lobbyId).emit('player-list', lobby.players);
@@ -212,7 +212,8 @@ io.on('connection', (socket) => {
     });
     io.to(lobbyId).emit('scene-data', {
         scene,
-        data: sceneData
+        data: sceneData,
+        players: lobby.players
     });
   });
 
@@ -264,7 +265,7 @@ io.on('connection', (socket) => {
       }
     });
 
-    io.to(lobbyId).emit('scene-data', { scene, data });
+    io.to(lobbyId).emit('scene-data', { scene, data, players: lobby.players });
   }
 
 
