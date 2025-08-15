@@ -12,7 +12,7 @@ export class MapScene extends BaseScene {
         super.create();
         this.lobbyId = data.lobbyId;
         this.playerName = data.playerName;
-        this.players = data.players;
+        this.players = data.players || [];
         this.sceneManager = new SceneManager(this, this.socket, this.lobbyId);
         this.mapChoices = data.choices || [];
         this.votes = {};
@@ -20,8 +20,11 @@ export class MapScene extends BaseScene {
 
         this.showScene();
 
-        this.socket.on('map-vote-update', ({ votes }) => {
+        this.socket.on('map-vote-update', ({ votes, players }) => {
             this.votes = votes;
+            if (players) {
+                this.players = this.players;
+            }
             this.updateVoteDisplay();
         });
     }

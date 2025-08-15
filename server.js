@@ -61,7 +61,7 @@ io.on('connection', (socket) => {
 
       if (lobby.currentScene) {
         const data = readSceneData(lobby.currentScene, lobby);
-        socket.emit('scene-data', { scene: lobby.currentScene, data, players: lobby.players });
+        socket.emit('scene-data', { scene: lobby.currentScene, data });
       }
 
       // Also update the player list so UI refreshes
@@ -112,7 +112,7 @@ io.on('connection', (socket) => {
 
     if (lobby.currentScene) {
       const data = readSceneData(lobby.currentScene, lobby);
-      socket.emit('scene-data', { scene: lobby.currentScene, data, players: lobby.players });
+      socket.emit('scene-data', { scene: lobby.currentScene, data });
     }
 
     io.to(session.lobbyId).emit('player-list', lobby.players);
@@ -212,8 +212,7 @@ io.on('connection', (socket) => {
     });
     io.to(lobbyId).emit('scene-data', {
         scene,
-        data: sceneData,
-        players: lobby.players
+        data: sceneData
     });
   });
 
@@ -225,7 +224,7 @@ io.on('connection', (socket) => {
           lobby.mapChoices = shuffleArray(allOptions).slice(0, 3);
         }
         lobby.mapVotes = lobby.mapVotes || {};
-        return { choices: lobby.mapChoices };
+        return { choices: lobby.mapChoices, players: lobby.players };
       }
       case 'BattleScene': {
         if (!lobby.battleEnemies) {
@@ -265,7 +264,7 @@ io.on('connection', (socket) => {
       }
     });
 
-    io.to(lobbyId).emit('scene-data', { scene, data, players: lobby.players });
+    io.to(lobbyId).emit('scene-data', { scene, data });
   }
 
 
@@ -324,7 +323,7 @@ io.on('connection', (socket) => {
     lobby.mapVotes[playerId] = choice;
 
     // broadcast current votes (playerId -> choice)
-    io.to(lobbyId).emit('map-vote-update', { votes: lobby.mapVotes });
+    io.to(lobbyId).emit('map-vote-update', { votes: lobby.mapVotes, players: lobby.players });
 
     // check majority
     const majority = Math.ceil(lobby.players.length / 2);
