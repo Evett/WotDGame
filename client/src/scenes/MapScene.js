@@ -66,9 +66,9 @@ export class MapScene extends BaseScene {
 
     updateVoteDisplay() {
         for (const location of this.mapChoices) {
-            const count = this.voteCounts[location] || 0;
-            if (this.voteTexts[location]) {
-                this.voteTexts[location].setText(count);
+            const count = this.votes[location] || 0;
+            if (this.votes[location]) {
+                this.votes[location].setText(count);
             }
         }
     }
