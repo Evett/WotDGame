@@ -3,6 +3,7 @@ import CardLibrary from '../data/CardLibrary.js';
 import SceneManager from '../SceneManager';
 import gameState from '../GameState';
 import CardRenderer from '../renderers/CardRenderer.js';
+import { playerId } from '../socket.js';
 
 export class ShopScene extends BaseScene {
     constructor() {

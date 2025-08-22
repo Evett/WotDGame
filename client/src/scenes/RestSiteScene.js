@@ -1,6 +1,7 @@
 import SceneManager from '../SceneManager';
 import BaseScene from './BaseScene';
 import gameState from '../GameState';
+import { playerId } from '../socket.js';
 
 export class RestSiteScene extends BaseScene {
     constructor() {

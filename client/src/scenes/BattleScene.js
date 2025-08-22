@@ -5,6 +5,7 @@ import EnemyRenderer from '../renderers/EnemyRenderer.js';
 import EnemyLibrary from '../data/EnemyLibrary.js';
 import MagicItemRenderer from '../renderers/MagicItemRenderer.js';
 import BaseScene from './BaseScene.js';
+import { playerId } from '../socket.js';
 
 export class BattleScene extends BaseScene {
     constructor() {

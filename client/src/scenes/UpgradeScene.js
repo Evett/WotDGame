@@ -1,6 +1,7 @@
 import BaseScene from './BaseScene.js';
 import SceneManager from '../SceneManager';
 import gameState from '../GameState';
+import { playerId } from '../socket.js';
 
 export class UpgradeScene extends BaseScene {
     constructor() {

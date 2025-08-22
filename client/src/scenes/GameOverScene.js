@@ -1,6 +1,7 @@
 import gameState from '../GameState.js';
 import SceneManager from '../SceneManager';
 import BaseScene from './BaseScene';
+import { playerId } from '../socket.js';
 
 export class GameOverScene extends BaseScene {
     constructor() {

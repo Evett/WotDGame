@@ -3,6 +3,7 @@ import SceneManager from '../SceneManager';
 import gameState from '../GameState';
 import CardRenderer from '../renderers/CardRenderer.js';
 import MagicItemRenderer from '../renderers/MagicItemRenderer.js';
+import { playerId } from '../socket.js';
 
 export class DeckScene extends BaseScene {
     constructor() {

@@ -3,6 +3,7 @@ import BaseScene from './BaseScene';
 import MagicItemLibrary from '../data/MagicItemLibrary';
 import MagicItemRenderer from '../renderers/MagicItemRenderer';
 import gameState from '../GameState';
+import { playerId } from '../socket.js';
 
 export class AltarScene extends BaseScene {
     constructor() {

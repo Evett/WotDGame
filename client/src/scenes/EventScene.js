@@ -3,6 +3,7 @@ import BaseScene from './BaseScene';
 import gameState from '../GameState.js';
 import EventLibrary from '../data/EventLibrary.js';
 import EventTags from '../data/EventTags.js';
+import { playerId } from '../socket.js';
 
 export class EventScene extends BaseScene {
     constructor() {

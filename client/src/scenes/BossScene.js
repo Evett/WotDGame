@@ -1,4 +1,5 @@
 import BaseScene from './BaseScene';
+import { playerId } from '../socket.js';
 
 export class BossScene extends BaseScene {
     constructor() {
