@@ -34,6 +34,10 @@ export class DeckScene extends BaseScene {
         this.renderDeck();
         this.renderItems();
 
+        let returnToMapButton = this.add.text(x, y, 'Confirm', {
+            fontSize: '24px', backgroundColor: '#0077ff', padding: { x: 20, y: 10 }, color: '#fff'
+        }).setOrigin(0.5).setInteractive();
+
         returnToMapButton.on('pointerdown', () => {
             this.socket.emit('scene-complete', { lobbyId: this.sceneManager.lobbyId, playerId });
             returnToMapButton.disableInteractive().setStyle({ backgroundColor: '#555' });
