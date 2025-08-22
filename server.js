@@ -326,16 +326,29 @@ io.on('connection', (socket) => {
     io.to(lobbyId).emit('map-vote-update', { votes: lobby.mapVotes, players: lobby.players });
 
     // check majority
-    const majority = Math.ceil(lobby.players.length / 2);
+    const majority = Math.floor((lobby.players.length / 2) + 1);
     const counts = {};
     Object.values(lobby.mapVotes).forEach(c => { counts[c] = (counts[c] || 0) + 1; });
 
     const winner = Object.entries(counts).find(([_, c]) => c >= majority)?.[0];
-    if (!winner) return;
+    //Case 1 majority
+    if (winner) {
+      const nextScene = choiceToScene(winner);
+      gotoScene(lobbyId, nextScene);
+      return;
+    }
 
-    const nextScene = choiceToScene(winner);
-    // move everyone by the same server path
-    gotoScene(lobbyId, nextScene);
+    //Case 2 no majority
+    if (Object.keys(lobby.mapVotes).length === lobby.players.length) {
+      const maxVotes = Math.max(...Object.values(counts));
+      const topChoices = Object.entries(counts)
+        .filter(([_, c]) => c === maxVotes)
+        .map(([choice]) => choice);
+
+      const finalChoice = topChoices[Math.floor(Math.random() * topChoices.length)];
+      const nextScene = choiceToScene(finalChoice);
+      gotoScene(lobbyId, nextScene);
+    }
   });
 
   // Battle turns
@@ -369,7 +382,7 @@ io.on('connection', (socket) => {
     switch (choice) {
       case 'Battle': return 'BattleScene';
       case 'Event': return 'EventScene';
-      case 'Rest': return 'RestScene';
+      case 'Rest': return 'RestSiteScene';
       case 'Shop': return 'ShopScene';
       case 'Reward': return 'RewardScene';
       case 'Altar': return 'AltarScene';
