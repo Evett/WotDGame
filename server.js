@@ -402,7 +402,7 @@ io.on('connection', (socket) => {
       case 'Event': return 'EventScene';
       case 'Rest': return 'RestSiteScene';
       case 'Shop': return 'ShopScene';
-      case 'Reward': return 'RewardScene';
+      case 'Reward': return 'CardRewardScene';
       case 'Altar': return 'AltarScene';
       case 'Deck': return 'DeckScene';
       default: return 'MapScene';

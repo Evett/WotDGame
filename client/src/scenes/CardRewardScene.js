@@ -9,8 +9,16 @@ export class CardRewardScene extends BaseScene {
         super('CardRewardScene');
     }
 
-    create() {
-        this.sceneManager = new SceneManager(this);
+    create(data) {
+        super.create();
+        this.lobbyId = data.lobbyId;
+        this.playerName = data.playerName;
+        this.players = data.players;
+        this.sceneManager = new SceneManager(this, this.socket, this.lobbyId);
+        this.showScene();
+    }
+
+    showScene() {
         this.createBackground();
         const { x, y } = this.getCenter();
         this.add.text(x, 50, 'Choose a Card', { fontSize: '24px', color: '#fff' }).setOrigin(0.5);
@@ -35,12 +43,23 @@ export class CardRewardScene extends BaseScene {
             this.cardUIs.push(renderer);
         });
 
-        let returnToMapButton = this.add.text(x, y, 'Return to Map', { fontSize: '24px', backgroundColor: '' })
-            .setOrigin(0.5)
-            .setInteractive();
-
         returnToMapButton.on('pointerdown', () => {
-            this.sceneManager.switchScene('MapScene');
+            this.socket.emit('scene-complete', { lobbyId: this.sceneManager.lobbyId, playerId });
+            returnToMapButton.disableInteractive().setStyle({ backgroundColor: '#555' });
+        });
+
+        this.readyText = this.add.text(x, y + 100, 'Waiting for others...', {
+            fontSize: '20px', color: '#fff'
+        }).setOrigin(0.5);
+
+        // server notifies when others confirm
+        this.socket.on('scene-complete-update', ({ readyPlayers }) => {
+            this.readyText.setText(`Ready: ${readyPlayers.length}/${this.players.length}`);
+        });
+
+        // when server says move on
+        this.socket.on('advance-scene', ({ scene, data }) => {
+            this.sceneManager.switchScene(scene, { ...data, players: this.players, playerId });
         });
     }
 }
