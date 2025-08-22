@@ -126,7 +126,7 @@ io.on('connection', (socket) => {
 
     let lobby = lobbies.get(lobbyId);
     if (!lobby) {
-      lobby = { players: [], maxPlayers: 2, characters: {}, chat: [], currentScene: null };
+      lobby = { players: [], maxPlayers: 2, characters: {}, chat: [], currentScene: null, sceneCounter: 0 };
       lobbies.set(lobbyId, lobby);
     }
 
@@ -367,6 +367,24 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('scene-complete', ({ lobbyId, playerId }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby) return;
+
+    lobby.readyPlayers = lobby.readyPlayers || new Set();
+    lobby.readyPlayers.add(playerId);
+
+    io.to(lobbyId).emit('scene-complete-update', { readyPlayers: Array.from(lobby.readyPlayers) });
+
+    if (lobby.readyPlayers.size === lobby.players.length) {
+      lobby.readyPlayers.clear();
+
+      const nextScene = getNextSceneAfterOther(lobby);
+      advanceScene(lobbyId, nextScene);
+    }
+  });
+
+
   // Soft disconnect — keep session for reconnect
   socket.on('disconnect', () => {
     console.log(`Socket disconnected: ${socket.id} (playerId: ${playerId})`);
@@ -388,6 +406,17 @@ io.on('connection', (socket) => {
       case 'Altar': return 'AltarScene';
       case 'Deck': return 'DeckScene';
       default: return 'MapScene';
+    }
+  }
+
+  function getNextSceneAfterOther(lobby) {
+    lobby.sceneCounter = (lobby.sceneCounter || 0) + 1;
+
+    if (lobby.sceneCounter % 5 === 0) {
+      // On every 5th, force Rest + Boss
+      return 'RestScene'; // after RestScene ends, send them to BossScene
+    } else {
+      return 'MapScene';
     }
   }
 });
