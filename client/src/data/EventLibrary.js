@@ -35,7 +35,7 @@ const events = {
                 text: "Lose 10 HP, gain a random card",
                 effect: (state, scene) => {
                     state.playerTakeDamage(10);
-                    state.addCard(CardLibrary.getRandomCardsForClass(state.getCharacterClass()));
+                    state.addCard(CardLibrary.getRandomCardsForClass(state.getPlayerCharacter()));
                     scene.sceneManager.switchScene('MapScene');
                 }
             },
