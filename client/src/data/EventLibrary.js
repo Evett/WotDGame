@@ -14,6 +14,7 @@ const events = {
                 text: "Help him (+20 gold)",
                 effect: (state, scene) => {
                     state.gainGold(20);
+                    scene.socket.emit('update-game-state', { state });
                     scene.sceneManager.switchScene('MapScene');
                 }
             },
@@ -36,6 +37,7 @@ const events = {
                 effect: (state, scene) => {
                     state.playerTakeDamage(10);
                     state.addCard(CardLibrary.getRandomCardsForClass(state.getPlayerCharacter()));
+                    scene.socket.emit('update-game-state', { state });
                     scene.sceneManager.switchScene('MapScene');
                 }
             },

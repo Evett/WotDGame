@@ -42,6 +42,7 @@ export class AltarScene extends BaseScene {
                 const itemIndex = sampleItems.indexOf(selectedItem);
                 if (itemIndex !== -1) {
                     gameState.addMagicItem(sampleItems[itemIndex]);
+                    this.socket.emit('update-game-state', { gameState });
                 }
                 // Maybe purchase or preview logic here
             });

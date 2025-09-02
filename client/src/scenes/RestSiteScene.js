@@ -52,6 +52,7 @@ export class RestSiteScene extends BaseScene {
         const healAmount = Math.floor(missingHealth * 0.3);
         gameState.health = Math.min(gameState.maxHealth, gameState.health + healAmount);
         gameState.restoreDailyCards();
+        this.socket.emit('update-game-state', { gameState });
 
         this.showMessage(`You heal for ${healAmount} HP.`, () => {
             this.sceneManager.switchScene('MapScene');

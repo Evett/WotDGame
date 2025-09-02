@@ -72,6 +72,7 @@ export class ShopScene extends BaseScene {
                 const cardIndex = cardOptions.indexOf(clickedCard);
                 if (cardIndex !== -1 && gameState.loseGold(cardCost)) {
                     gameState.addCard(card);
+                    this.socket.emit('update-game-state', { gameState });
                     this.updateShopDisplay();
                 }
             }, { goldCost: cardCost });

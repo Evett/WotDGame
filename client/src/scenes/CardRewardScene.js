@@ -39,6 +39,7 @@ export class CardRewardScene extends BaseScene {
                 const cardIndex = cardOptions.indexOf(clickedCard);
                 if (cardIndex !== -1) {
                     gameState.addCard(cardOptions[cardIndex]);
+                    this.socket.emit('update-game-state', { gameState });
                 }
             });
             this.cardUIs.push(renderer);

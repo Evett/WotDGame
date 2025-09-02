@@ -43,6 +43,7 @@ export class UpgradeScene extends BaseScene {
 
             bg.on('pointerdown', () => {
                 card.upgrade();
+                this.socket.emit('update-game-state', { gameState });
                 this.scene.start('RestSiteScene');
             });
         });
