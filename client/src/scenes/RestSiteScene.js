@@ -11,8 +11,16 @@ export class RestSiteScene extends BaseScene {
     preload() {
     }
 
-    create() {
-        this.sceneManager = new SceneManager(this);
+    create(data) {
+        super.create();
+        this.lobbyId = data.lobbyId;
+        this.playerName = data.playerName;
+        this.players = data.players;
+        this.sceneManager = new SceneManager(this, this.socket, this.lobbyId);
+        this.showScene();
+    }
+
+    showScene() {
         this.createBackground();
         const { x, y } = this.getCenter();
 

@@ -13,7 +13,7 @@ export class DeckScene extends BaseScene {
     preload() {
     }
 
-    create() {
+    create(data) {
         super.create();
         this.lobbyId = data.lobbyId;
         this.playerName = data.playerName;
