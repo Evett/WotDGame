@@ -20,6 +20,14 @@ const EnemyLibrary = {
             { type: 'buff', effect: 'rage' }
         ]
     }),
+
+    Slime: (scene) => new Enemy(scene, {
+        name: "Slime",
+        maxHealth: 10,
+        intents: [
+            { type: 'attack', damage: 3 }
+        ]
+    })
 };
 
 export default EnemyLibrary;

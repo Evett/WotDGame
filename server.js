@@ -200,7 +200,7 @@ io.on('connection', (socket) => {
     if (!lobby) return;
     lobby.currentScene = scene;
 
-    const sceneData = generateSceneData(scene, lobby);
+    const sceneData = generateSceneData(scene, lobby, lobbyId);
 
     lobby.players.forEach(p => {
       const ps = playerSessions.get(p.playerId);
@@ -216,7 +216,7 @@ io.on('connection', (socket) => {
     });
   });
 
-  function generateSceneData(scene, lobby) {
+  function generateSceneData(scene, lobby, lobbyId) {
     switch (scene) {
       case 'MapScene': {
         if (!lobby.mapChoices || !Array.isArray(lobby.mapChoices) || lobby.mapChoices.length === 0) {
@@ -224,17 +224,17 @@ io.on('connection', (socket) => {
           lobby.mapChoices = shuffleArray(allOptions).slice(0, 3);
         }
         lobby.mapVotes = lobby.mapVotes || {};
-        return { choices: lobby.mapChoices, players: lobby.players };
+        return { lobbyId: lobbyId, choices: lobby.mapChoices, players: lobby.players };
       }
       case 'BattleScene': {
         if (!lobby.battleEnemies) {
           const enemies = ['Goblin', 'Orc', 'Slime'];
           lobby.battleEnemies = shuffleArray(enemies).slice(0, 2);
         }
-        return { enemies: lobby.battleEnemies };
+        return { lobbyId, lobbyId, players: lobby.players, enemies: lobby.battleEnemies };
       }
       default:
-        return {};
+        return { lobbyId: lobbyId, players: lobby.players };
     }
   }
 
@@ -254,7 +254,7 @@ io.on('connection', (socket) => {
     if (!lobby) return;
 
     lobby.currentScene = scene;
-    const data = generateSceneData(scene, lobby);
+    const data = generateSceneData(scene, lobby, lobbyId);
 
     lobby.players.forEach(p => {
       const ps = playerSessions.get(p.playerId);
