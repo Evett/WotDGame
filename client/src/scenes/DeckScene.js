@@ -52,11 +52,6 @@ export class DeckScene extends BaseScene {
         this.socket.on('scene-complete-update', ({ readyPlayers }) => {
             this.readyText.setText(`Ready: ${readyPlayers.length}/${this.players.length}`);
         });
-
-        // when server says move on
-        this.socket.on('advance-scene', ({ scene, data }) => {
-            this.sceneManager.switchScene(scene, { ...data, players: this.players, playerId });
-        });
     }
 
     renderDeck() {
