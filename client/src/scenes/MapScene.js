@@ -17,6 +17,7 @@ export class MapScene extends BaseScene {
         this.mapChoices = data.choices || [];
         this.votes = {};
         this.choiceLabels = {};
+        this.choiceMade = false;
 
         this.showScene();
 
