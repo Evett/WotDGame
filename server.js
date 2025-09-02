@@ -416,7 +416,7 @@ io.on('connection', (socket) => {
 
     if (lobby.sceneCounter % 5 === 0) {
       // On every 5th, force Rest + Boss
-      return 'RestScene';
+      return 'RestSiteScene';
     } else {
       return 'MapScene';
     }
