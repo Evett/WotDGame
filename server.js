@@ -380,7 +380,7 @@ io.on('connection', (socket) => {
       lobby.readyPlayers.clear();
 
       const nextScene = getNextSceneAfterOther(lobby);
-      advanceScene(lobbyId, nextScene);
+      gotoScene(lobbyId, nextScene);
     }
   });
 
