@@ -2,14 +2,12 @@ import Character from "./Character";
 
 export default class CharacterFactory {
 
-  static rehydrateCharacter(arr) {
-    if (!arr) return [];
-    return arr.map(c => c instanceof Character ? c : new Character(c));
+  static rehydrateCharacter(data) {
+    return data instanceof Character ? data : new Character(data);
   }
 
-  static serializeCharacter(arr) {
-    if (!arr) return [];
-    return arr.map(c => ({
+  static serializeCharacter(char) {
+    return {
       name: c.name,
       characterClass: c.characterClass,
       health: c.health,
@@ -17,6 +15,6 @@ export default class CharacterFactory {
       mana: c.mana,
       deck: c.deck,
       heroAbility: c.heroAbility
-    }));
+    };
   }
 }
