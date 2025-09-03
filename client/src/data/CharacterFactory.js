@@ -8,13 +8,13 @@ export default class CharacterFactory {
 
   static serializeCharacter(char) {
     return {
-      name: c.name,
-      characterClass: c.characterClass,
-      health: c.health,
-      actions: c.actions,
-      mana: c.mana,
-      deck: c.deck,
-      heroAbility: c.heroAbility
+      name: char.name,
+      characterClass: char.characterClass,
+      health: char.health,
+      actions: char.actions,
+      mana: char.mana,
+      deck: char.deck,
+      heroAbility: char.heroAbility
     };
   }
 }
