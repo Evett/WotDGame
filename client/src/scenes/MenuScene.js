@@ -3,6 +3,7 @@ import SceneManager from '../SceneManager';
 import BaseScene from './BaseScene';
 import { playerId } from '../socket.js';
 import gameState from '../GameState.js';
+import GameStateRehydrator from '../data/GameStateRehydrator.js';
 
 export class MenuScene extends BaseScene {
   constructor() {
@@ -23,7 +24,8 @@ export class MenuScene extends BaseScene {
     this.socket.on('resync-data', ({ gameState: serverGameState, session, lobby, sceneToGo }) => {
       // Merge server game state into our local gameState singleton
       if (serverGameState) {
-        Object.assign(gameState, serverGameState);
+        const hydrated = GameStateRehydrator.rehydrate(serverGameState);
+        Object.assign(gameState, hydrated);
       }
       if (session) {
         this.lobbyId = session.lobbyId;
