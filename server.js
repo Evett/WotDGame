@@ -198,11 +198,24 @@ io.on('connection', (socket) => {
     console.log(`Advancing to scene: ${scene}`);
     const lobby = lobbies.get(lobbyId);
     if (!lobby) return;
-    lobby.currentScene = scene;
+    let nextScene = scene;
 
     if (scene === 'BattleScene') {
       lobby.completedBattles = (lobby.completedBattles || 0) + 1;
+
+      nextScene = 'MapScene';
     }
+
+    else if (scene === 'MapScene') {
+      // After map → always BattleScene
+      if ((lobby.completedBattles || 0) > 0 && (lobby.completedBattles % 5 === 0)) {
+        nextScene = 'BattleScene'; // BOSS MAN
+      } else {
+        nextScene = 'BattleScene';
+      }
+    }
+
+    lobby.currentScene = nextScene;
 
     const sceneData = generateSceneData(scene, lobby, lobbyId);
 

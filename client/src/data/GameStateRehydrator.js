@@ -1,5 +1,6 @@
 import CardFactory from './CardFactory.js';
 import CharacterFactory from './CharacterFactory.js';
+import EnemyFactory from './EnemyFactory.js';
 
 
 export default class GameStateRehydrator {
@@ -35,10 +36,6 @@ export default class GameStateRehydrator {
 
     if (serverState.enemies) {
       rehydrated.enemies = EnemyFactory.rehydrate(this, serverState.enemies);
-    }
-
-    if (serverState.boss) {
-      rehydrated.boss = serverState.boss;  //placeholder
     }
 
     return rehydrated;
