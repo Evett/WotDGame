@@ -203,10 +203,14 @@ io.on('connection', (socket) => {
     if (scene === 'BattleScene') {
       lobby.completedBattles = (lobby.completedBattles || 0) + 1;
 
+      nextScene = 'CardRewardScene';
+    }
+
+    else if (scene === 'CardRewardScene') {
       nextScene = 'MapScene';
     }
 
-    else if (scene === 'MapScene') {
+    else if (scene !== 'MapScene') {
       // After map → always BattleScene
       if ((lobby.completedBattles || 0) > 0 && (lobby.completedBattles % 5 === 0)) {
         nextScene = 'BattleScene'; // BOSS MAN
