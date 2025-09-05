@@ -36,6 +36,10 @@ export class MapScene extends BaseScene {
 
         this.add.text(x, y - 250, 'Map - Choose Your Next Path', { fontSize: '32px', color: '#fff' }).setOrigin(0.5);
 
+        if (this.warning) {
+            this.add.text(x, y - 200, this.warning, { fontSize: '20px', color: '#ff5555' }).setOrigin(0.5);
+        }
+
         let offsetY = y - 50;
         this.mapChoices.forEach(choice => {
             const btn = this.add.text(x, offsetY, choice, {

@@ -27,6 +27,27 @@ const EnemyLibrary = {
         intents: [
             { type: 'attack', damage: 3 }
         ]
+    }),
+
+    // === BOSSES ===
+    Dragon: (scene) => new Enemy(scene, {
+        name: "Dragon",
+        maxHealth: 200,
+        intents: [
+            { type: 'attack', damage: 25 },
+            { type: 'attack', damage: 15, effect: 'burn' },
+            { type: 'buff', effect: 'enrage' }
+        ]
+    }),
+
+    Lich: (scene) => new Enemy(scene, {
+        name: "Lich",
+        maxHealth: 150,
+        intents: [
+            { type: 'attack', damage: 20 },
+            { type: 'summon', enemy: 'Skeleton' },
+            { type: 'buff', effect: 'curse' }
+        ]
     })
 };
 

@@ -34,9 +34,7 @@ export default class GameStateRehydrator {
     }
 
     if (serverState.enemies) {
-      rehydrated.enemies = serverState.enemies.map(e => {
-        return e; // placeholder
-      });
+      rehydrated.enemies = EnemyFactory.rehydrate(this, serverState.enemies);
     }
 
     if (serverState.boss) {

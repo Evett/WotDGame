@@ -200,6 +200,10 @@ io.on('connection', (socket) => {
     if (!lobby) return;
     lobby.currentScene = scene;
 
+    if (scene === 'BattleScene') {
+      lobby.completedBattles = (lobby.completedBattles || 0) + 1;
+    }
+
     const sceneData = generateSceneData(scene, lobby, lobbyId);
 
     lobby.players.forEach(p => {
@@ -219,6 +223,16 @@ io.on('connection', (socket) => {
   function generateSceneData(scene, lobby, lobbyId) {
     switch (scene) {
       case 'MapScene': {
+
+        lobby.completedBattles = lobby.completedBattles || 0;
+
+        // If we’re right before a boss fight → Rest + Altar only
+        if (lobby.completedBattles > 0 && lobby.completedBattles % 5 === 0) {
+          lobby.mapChoices = ['Rest', 'Altar'];
+          lobby.mapVotes = {};
+          return { lobbyId: lobbyId, choices: lobby.mapChoices, players: lobby.players, warning: "⚠ Danger ahead!" };
+        }
+
         if (!lobby.mapChoices || !Array.isArray(lobby.mapChoices) || lobby.mapChoices.length === 0) {
           const allOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
           lobby.mapChoices = shuffleArray(allOptions).slice(0, 3);
@@ -227,11 +241,17 @@ io.on('connection', (socket) => {
         return { lobbyId: lobbyId, choices: lobby.mapChoices, players: lobby.players };
       }
       case 'BattleScene': {
-        if (!lobby.battleEnemies) {
-          const enemies = ['Goblin', 'Orc', 'Slime'];
-          lobby.battleEnemies = shuffleArray(enemies).slice(0, 2);
+        if ((lobby.completedBattles || 0) > 0 && lobby.completedBattles % 5 === 0) {
+          const bosses = ['Dragon', 'Lich'];
+          const bossKey = bosses[Math.floor(Math.random() * bosses.length)];
+          lobby.battleEnemies = [{ key: bossKey, currentHP: null }]; // client rehydrates
+          return { lobbyId, lobbyId, players: lobby.players, enemies: lobby.battleEnemies };
+        } else {
+          const normal = ['Goblin', 'Orc', 'Slime'];
+          const picks = shuffleArray(normal).slice(0, 2);
+          lobby.battleEnemies = picks.map(k => ({ key: k, currentHP: null }));
+          return { lobbyId, lobbyId, players: lobby.players, enemies: lobby.battleEnemies };
         }
-        return { lobbyId, lobbyId, players: lobby.players, enemies: lobby.battleEnemies };
       }
       default:
         return { lobbyId: lobbyId, players: lobby.players };
