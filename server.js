@@ -5,6 +5,8 @@ import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import EnemyLibrary from './server/EnemyLibrary';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const server = http.createServer(app);
@@ -219,7 +221,7 @@ io.on('connection', (socket) => {
       }
     }
 
-    lobby.currentScene = nextScene;
+    lobby.currentScene = scene;
 
     const sceneData = generateSceneData(scene, lobby, lobbyId);
 
@@ -237,43 +239,115 @@ io.on('connection', (socket) => {
     });
   });
 
-  function generateSceneData(scene, lobby, lobbyId) {
+    // Enemy damage sync
+  socket.on('enemy-damage', ({ lobbyId, enemies }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby) return;
+
+    // Store latest enemy state in lobby
+    lobby.battleEnemiesState = enemies;
+
+    // Broadcast to everyone in the lobby
+    io.to(lobbyId).emit('enemy-update', enemies);
+  });
+
+  // When a battle is complete, advance to reward scene
+  socket.on('battle-complete', ({ lobbyId }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby) return;
+
+    lobby.currentScene = 'RewardScene';
+
+    lobby.players.forEach(p => {
+      const ps = playerSessions.get(p.playerId);
+      if (ps) {
+        ps.gameState.scene = 'RewardScene';
+        playerSessions.set(p.playerId, ps);
+      }
+    });
+
+    // Let SceneManager handle starting RewardScene
+    const sceneData = generateSceneData('RewardScene', lobby);
+    io.to(lobbyId).emit('scene-data', {
+      scene: 'RewardScene',
+      data: sceneData
+    });
+  });
+
+
+  function generateSceneData(scene, lobby) {
+    const baseData = {
+        lobbyId: lobby.id,   
+        players: lobby.players,
+        characters: lobby.characters
+    };
+
     switch (scene) {
-      case 'MapScene': {
-
-        lobby.completedBattles = lobby.completedBattles || 0;
-
-        // If we’re right before a boss fight → Rest + Altar only
-        if (lobby.completedBattles > 0 && lobby.completedBattles % 5 === 0) {
-          lobby.mapChoices = ['Rest', 'Altar'];
-          lobby.mapVotes = {};
-          return { lobbyId: lobbyId, choices: lobby.mapChoices, players: lobby.players, warning: "⚠ Danger ahead!" };
+        case 'MapScene': {
+            const allOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
+            const shuffled = shuffleArray(allOptions);
+            lobby.mapChoices = shuffled.slice(0, 3);
+            lobby.mapVotes = {};
+            return { 
+                ...baseData,
+                choices: lobby.mapChoices,
+                warning: lobby.warning || null 
+            };
         }
+        case 'BattleScene': {
+            if (!lobby.battleEnemies) {
+              const allEnemies = Object.keys(EnemyLibrary);
+              const shuffled = shuffleArray(allEnemies);
+              lobby.battleEnemies = shuffled.slice(0, 2);
+            }
 
-        if (!lobby.mapChoices || !Array.isArray(lobby.mapChoices) || lobby.mapChoices.length === 0) {
-          const allOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
-          lobby.mapChoices = shuffleArray(allOptions).slice(0, 3);
+            if (!lobby.battleEnemiesState) {
+              lobby.battleEnemiesState = lobby.battleEnemies.map(name => ({
+                name,
+                currentHealth: EnemyLibrary[name].maxHealth,
+                intent: null
+              }));
+            }
+
+            // Pick intents + targets for each enemy
+            lobby.battleEnemiesState.forEach(enemy => {
+              const def = EnemyLibrary[enemy.name];
+              const randomIntent = def.intents[Math.floor(Math.random() * def.intents.length)];
+              enemy.intent = randomIntent;
+
+              // Pick random target from lobby players
+              if (randomIntent.type === 'attack' || randomIntent.type === 'debuff') {
+                const randomPlayer = lobby.players[Math.floor(Math.random() * lobby.players.length)];
+                enemy.target = randomPlayer.playerId;
+              } else {
+                enemy.target = null;
+              }
+            });
+
+            return { 
+                ...baseData,
+                enemies: battleEnemiesState
+            };
         }
-        lobby.mapVotes = lobby.mapVotes || {};
-        return { lobbyId: lobbyId, choices: lobby.mapChoices, players: lobby.players };
-      }
-      case 'BattleScene': {
-        if ((lobby.completedBattles || 0) > 0 && lobby.completedBattles % 5 === 0) {
-          const bosses = ['Dragon', 'Lich'];
-          const bossKey = bosses[Math.floor(Math.random() * bosses.length)];
-          lobby.battleEnemies = [{ key: bossKey, currentHP: null }]; // client rehydrates
-          return { lobbyId, lobbyId, players: lobby.players, enemies: lobby.battleEnemies };
-        } else {
-          const normal = ['Goblin', 'Orc', 'Slime'];
-          const picks = shuffleArray(normal).slice(0, 2);
-          lobby.battleEnemies = picks.map(k => ({ key: k, currentHP: null }));
-          return { lobbyId, lobbyId, players: lobby.players, enemies: lobby.battleEnemies };
+        case 'CardRewardScene': {
+            return { 
+                ...baseData
+            };
         }
-      }
-      default:
-        return { lobbyId: lobbyId, players: lobby.players };
+        case 'BossBattleScene': {
+            const boss = ['Dragon', 'Lich', 'Titan'][Math.floor(Math.random()*3)];
+            lobby.battleEnemies = [boss];
+            return { 
+                ...baseData,
+                enemies: [boss],
+                boss: true 
+            };
+        }
+        default:
+            return { ...baseData };
     }
-  }
+}
+
 
   function readSceneData(scene, lobby) {
     switch (scene) {
@@ -404,6 +478,29 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('battle-enemy-turn', ({ lobbyId }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby || !lobby.battleEnemiesState) return;
+
+    // Re-roll intents/targets for next enemy turn
+    lobby.battleEnemiesState.forEach(enemy => {
+      const def = EnemyLibrary[enemy.name];
+      const randomIntent = def.intents[Math.floor(Math.random() * def.intents.length)];
+      enemy.intent = randomIntent;
+
+      if (randomIntent.type === 'attack' || randomIntent.type === 'debuff') {
+        const randomPlayer = lobby.players[Math.floor(Math.random() * lobby.players.length)];
+        enemy.target = randomPlayer.playerId;
+      } else {
+        enemy.target = null;
+      }
+    });
+
+    // Broadcast to all clients
+    io.to(lobbyId).emit('enemy-intents-update', { enemies: lobby.battleEnemiesState });
+  });
+
+
   socket.on('scene-complete', ({ lobbyId, playerId }) => {
     const lobby = lobbies.get(lobbyId);
     if (!lobby) return;
@@ -436,6 +533,12 @@ io.on('connection', (socket) => {
   });
 
   function choiceToScene(choice) {
+
+    if ((lobby.battleCount || 0) > 0 && (lobby.battleCount % 5 === 0)) {
+        lobby.warning = "⚠ Danger ahead! Rest and prepare for the boss.";
+        return 'MapScene';
+    }
+
     switch (choice) {
       case 'Battle': return 'BattleScene';
       case 'Event': return 'EventScene';
@@ -447,6 +550,27 @@ io.on('connection', (socket) => {
       default: return 'MapScene';
     }
   }
+
+  function handleBattleComplete(lobbyId) {
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby) return;
+
+    lobby.battleCount = (lobby.battleCount || 0) + 1;
+
+    if (lobby.battleCount % 5 === 0) {
+        lobby.mapChoices = ['Rest', 'Altar'];
+        lobby.warning = "⚠ Danger ahead! Rest and prepare for the boss.";
+        io.to(lobbyId).emit('scene-data', {
+            scene: 'MapScene',
+            data: { choices: lobby.mapChoices, warning: lobby.warning }
+        });
+    } else {
+        io.to(lobbyId).emit('scene-data', {
+            scene: 'RewardScene',
+            data: { rewardType: 'cards' }
+        });
+    }
+}
 
   function getNextSceneAfterOther(lobby) {
     lobby.sceneCounter = (lobby.sceneCounter || 0) + 1;

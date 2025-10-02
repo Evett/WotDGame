@@ -18,6 +18,7 @@ export class MapScene extends BaseScene {
         this.votes = {};
         this.choiceLabels = {};
         this.choiceMade = false;
+        this.warning = data.warning || null;
 
         this.showScene();
 

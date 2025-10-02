@@ -21,8 +21,10 @@ class SceneManager {
                     ...data,
                     gameState,
                     playerId: gameState.playerId,
-                    lobbyId: this.lobbyId,
-                    socket: this.socket
+                    lobbyId: data.lobbyId || this.lobbyId,
+                    socket: this.socket,
+                    players: data.players,
+                    characters: data.characters || {}
                 };
 
                 // Start the scene using server payload

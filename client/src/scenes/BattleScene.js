@@ -12,9 +12,7 @@ export class BattleScene extends BaseScene {
         super({ key: 'BattleScene' });
         this.turnState = 'players';
         this.playerReady = false;
-    }
-
-    preload() {
+        this.enemyUIs = [];
     }
 
     create(data) {
@@ -23,7 +21,17 @@ export class BattleScene extends BaseScene {
         this.playerName = data.playerName;
         this.players = data.players;
         this.sceneManager = new SceneManager(this, this.socket, this.lobbyId);
+
+        this.startCombat(data.battleEnemies || []);
         this.showScene();
+
+        this.socket.on('enemy-update', (updatedEnemies) => {
+            gameState.enemies.forEach((enemy, i) => {
+                enemy.currentHealth = updatedEnemies[i].currentHealth;
+                enemy.intent = updatedEnemies[i].intent;
+            })
+            this.enemyUIs.forEach(ui => ui.update());
+        })
     }
 
     showScene() {
@@ -35,7 +43,7 @@ export class BattleScene extends BaseScene {
         });
         this.renderHand = true;
         this.createEndTurnButton();
-        this.startCombat();
+
         this.add.text(x, y-300, `Battling as: ${gameState.character.name}`, { fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
         console.log("Hand on entering battle:", gameState.hand);
 
@@ -114,13 +122,10 @@ export class BattleScene extends BaseScene {
         });
     }
 
-    startCombat() {
-        console.log("Combat Start");
-        gameState.startBattle([
-            EnemyLibrary.Goblin(this),
-            EnemyLibrary.Orc(this)
-        ]);
+    startCombat(enemyKeys) {
+        console.log("Starting combat with:", enemyKeys);
 
+        gameState.startBattle(enemyKeys.map(key => EnemyLibrary[key](this)));
         gameState.enemies.forEach(enemy => enemy.decideIntent());
 
         this.updateEnemyDisplay();
@@ -140,6 +145,7 @@ export class BattleScene extends BaseScene {
     }
 
     updateEnemyDisplay() {
+        this.enemyUIs.forEach(ui => ui.destroy());
         this.enemyUIs = [];
 
         const spacing = 300;
@@ -234,4 +240,23 @@ export class BattleScene extends BaseScene {
             this.usableItemUIs.push(renderer);
         });
     }
+
+    checkBattleEnd() {
+        const allDefeated = this.enemies.every(e => e.currentHealth <= 0);
+        if (allDefeated) {
+            console.log("Battle complete!");
+            this.socket.emit('battle-complete', { lobbyId: this.lobbyId });
+        }
+    }
+
+    attackEnemy(enemy, damage) {
+        enemy.currentHealth -= damage;
+        if (enemy.currentHealth <= 0) {
+            enemy.currentHealth = 0;
+            // maybe remove enemy sprite here
+        }
+
+        this.checkBattleEnd(); // <-- call after each attack
+    }
+
 }

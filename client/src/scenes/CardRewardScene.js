@@ -45,7 +45,7 @@ export class CardRewardScene extends BaseScene {
             this.cardUIs.push(renderer);
         });
 
-        let returnToMapButton = this.add.text(x, y, 'Confirm', {
+        let returnToMapButton = this.add.text(x, y, 'Continue on your journey', {
             fontSize: '24px', backgroundColor: '#0077ff', padding: { x: 20, y: 10 }, color: '#fff'
         }).setOrigin(0.5).setInteractive();
 
