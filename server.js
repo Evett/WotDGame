@@ -470,7 +470,7 @@ io.on('connection', (socket) => {
     const winner = Object.entries(counts).find(([_, c]) => c >= majority)?.[0];
     //Case 1 majority
     if (winner) {
-      const nextScene = choiceToScene(winner);
+      const nextScene = choiceToScene(winner, lobby);
       gotoScene(lobbyId, nextScene);
       return;
     }
@@ -483,7 +483,7 @@ io.on('connection', (socket) => {
         .map(([choice]) => choice);
 
       const finalChoice = topChoices[Math.floor(Math.random() * topChoices.length)];
-      const nextScene = choiceToScene(finalChoice);
+      const nextScene = choiceToScene(finalChoice, lobby);
       gotoScene(lobbyId, nextScene);
     }
   });
@@ -558,7 +558,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  function choiceToScene(choice) {
+  function choiceToScene(choice, lobby) {
 
     if ((lobby.battleCount || 0) > 0 && (lobby.battleCount % 5 === 0)) {
         lobby.warning = "⚠ Danger ahead! Rest and prepare for the boss.";
