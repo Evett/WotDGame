@@ -5,7 +5,7 @@ import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import EnemyLibrary from './client/src/data/EnemyLibrary';
+import EnemyLibrary from './EnemyLibrary';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
