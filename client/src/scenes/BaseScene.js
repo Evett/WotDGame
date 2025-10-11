@@ -32,6 +32,10 @@ export default class BaseScene extends Phaser.Scene {
         this.events.once('destroy', this.cleanupResizeListener, this);  
     }
 
+    cleanupResizeListener() {
+        this.scale.off('resize', this.onResize, this);
+    }
+
     onResize(gameSize) {
         if (!this.scene || !this.scene.isActive() || !this.background || !this.background.setSize) {
             console.warn(`[onResize] Skipping resize: Scene inactive or background missing for ${this.scene?.key}`);
