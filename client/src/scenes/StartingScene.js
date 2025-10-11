@@ -1,5 +1,5 @@
 import BaseScene from './BaseScene';
-import { onPlayerJoin, onQuit, insertCoin, isHost, myPlayer } from "playroomkit";
+import { onPlayerJoin, insertCoin, isHost, myPlayer } from "playroomkit";
 
 export class StartingScene extends BaseScene {
   constructor() {
