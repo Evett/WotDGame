@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { StartingScene } from '/scenes/StartingScene';
 
 const config = {
     title: 'WotDGame',
