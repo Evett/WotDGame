@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { onPlayerJoin, onQuit, insertCoin, isHost, myPlayer } from "playroomkit";
 
 export default class BaseScene extends Phaser.Scene {
     constructor(key) {
