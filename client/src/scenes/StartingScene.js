@@ -13,7 +13,7 @@ export class StartingScene extends BaseScene {
 
     this.add.text(x, y - 250, 'Wars of the Defeated', { fontSize: '40px', color: '#fff' }).setOrigin(0.5);
 
-    try {
+    /*try {
       await insertCoin({
         maxPlayers: 6,
         persistentMode: true,
@@ -21,18 +21,18 @@ export class StartingScene extends BaseScene {
       });
     } catch (error) {
       console.error(error);
-    }
+    }*/
 
     this.playerText = this.add.text(400, 200, "", { color: "#fff", fontSize: "20px" }).setOrigin(0.5);
 
     onPlayerJoin((p) => {
-      let state = playerStates.get(p.Id);
+      let state = this.playerStates.get(p.Id);
       if (state) {
         return;
       }
       else {
         state = { playerId: p.id };
-        playerSessions.set(p.id, state);
+        this.playerSessions.set(p.id, state);
         console.log("New PlayerState:", state);
       }
 

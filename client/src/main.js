@@ -21,4 +21,10 @@ const config = {
     }
 };
 
-new Phaser.Game(config);
+insertCoin({
+        maxPlayers: 6,
+        persistentMode: true,
+        reconnectGracePeriod: 10
+      }).then(() => {
+  const game = new Phaser.Game(config);
+});
