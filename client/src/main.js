@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { StartingScene } from './scenes/StartingScene';
+import { insertCoin } from 'playroomkit';
 
 const config = {
     title: 'WotDGame',
