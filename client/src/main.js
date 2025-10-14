@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { StartingScene } from './scenes/StartingScene';
-import { insertCoin } from 'playroomkit';
 
 const config = {
     title: 'WotDGame',
@@ -22,15 +21,4 @@ const config = {
     }
 };
 
-const avatars = [
-    './assets/jooooooooel.png'
-];
-
-insertCoin({
-        maxPlayers: 6,
-        persistentMode: true,
-        reconnectGracePeriod: 10,
-        avatars
-      }).then(() => {
-  const game = new Phaser.Game(config);
-});
+const game = new Phaser.Game(config);
