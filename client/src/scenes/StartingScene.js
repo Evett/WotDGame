@@ -32,7 +32,7 @@ export class StartingScene extends BaseScene {
       }
       else {
         state = { playerId: p.id };
-        this.playerSessions.set(p.id, state);
+        this.playerStates.set(p.id, state);
         console.log("New PlayerState:", state);
       }
 
