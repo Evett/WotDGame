@@ -10,7 +10,7 @@ const CUSTOM_PLAYROOM_EVENTS = {
 export class Service {
 
     constructor() {
-        this.playerStates = {};
+        this.playerStates = new Map();
     }
 
     async connect() { 
