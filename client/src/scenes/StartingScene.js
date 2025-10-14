@@ -4,7 +4,7 @@ import { Service } from '../service';
 export class StartingScene extends BaseScene {
   constructor() {
     super({ key: 'StartingScene' });
-    this.service = Service;
+    this.service = new Service();
   }
 
   async create() {
