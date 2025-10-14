@@ -13,16 +13,6 @@ export class StartingScene extends BaseScene {
 
     this.add.text(x, y - 250, 'Wars of the Defeated', { fontSize: '40px', color: '#fff' }).setOrigin(0.5);
 
-    /*try {
-      await insertCoin({
-        maxPlayers: 6,
-        persistentMode: true,
-        reconnectGracePeriod: 10
-      });
-    } catch (error) {
-      console.error(error);
-    }*/
-
     this.playerText = this.add.text(400, 200, "", { color: "#fff", fontSize: "20px" }).setOrigin(0.5);
 
     onPlayerJoin((p) => {

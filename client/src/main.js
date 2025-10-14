@@ -22,10 +22,15 @@ const config = {
     }
 };
 
+const avatars = [
+    './assets/jooooooooel.png'
+];
+
 insertCoin({
         maxPlayers: 6,
         persistentMode: true,
-        reconnectGracePeriod: 10
+        reconnectGracePeriod: 10,
+        avatars
       }).then(() => {
   const game = new Phaser.Game(config);
 });
