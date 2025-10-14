@@ -52,7 +52,7 @@ export class Service {
     }
 
     handlePlayerJoined(player) {
-        let state = this.playerStates.get(player.Id);
+        let state = this.playerStates.get(player.id);
         if (state) {
             return;
         }
