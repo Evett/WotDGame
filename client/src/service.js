@@ -52,13 +52,13 @@ export class Service {
     }
 
     handlePlayerJoined(player) {
-        let state = this.playerStates.get(p.Id);
+        let state = this.playerStates.get(player.Id);
         if (state) {
             return;
         }
         
-        state = { playerId: p.id };
-        this.playerStates.set(p.id, state);
+        state = { playerId: player.id };
+        this.playerStates.set(player.id, state);
         console.log("New PlayerState:", state);
     }
 }

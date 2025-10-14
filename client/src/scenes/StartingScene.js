@@ -12,11 +12,11 @@ export class StartingScene extends BaseScene {
     this.createBackground();
 
     const connected = await this.service.connect();
-      if (!connected) {
-        console.log('failed to connect to service');
-        return;
-      }
-      console.log('connected to service');
+    if (!connected) {
+      console.log('failed to connect to service');
+      return;
+    }
+    console.log('connected to service');
 
     this.add.text(x, y - 250, 'Wars of the Defeated', { fontSize: '40px', color: '#fff' }).setOrigin(0.5);
 
