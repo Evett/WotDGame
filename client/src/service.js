@@ -25,7 +25,7 @@ export class Service {
                 maxPlayers: 6,
                 persistentMode: true,
                 reconnectGracePeriod: 10,
-                avatars
+                avatars: avatars
             });
 
             return true;
