@@ -77,6 +77,7 @@ export class Service {
         const allReady = this.playerStates.length > 0 && this.playerStates.every(p => p.isReady);
         if (allReady) {
             console.log(`All players are ready!`);
+            const data = true;
             Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.READY_UP, data, Playroom.RPC.Mode.ALL).catch((error) => {
                 console.log(error);
             });
