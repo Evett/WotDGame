@@ -1,10 +1,11 @@
 import * as Phaser from 'phaser';
 import * as Playroom from 'playroomkit';
 
-const CUSTOM_PLAYROOM_EVENTS = {
+const OUT_OF_COMBAT_EVENTS = {
   PLAYER_CONNECTED: 'PLAYER_CONNECTED',
   NEW_GAME_STARTED: 'NEW_GAME_STARTED',
   EXISTING_GAME: 'EXISTING_GAME',
+  READY_UP: 'READY_UP'
 };
 
 export class Service {
@@ -37,9 +38,13 @@ export class Service {
     }
 
     registerEventListeners() {
-        Playroom.RPC.register(CUSTOM_PLAYROOM_EVENTS.PLAYER_CONNECTED, async PlayerConnectedData => {
+        Playroom.RPC.register(OUT_OF_COMBAT_EVENTS.PLAYER_CONNECTED, async PlayerConnectedData => {
             await this.handlePlayerConnectedEvent(PlayerConnectedData);
         });
+
+        Playroom.RPC.register(OUT_OF_COMBAT_EVENTS.READY_UP, async ReadyData => {
+            await this.readyPlayerEvent(ReadyData);
+        })
 
         Playroom.onPlayerJoin(player => {
             this.handlePlayerJoined(player);
@@ -47,8 +52,11 @@ export class Service {
     }
 
     async handlePlayerConnectedEvent(data) {
-        
-        
+        console.log("Handling player connecting:", data);
+    }
+
+    async readyPlayerEvent(data) {
+        console.log(`Player ${data.playerId} is ready`);
     }
 
     handlePlayerJoined(player) {
@@ -60,5 +68,15 @@ export class Service {
         state = { playerId: player.id };
         this.playerStates.set(player.id, state);
         console.log("New PlayerState:", state);
+    }
+
+    readyPlayer() {
+        console.log(`Player ${Playroom.me().name} is ready`);
+        this.playerStates.get(Playroom.me().id).isReady = true;
+
+        const allReady = this.playerStates.length > 0 && this.playerStates.every(p => p.isReady);
+        if (allReady) {
+            console.log(`All players are ready!`);
+        }
     }
 }

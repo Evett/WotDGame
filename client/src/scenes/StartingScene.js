@@ -24,5 +24,9 @@ export class StartingScene extends BaseScene {
 
     const readyButton = this.add.text(x, y + 300, 'Not Ready', { fontSize: '24px', backgroundColor: '#ff8800', padding: { x: 20, y: 10 }, color: '#fff' })
       .setOrigin(0.5).setInteractive();
+
+    readyButton.on('pointerdown', () => {
+      this.service.readyPlayer();
+    });
   }
 }
