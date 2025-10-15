@@ -56,7 +56,7 @@ export class Service {
     }
 
     async readyPlayerEvent(data) {
-        console.log(`Player ${data.playerId} is ready`);
+        console.log(`All players are ready, starting game`);
     }
 
     handlePlayerJoined(player) {
@@ -71,12 +71,15 @@ export class Service {
     }
 
     readyPlayer() {
-        console.log(`Player ${Playroom.me().name} is ready`);
+        console.log(`Player ${Playroom.me()} is ready`);
         this.playerStates.get(Playroom.me().id).isReady = true;
 
         const allReady = this.playerStates.length > 0 && this.playerStates.every(p => p.isReady);
         if (allReady) {
             console.log(`All players are ready!`);
+            Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.READY_UP, data, Playroom.RPC.Mode.ALL).catch((error) => {
+                console.log(error);
+            });
         }
     }
 }
