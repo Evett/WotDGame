@@ -76,7 +76,7 @@ export class Service {
         this.playerStates.get(player.id).setState('ready', true);
         console.log("All current players:", this.playerStates);
 
-        const allReady = this.playerStates.length > 0 && this.playerStates.every(p => p.getState('ready') === true);
+        const allReady = this.playerStates.length > 0 && this.playerStates.every(p => p.state.ready === true);
         if (allReady) {
             console.log(`All players are ready!`);
             const data = true;
