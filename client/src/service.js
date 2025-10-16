@@ -46,8 +46,6 @@ export class Service {
             await this.readyPlayerEvent(ReadyData);
         });
 
-        Playroom.useMultiplayerState()
-
         Playroom.onPlayerJoin(player => {
             this.handlePlayerJoined(player);
         });
