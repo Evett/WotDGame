@@ -73,7 +73,7 @@ export class Service {
     readyPlayer() {
         const player = Playroom.myPlayer();
         console.log(`Player ${player.getProfile().name} with id ${player.id} is ready`);
-        this.playerStates.get(Playroom.myPlayer().id).isReady = true;
+        this.playerStates.get(player.id).isReady = true;
 
         const allReady = this.playerStates.length > 0 && this.playerStates.every(p => p.isReady);
         if (allReady) {
