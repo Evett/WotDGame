@@ -1,5 +1,5 @@
-import Phaser from 'phaser';
-import { RPC, onPlayerJoin, insertCoin, isHost, myPlayer } from 'playroomkit';
+import * as Phaser from 'phaser';
+import * as Playroom from 'playroomkit';
 
 const OUT_OF_COMBAT_EVENTS = {
   PLAYER_CONNECTED: 'PLAYER_CONNECTED',
@@ -22,7 +22,7 @@ export class Service {
                 'assets/jooooooooel.png'
             ];
 
-            insertCoin({
+            Playroom.insertCoin({
                 maxPlayers: 6,
                 persistentMode: true,
                 reconnectGracePeriod: 10,
@@ -38,15 +38,15 @@ export class Service {
     }
 
     registerEventListeners() {
-        RPC.register(OUT_OF_COMBAT_EVENTS.PLAYER_CONNECTED, async PlayerConnectedData => {
+        Playroom.RPC.register(OUT_OF_COMBAT_EVENTS.PLAYER_CONNECTED, async PlayerConnectedData => {
             await this.handlePlayerConnectedEvent(PlayerConnectedData);
         });
 
-        RPC.register(OUT_OF_COMBAT_EVENTS.READY_UP, async ReadyData => {
+        Playroom.RPC.register(OUT_OF_COMBAT_EVENTS.READY_UP, async ReadyData => {
             await this.readyPlayerEvent(ReadyData);
         });
 
-        onPlayerJoin(player => {
+        Playroom.onPlayerJoin(player => {
             this.handlePlayerJoined(player);
         });
     }
@@ -71,9 +71,9 @@ export class Service {
     }
 
     readyPlayer() {
-        console.log(`Player ${myPlayer()} is ready`);
-        console.log(`Participants test ${getParticipants()}`);
-        this.playerStates.get(myPlayer().id).isReady = true;
+        const player = Playroom.myPlayer();
+        console.log(`Player ${player.getProfile().name} with id ${player.id} is ready`);
+        this.playerStates.get(Playroom.myPlayer().id).isReady = true;
 
         const allReady = this.playerStates.length > 0 && this.playerStates.every(p => p.isReady);
         if (allReady) {
