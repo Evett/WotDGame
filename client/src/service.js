@@ -44,7 +44,9 @@ export class Service {
 
         Playroom.RPC.register(OUT_OF_COMBAT_EVENTS.READY_UP, async ReadyData => {
             await this.readyPlayerEvent(ReadyData);
-        })
+        });
+
+        Playroom.useMultiplayerState()
 
         Playroom.onPlayerJoin(player => {
             this.handlePlayerJoined(player);
@@ -65,9 +67,9 @@ export class Service {
             return;
         }
         
-        state = { playerId: player.id };
-        this.playerStates.set(player.id, state);
-        console.log("New PlayerState:", state);
+        this.playerStates.set(player.id, player);
+        console.log("New PlayerState:", player);
+        console.log("All current players:", this.playerStates);
     }
 
     readyPlayer() {
