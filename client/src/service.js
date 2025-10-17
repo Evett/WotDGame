@@ -34,6 +34,13 @@ export class Service {
                 avatars: avatars
             });
 
+            Playroom.onStateChange('scene', (scene) => {
+                if (scene) {
+                    console.log(`[Playroom] Scene changed to ${scene}`);
+                    this.handleSceneChange(scene);
+                }
+            });
+
             this.setScene(SCENES.MENU);
 
             return true;
@@ -93,6 +100,13 @@ export class Service {
     switchScene(data) {
         console.log(`Switching from scene ${data.current} to ${data.next}`);
         data.current.scene.start(next);
+    }
+    handleSceneChange(scene) {
+        const phaserScene = window.currentPhaserScene;
+        if (phaserScene) {
+            console.log(`[Service] Transitioning to ${scene}...`);
+            phaserScene.scene.start(scene, { service: this });
+        }
     }
 
     handlePlayerJoined(player) {
