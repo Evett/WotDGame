@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { StartingScene } from './scenes/StartingScene';
+import { CharacterSelectScene } from './scenes/CharacterSelectScene';
 
 const config = {
     title: 'WotDGame',
@@ -14,7 +15,8 @@ const config = {
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
     scene: [
-        StartingScene
+        StartingScene,
+        CharacterSelectScene
     ],
     dom: {
         createContainer: true
