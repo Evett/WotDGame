@@ -8,10 +8,16 @@ const OUT_OF_COMBAT_EVENTS = {
   READY_UP: 'READY_UP'
 };
 
+const SCENES = {
+    MENU: 'StartingScene',
+    SELECT: 'CharacterSelectScene'
+}
+
 export class Service {
 
     constructor() {
         this.playerStates = new Map();
+        this.setScene(SCENES.MENU);
     }
 
     async connect() { 
@@ -46,6 +52,10 @@ export class Service {
             await this.readyPlayerEvent(ReadyData);
         });
 
+        Playroom.RPC.register(OUT_OF_COMBAT_EVENTS.SWITCH_SCENE, async SwitchSceneData => {
+            await this.switchScene(SwitchSceneData);
+        });
+
         Playroom.onPlayerJoin(player => {
             this.handlePlayerJoined(player);
         });
@@ -55,8 +65,32 @@ export class Service {
         console.log("Handling player connecting:", data);
     }
 
-    async readyPlayerEvent(data) {
+    async readyPlayerEvent(scene) {
         console.log(`All players are ready, starting game`);
+        let currentScene = this.getScene();
+        this.setScene(scene);
+        const data = {current : currentScene,
+            next : scene
+        }
+        Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.SWITCH_SCENE, data, Playroom.RPC.Mode.ALL).catch((error) => {
+            console.log(error);
+        });
+    }
+    
+
+    getScene() {
+        console.log(`Getting scene ${Playroom.getState('scene')}`);
+        return Playroom.getState('scene');
+    }
+
+    setScene(scene) {
+        console.log(`Setting scene to ${scene}`);
+        Playroom.setState('scene', scene);
+    }
+
+    switchScene(data) {
+        console.log(`Switching from scene ${data.current} to ${data.next}`);
+        data.current.scene.start(next);
     }
 
     handlePlayerJoined(player) {
@@ -80,10 +114,23 @@ export class Service {
                      [...this.playerStates.values()].every(p => p.state?.ready === true);
         if (allReady) {
             console.log(`All players are ready!`);
-            const data = true;
+            const data = SCENES.SELECT;
             Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.READY_UP, data, Playroom.RPC.Mode.ALL).catch((error) => {
                 console.log(error);
             });
+        }
+    }
+
+    choiceToScene(choice) {
+        switch (choice) {
+            case 'Battle': return 'BattleScene';
+            case 'Event': return 'EventScene';
+            case 'Rest': return 'RestSiteScene';
+            case 'Shop': return 'ShopScene';
+            case 'Reward': return 'CardRewardScene';
+            case 'Altar': return 'AltarScene';
+            case 'Deck': return 'DeckScene';
+            default: return 'MapScene';
         }
     }
 }
