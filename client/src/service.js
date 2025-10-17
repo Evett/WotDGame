@@ -17,7 +17,6 @@ export class Service {
 
     constructor() {
         this.playerStates = new Map();
-        this.setScene(SCENES.MENU);
     }
 
     async connect() { 
@@ -34,6 +33,8 @@ export class Service {
                 reconnectGracePeriod: 10,
                 avatars: avatars
             });
+
+            this.setScene(SCENES.MENU);
 
             return true;
         }
