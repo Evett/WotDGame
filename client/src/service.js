@@ -70,7 +70,7 @@ export class Service {
         console.log(`All players are ready, starting game`);
         let currentScene = this.getScene();
         this.setScene(scene);
-        const data = {current : currentScene,
+        const data = { current : currentScene,
             next : scene
         }
         Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.SWITCH_SCENE, data, Playroom.RPC.Mode.ALL).catch((error) => {
@@ -80,7 +80,8 @@ export class Service {
     
 
     getScene() {
-        console.log(`Getting scene ${Playroom.getState('scene')}`);
+        let scene = Playroom.getScene('scene');
+        console.log(`Getting scene ${scene}`);
         return Playroom.getState('scene');
     }
 
