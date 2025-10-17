@@ -80,7 +80,7 @@ export class Service {
     
 
     getScene() {
-        let scene = Playroom.getScene('scene');
+        let scene = Playroom.getState('scene');
         console.log(`Getting scene ${scene}`);
         return Playroom.getState('scene');
     }
