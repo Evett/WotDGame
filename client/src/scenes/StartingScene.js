@@ -10,7 +10,6 @@ export class StartingScene extends BaseScene {
   async create() {
     const { x, y } = this.getCenter();
     this.createBackground();
-    this.sceneManager = new SceneManager(this.service);
 
     const connected = await this.service.connect();
     if (!connected) {
