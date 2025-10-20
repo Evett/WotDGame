@@ -23,20 +23,20 @@ export class CharacterSelectScene extends BaseScene {
     Object.keys(CharacterLibrary).forEach((charKey) => {
       const character = CharacterLibrary[charKey];
 
-      const isTaken = takenChars.includes(key);
+      const isTaken = takenChars.includes(charKey);
       const button = this.add.text(x, yPos, character.name, {
         fontSize: '24px', backgroundColor: '#333', padding: { x: 10, y: 5 }, color: '#fff'
       }).setOrigin(0.5).setInteractive();
 
       if (!isTaken) {
         button.on('pointerdown', () => {
-          this.service.selectCharacter(key);
+          this.service.selectCharacter(charKey);
           button.setStyle({ backgroundColor: '#006400' });
           this.disableAllButtons();
         });
       }
 
-      this.characterButtons.push({ key, button });
+      this.characterButtons.push({ charKey, button });
     });
   }
 
