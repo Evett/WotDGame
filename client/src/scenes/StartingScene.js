@@ -32,16 +32,6 @@ export class StartingScene extends BaseScene {
 
     this.currentSceneKey = this.service.getScene();
 
-    this.time.addEvent({
-      delay: 300, loop: true,
-      callback: () => {
-        const sharedScene = this.service.getScene();
-        if (sharedScene && sharedScene !== this.currentSceneKey) {
-          console.log(`Scene change detected: ${this.currentSceneKey} -> ${sharedScene}`);
-          this.currentSceneKey = sharedScene;
-          this.scene.start(sharedScene, { service: this.service });
-        }
-      }
-    });
+    this.createSceneListener(this.service, this.currentSceneKey);
   }
 }

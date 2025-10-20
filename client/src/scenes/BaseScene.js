@@ -52,4 +52,18 @@ export default class BaseScene extends Phaser.Scene {
             y: this.scale.height / 2
         };
     }
+
+    createSceneListener(inService, currentSceneKey) {
+        this.time.addEvent({
+            delay: 300, loop: true,
+            callback: () => {
+                const sharedScene = inService.getScene();
+                if (sharedScene && sharedScene !== currentSceneKey) {
+                    console.log(`Scene change detected: ${currentSceneKey} -> ${sharedScene}`);
+                    currentSceneKey = sharedScene;
+                    this.scene.start(sharedScene, { service: inService });
+                }
+            }
+        });
+    }
 }

@@ -10,7 +10,8 @@ const OUT_OF_COMBAT_EVENTS = {
 
 const SCENES = {
     MENU: 'StartingScene',
-    SELECT: 'CharacterSelectScene'
+    SELECT: 'CharacterSelectScene',
+    MAP: 'MapScene'
 }
 
 export class Service {
@@ -77,7 +78,6 @@ export class Service {
             console.log(error);
         });
     }
-    
 
     getScene() {
         let scene = Playroom.getState('scene');
@@ -121,6 +121,69 @@ export class Service {
                 console.log(error);
             });
         }
+    }
+
+    selectCharacter(characterKey) {
+        const player = Playroom.myPlayer();
+        if (!player) return;
+
+        const takenChars = this.getRoomState('takenCharacters') || [];
+        if (takenChars.includes(characterKey)) {
+            console.warn(`${characterKey} is already taken.`);
+            return;
+        }
+
+        this.setPlayerState(player, 'character', characterKey);
+
+        const updatedTaken = [...takenChars, characterKey];
+        this.setRoomState('takenCharacters', updatedTaken);
+
+        console.log(`${player.getProfile().name} selected ${characterKey}`);
+
+        Playroom.RPC.call(
+            OUT_OF_COMBAT_EVENTS.CHARACTER_LOCKED,
+            { playerId: player.id, characterKey },
+            Playroom.RPC.Mode.ALL
+        );
+    }
+
+    handleCharacterLocked({ playerId, characterKey }) {
+        const player = this.playerStates.get(playerId);
+        if (player) this.setPlayerState(player, 'character', characterKey);
+
+        const taken = new Set(Playroom.getState('takenCharacters') || []);
+        taken.add(characterKey);
+        this.setRoomState('takenCharacters', [...taken]);
+
+        const allPlayers = [...this.playerStates.values()];
+        const allLocked = allPlayers.every((p) => p.state?.character);
+
+        if (allLocked) {
+            console.log('All players have chosen their character!');
+            this.setScene(SCENES.MAP);
+        }
+    }
+
+    getPlayerState(player, inState) {
+        const value = this.playerStates.get(player.id).getState(inState);
+        console.log(`Getting value ${value} from player state ${inState} for player ${player.getProfile().name}`);
+        return value;
+    }
+
+    setPlayerState(player, inState, inValue) {
+        this.playerStates.get(player.id).setState(inState, inValue);
+        console.log(`Player ${player.getProfile().name} set state ${inState} to ${inValue}`);
+    }
+
+    getRoomState(inState) {
+        const value = Playroom.get(inState);
+        console.log(`Getting value ${value} from room state ${inState}`);
+        return value;
+    }
+
+    setRoomState(inState, inValue) {
+        Playroom.setState(inState, inValue);
+        console.log(`Room set state ${inState} to ${inValue}`);
     }
 
     choiceToScene(choice) {
