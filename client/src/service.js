@@ -176,7 +176,7 @@ export class Service {
     }
 
     getRoomState(inState) {
-        const value = Playroom.get(inState);
+        const value = Playroom.getState(inState);
         console.log(`Getting value ${value} from room state ${inState}`);
         return value;
     }
