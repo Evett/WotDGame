@@ -1,4 +1,5 @@
 import BaseScene from './BaseScene';
+import CharacterLibrary from '../data/CharacterLibrary';
 
 export class CharacterSelectScene extends BaseScene {
   constructor() {
