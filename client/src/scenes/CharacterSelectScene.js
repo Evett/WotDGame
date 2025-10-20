@@ -36,12 +36,13 @@ export class CharacterSelectScene extends BaseScene {
         });
       }
 
-      this.characterButtons.push({ charKey, button });
+      this.characterButtons[charKey] = button;
+      yPos += 50;
     });
   }
 
   disableAllButtons() {
-    this.characterButtons.forEach(({ button }) => {
+    this.characterButtons.forEach((button) => {
       button.disableInteractive();
     });
   }
