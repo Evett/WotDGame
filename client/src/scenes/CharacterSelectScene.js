@@ -42,7 +42,7 @@ export class CharacterSelectScene extends BaseScene {
   }
 
   disableAllButtons() {
-    this.characterButtons.forEach((button) => {
+    Object.entries(this.characterButtons).forEach(([key, button]) => {
       button.disableInteractive();
     });
   }
