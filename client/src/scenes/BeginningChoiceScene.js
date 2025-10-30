@@ -1,3 +1,5 @@
+import BaseScene from './BaseScene';
+
 export class BeginningChoiceScene extends BaseScene {
   constructor() {
     super({ key: 'BeginningChoiceScene' });
