@@ -68,7 +68,7 @@ export class Service {
         let currentScene = this.getRoomState('scene');
         this.setRoomState('scene', scene);
         console.log(`Switching from scene ${currentScene} to ${scene}`);
-        currentScene.scene.start(next);
+        currentScene.scene.start(scene);
     }
 
     handlePlayerJoined(player) {
