@@ -51,8 +51,12 @@ export class Service {
             await this.handlePlayerConnectedEvent(PlayerConnectedData);
         });
 
+        Playroom.RPC.register(OUT_OF_COMBAT_EVENTS.READY_UP, async ReadyData => {
+            await this.readyPlayerEvent(ReadyData);
+        });
+
         Playroom.RPC.register(OUT_OF_COMBAT_EVENTS.SWITCH_SCENE, async SwitchSceneData => {
-            await this.switchSceneEvent(SwitchSceneData);
+            await this.switchScene(SwitchSceneData);
         });
 
         Playroom.onPlayerJoin(player => {
@@ -64,11 +68,21 @@ export class Service {
         console.log("Handling player connecting:", data);
     }
 
-    async switchSceneEvent(scene) {
+    async readyPlayerEvent(scene) {
+        console.log(`All players are ready, starting game`);
         let currentScene = this.getRoomState('scene');
         this.setRoomState('scene', scene);
-        console.log(`Switching from scene ${currentScene} to ${scene}`);
-        currentScene.scene.start(scene);
+        const data = { current : currentScene,
+            next : scene
+        }
+        Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.SWITCH_SCENE, data, Playroom.RPC.Mode.ALL).catch((error) => {
+            console.log(error);
+        });
+    }
+
+    switchScene(data) {
+        console.log(`Switching from scene ${data.current} to ${data.next}`);
+        data.current.scene.start(next);
     }
 
     handlePlayerJoined(player) {
@@ -91,9 +105,9 @@ export class Service {
         const allReady = [...this.playerStates.values()].length > 0 &&
                      [...this.playerStates.values()].every(p => p.state?.ready === true);
         if (allReady) {
-            console.log(`All players are ready, starting game`);
-            const nextScene = SCENES.SELECT;
-            Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.SWITCH_SCENE, nextScene, Playroom.RPC.Mode.ALL).catch((error) => {
+            console.log(`All players are ready!`);
+            const data = SCENES.SELECT;
+            Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.READY_UP, data, Playroom.RPC.Mode.ALL).catch((error) => {
                 console.log(error);
             });
         }
@@ -128,9 +142,9 @@ export class Service {
         if (allSelected) {
             console.log(`✅ All players have selected their characters! Moving to next scene.`);
 
-            const nextScene = SCENES.BEGINNING;
+            const nextScene = SCENES.MAP;
             Playroom.RPC.call(
-                OUT_OF_COMBAT_EVENTS.SWITCH_SCENE,
+                OUT_OF_COMBAT_EVENTS.READY_UP,
                 nextScene,
                 Playroom.RPC.Mode.ALL
             );
