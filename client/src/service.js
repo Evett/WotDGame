@@ -69,7 +69,7 @@ export class Service {
     }
 
     async readyPlayerEvent(scene) {
-        console.log(`All players are ready, starting game`);
+        console.log(`All players are ready, switching scenes`);
         let currentScene = this.getRoomState('scene');
         this.setRoomState('scene', scene);
         const data = { current : currentScene,
@@ -105,7 +105,6 @@ export class Service {
         const allReady = [...this.playerStates.values()].length > 0 &&
                      [...this.playerStates.values()].every(p => p.state?.ready === true);
         if (allReady) {
-            console.log(`All players are ready!`);
             const data = SCENES.SELECT;
             Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.READY_UP, data, Playroom.RPC.Mode.ALL).catch((error) => {
                 console.log(error);
