@@ -81,8 +81,6 @@ export class Service {
     }
 
     switchScene(data) {
-        console.log(`Switching from scene ${data.current} to ${data.next}`);
-        data.current.scene.start(next);
     }
 
     handlePlayerJoined(player) {
@@ -141,7 +139,7 @@ export class Service {
         if (allSelected) {
             console.log(`✅ All players have selected their characters! Moving to next scene.`);
 
-            const nextScene = SCENES.MAP;
+            const nextScene = SCENES.BEGINNING;
             Playroom.RPC.call(
                 OUT_OF_COMBAT_EVENTS.READY_UP,
                 nextScene,

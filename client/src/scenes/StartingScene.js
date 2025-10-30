@@ -5,12 +5,12 @@ export class StartingScene extends BaseScene {
   constructor() {
     super({ key: 'StartingScene' });
     this.service = new Service();
+    this.service.setRoomState('scene', this);
   }
 
   async create() {
     const { x, y } = this.getCenter();
     this.createBackground();
-    window.currentPhaserScene = this;
 
     const connected = await this.service.connect();
     if (!connected) {
