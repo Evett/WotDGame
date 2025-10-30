@@ -65,20 +65,10 @@ export class Service {
     }
 
     async switchSceneEvent(scene) {
-        console.log(`Switching scenes`);
         let currentScene = this.getRoomState('scene');
         this.setRoomState('scene', scene);
-        /*const data = { current : currentScene,
-            next : scene
-        }
-        Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.SWITCH_SCENE, data, Playroom.RPC.Mode.ALL).catch((error) => {
-            console.log(error);
-        });*/
-    }
-
-    switchScene(data) {
-        console.log(`Switching from scene ${data.current} to ${data.next}`);
-        data.current.scene.start(next);
+        console.log(`Switching from scene ${currentScene} to ${scene}`);
+        currentScene.scene.start(next);
     }
 
     handlePlayerJoined(player) {

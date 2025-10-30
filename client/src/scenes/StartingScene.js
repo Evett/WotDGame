@@ -30,8 +30,8 @@ export class StartingScene extends BaseScene {
       this.service.readyPlayer();
     });
 
-    this.currentSceneKey = this.service.getRoomState('scene');
+    /*this.currentSceneKey = this.service.getRoomState('scene');
 
-    this.createSceneListener(this.service, this.currentSceneKey);
+    this.createSceneListener(this.service, this.currentSceneKey);*/
   }
 }
