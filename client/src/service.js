@@ -11,7 +11,8 @@ const OUT_OF_COMBAT_EVENTS = {
 const SCENES = {
     MENU: 'StartingScene',
     SELECT: 'CharacterSelectScene',
-    MAP: 'MapScene'
+    MAP: 'MapScene',
+    BEGINNING: 'BeginningChoiceScene'
 }
 
 export class Service {
@@ -35,7 +36,7 @@ export class Service {
                 avatars: avatars
             });
 
-            if (!Playroom.getState('scene')) { this.setScene(SCENES.MENU); }
+            if (!Playroom.getState('scene')) { this.setRoomState('scene', SCENES.MENU); }
 
             return true;
         }
@@ -50,12 +51,8 @@ export class Service {
             await this.handlePlayerConnectedEvent(PlayerConnectedData);
         });
 
-        Playroom.RPC.register(OUT_OF_COMBAT_EVENTS.READY_UP, async ReadyData => {
-            await this.readyPlayerEvent(ReadyData);
-        });
-
         Playroom.RPC.register(OUT_OF_COMBAT_EVENTS.SWITCH_SCENE, async SwitchSceneData => {
-            await this.switchScene(SwitchSceneData);
+            await this.switchSceneEvent(SwitchSceneData);
         });
 
         Playroom.onPlayerJoin(player => {
@@ -67,27 +64,16 @@ export class Service {
         console.log("Handling player connecting:", data);
     }
 
-    async readyPlayerEvent(scene) {
-        console.log(`All players are ready, starting game`);
-        let currentScene = this.getScene();
-        this.setScene(scene);
-        const data = { current : currentScene,
+    async switchSceneEvent(scene) {
+        console.log(`Switching scenes`);
+        let currentScene = this.getRoomState('scene');
+        this.setRoomState('scene', scene);
+        /*const data = { current : currentScene,
             next : scene
         }
         Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.SWITCH_SCENE, data, Playroom.RPC.Mode.ALL).catch((error) => {
             console.log(error);
-        });
-    }
-
-    getScene() {
-        let scene = Playroom.getState('scene');
-        console.log(`Getting scene ${scene}`);
-        return Playroom.getState('scene');
-    }
-
-    setScene(scene) {
-        console.log(`Setting scene to ${scene}`);
-        Playroom.setState('scene', scene);
+        });*/
     }
 
     switchScene(data) {
@@ -115,9 +101,9 @@ export class Service {
         const allReady = [...this.playerStates.values()].length > 0 &&
                      [...this.playerStates.values()].every(p => p.state?.ready === true);
         if (allReady) {
-            console.log(`All players are ready!`);
-            const data = SCENES.SELECT;
-            Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.READY_UP, data, Playroom.RPC.Mode.ALL).catch((error) => {
+            console.log(`All players are ready, starting game`);
+            const nextScene = SCENES.SELECT;
+            Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.SWITCH_SCENE, nextScene, Playroom.RPC.Mode.ALL).catch((error) => {
                 console.log(error);
             });
         }
@@ -125,12 +111,12 @@ export class Service {
 
     selectCharacter(characterKey) {
         const player = Playroom.myPlayer();
-        if (!player) return;
+        if (!player) return false;
 
         const takenChars = this.getRoomState('takenCharacters') || [];
         if (takenChars.includes(characterKey)) {
             console.warn(`${characterKey} is already taken.`);
-            return;
+            return false;
         }
 
         this.setPlayerState(player, 'character', characterKey);
@@ -145,6 +131,22 @@ export class Service {
             { playerId: player.id, characterKey },
             Playroom.RPC.Mode.ALL
         );
+
+        const allPlayers = [...this.playerStates.values()];
+        const allSelected = allPlayers.length > 0 && allPlayers.every(p => p.state?.character);
+
+        if (allSelected) {
+            console.log(`✅ All players have selected their characters! Moving to next scene.`);
+
+            const nextScene = SCENES.BEGINNING;
+            Playroom.RPC.call(
+                OUT_OF_COMBAT_EVENTS.SWITCH_SCENE,
+                nextScene,
+                Playroom.RPC.Mode.ALL
+            );
+        }
+
+        return true;
     }
 
     handleCharacterLocked({ playerId, characterKey }) {
@@ -160,7 +162,7 @@ export class Service {
 
         if (allLocked) {
             console.log('All players have chosen their character!');
-            this.setScene(SCENES.MAP);
+            this.setRoomState('scene', SCENES.MAP);
         }
     }
 

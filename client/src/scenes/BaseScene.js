@@ -57,7 +57,7 @@ export default class BaseScene extends Phaser.Scene {
         this.time.addEvent({
             delay: 300, loop: true,
             callback: () => {
-                const sharedScene = inService.getScene();
+                const sharedScene = inService.getRoomState('scene');
                 if (sharedScene && sharedScene !== currentSceneKey) {
                     console.log(`Scene change detected: ${currentSceneKey} -> ${sharedScene}`);
                     currentSceneKey = sharedScene;

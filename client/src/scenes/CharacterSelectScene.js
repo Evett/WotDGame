@@ -30,15 +30,20 @@ export class CharacterSelectScene extends BaseScene {
 
       if (!isTaken) {
         button.on('pointerdown', () => {
-          this.service.selectCharacter(charKey);
-          button.setStyle({ backgroundColor: '#006400' });
-          this.disableAllButtons();
+          if (this.service.selectCharacter(charKey)) {
+            button.setStyle({ backgroundColor: '#006400' });
+            this.disableAllButtons();
+          }
         });
       }
 
       this.characterButtons[charKey] = button;
       yPos += 50;
     });
+
+    this.currentSceneKey = this.service.getRoomState('scene');
+
+    this.createSceneListener(this.service, this.currentSceneKey);
   }
 
   disableAllButtons() {

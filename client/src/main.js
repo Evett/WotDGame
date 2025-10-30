@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { StartingScene } from './scenes/StartingScene';
 import { CharacterSelectScene } from './scenes/CharacterSelectScene';
+import { BeginningChoiceScene } from './scenes/BeginningChoiceScene';
 
 const config = {
     title: 'WotDGame',
@@ -16,7 +17,8 @@ const config = {
     },
     scene: [
         StartingScene,
-        CharacterSelectScene
+        CharacterSelectScene,
+        BeginningChoiceScene
     ],
     dom: {
         createContainer: true
