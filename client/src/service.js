@@ -167,21 +167,29 @@ export class Service {
 
         console.log(`${player.getProfile().name} voted for ${choice}`);
 
-        const allVotes = Object.values(currentVotes);
+        const votesSoFar = Object.values(currentVotes).length;
         const totalPlayers = [...this.playerStates.values()].length;
 
-        const voteCount = allVotes.reduce((acc, c) => {
-            acc[c] = (acc[c] || 0) + 1;
-            return acc;
-        }, {});
+        if (votesSoFar < totalPlayers) {
+            console.log(`Waiting for all players to vote (${votesSoFar}/${totalPlayers})...`);
+            return;
+        }
 
-        const majority = Math.ceil(totalPlayers / 2);
-        let winningChoice = null;
-        for (const [option, count] of Object.entries(voteCount)) {
-            if (count >= majority) {
-                winningChoice = option;
-                break;
-            }
+        const voteCount = {};
+        Object.values(currentVotes).forEach(c => {
+            voteCount[c] = (voteCount[c] || 0) + 1;
+        });
+
+        const maxVotes = Math.max(...Object.values(voteCount));
+        const topChoices = Object.keys(voteCount).filter(c => voteCount[c] === maxVotes);
+
+        let winningChoice;
+        if (topChoices.length === 1) {
+            winningChoice = topChoices[0];
+            console.log(`✅ Winning choice by votes: ${winningChoice}`);
+        } else {
+            winningChoice = topChoices[Math.floor(Math.random() * topChoices.length)];
+            console.log(`⚖️ Tie detected. Randomly selected ${winningChoice} among`, topChoices);
         }
 
         if (winningChoice) {
