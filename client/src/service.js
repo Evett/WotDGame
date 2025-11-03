@@ -12,7 +12,13 @@ const SCENES = {
     MENU: 'StartingScene',
     SELECT: 'CharacterSelectScene',
     MAP: 'MapScene',
-    BEGINNING: 'BeginningChoiceScene'
+    BEGINNING: 'BeginningChoiceScene',
+    EVENT: 'EventScene',
+    REST: 'RestScene',
+    SHOP: 'ShopScene',
+    REWARD: 'CardRewardScene',
+    ALTAR: 'AltarScene',
+    DECK: 'DeckScene'
 }
 
 export class Service {
@@ -150,20 +156,46 @@ export class Service {
         return true;
     }
 
-    handleCharacterLocked({ playerId, characterKey }) {
-        const player = this.playerStates.get(playerId);
-        if (player) this.setPlayerState(player, 'character', characterKey);
+    selectChoice() {
+        const player = Playroom.myPlayer();
+        if (!player) return;
 
-        const taken = new Set(Playroom.getState('takenCharacters') || []);
-        taken.add(characterKey);
-        this.setRoomState('takenCharacters', [...taken]);
+        const currentVotes = this.getRoomState('votes') || {};
 
-        const allPlayers = [...this.playerStates.values()];
-        const allLocked = allPlayers.every((p) => p.state?.character);
+        currentVotes[player.id] = choice;
+        this.setRoomState('votes', currentVotes);
 
-        if (allLocked) {
-            console.log('All players have chosen their character!');
-            this.setRoomState('scene', SCENES.MAP);
+        console.log(`${player.getProfile().name} voted for ${choice}`);
+
+        const allVotes = Object.values(currentVotes);
+        const totalPlayers = [...this.playerStates.values()].length;
+
+        const voteCount = allVotes.reduce((acc, c) => {
+            acc[c] = (acc[c] || 0) + 1;
+            return acc;
+        }, {});
+
+        const majority = Math.ceil(totalPlayers / 2);
+        let winningChoice = null;
+        for (const [option, count] of Object.entries(voteCount)) {
+            if (count >= majority) {
+                winningChoice = option;
+                break;
+            }
+        }
+
+        if (winningChoice) {
+            const nextScene = this.choiceToScene(winningChoice);
+            console.log(`🎯 Majority vote reached! ${winningChoice} → ${nextScene}`);
+
+            this.setRoomState('votes', {});
+            this.setRoomState('choices', null);
+
+            Playroom.RPC.call(
+                OUT_OF_COMBAT_EVENTS.READY_UP,
+                nextScene,
+                Playroom.RPC.Mode.ALL
+            );
         }
     }
 
@@ -189,15 +221,24 @@ export class Service {
         console.log(`Room set state ${inState} to ${inValue}`);
     }
 
+    getChoices() {
+        if (!this.getRoomState('choices')) {
+            const allOptions = ['Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
+            const shuffled = shuffleArray(allOptions);
+            const options = shuffled.slice(0, 3);
+            this.setRoomState('choices', options);
+        }
+        return this.getRoomState('choices');
+    }
+
     choiceToScene(choice) {
         switch (choice) {
-            case 'Battle': return 'BattleScene';
-            case 'Event': return 'EventScene';
-            case 'Rest': return 'RestSiteScene';
-            case 'Shop': return 'ShopScene';
-            case 'Reward': return 'CardRewardScene';
-            case 'Altar': return 'AltarScene';
-            case 'Deck': return 'DeckScene';
+            case 'Event': return SCENES.EVENT;
+            case 'Rest': return SCENES.REST;
+            case 'Shop': return SCENES.SHOP;
+            case 'Reward': return SCENES.REWARD;
+            case 'Altar': return SCENES.ALTAR;
+            case 'Deck': return SCENES.DECK;
             default: return 'MapScene';
         }
     }
