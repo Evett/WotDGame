@@ -26,7 +26,7 @@ export class BeginningChoiceScene extends BaseScene {
       btn.on('pointerdown', () => {
         if (!this.choiceMade) {
           this.choiceMade = true;
-          button.setStyle({ backgroundColor: '#006400' });
+          btn.setStyle({ backgroundColor: '#006400' });
           this.service.selectChoice();
         }
       });
