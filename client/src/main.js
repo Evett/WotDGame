@@ -2,6 +2,12 @@ import Phaser from 'phaser';
 import { StartingScene } from './scenes/StartingScene';
 import { CharacterSelectScene } from './scenes/CharacterSelectScene';
 import { BeginningChoiceScene } from './scenes/BeginningChoiceScene';
+import { AltarScene } from './scenes/AltarScene';
+import { CardRewardScene } from './scenes/CardRewardScene';
+import { DeckScene } from './scenes/DeckScene';
+import { EventScene } from './scenes/EventScene';
+import { RestScene } from './scenes/RestScene';
+import { ShopScene } from './scenes/ShopScene';
 
 const config = {
     title: 'WotDGame',
@@ -18,7 +24,13 @@ const config = {
     scene: [
         StartingScene,
         CharacterSelectScene,
-        BeginningChoiceScene
+        BeginningChoiceScene,
+        AltarScene,
+        CardRewardScene,
+        DeckScene,
+        EventScene,
+        RestScene,
+        ShopScene
     ],
     dom: {
         createContainer: true
