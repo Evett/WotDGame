@@ -19,15 +19,15 @@ export class BeginningChoiceScene extends BaseScene {
     let offsetY = y - 50;
     this.mapChoices.forEach(choice => { 
       const btn = this.add.text(x, offsetY, choice, {
-            fontSize: '24px', backgroundColor: '#333', padding: { x: 10, y: 5 }, color: '#fff'
-        }).setOrigin(0.5).setInteractive();
+        fontSize: '24px', backgroundColor: '#333', padding: { x: 10, y: 5 }, color: '#fff'
+      }).setOrigin(0.5).setInteractive();
 
 
       btn.on('pointerdown', () => {
         if (!this.choiceMade) {
           this.choiceMade = true;
           btn.setStyle({ backgroundColor: '#006400' });
-          this.service.selectChoice();
+          this.service.selectChoice(choice);
         }
       });
       offsetY += 50;

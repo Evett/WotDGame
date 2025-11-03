@@ -156,7 +156,7 @@ export class Service {
         return true;
     }
 
-    selectChoice() {
+    selectChoice(choice) {
         const player = Playroom.myPlayer();
         if (!player) return;
 
