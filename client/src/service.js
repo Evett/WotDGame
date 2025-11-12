@@ -1,5 +1,7 @@
 import * as Phaser from 'phaser';
 import * as Playroom from 'playroomkit';
+import GameState from './GameState';
+import CharacterLibrary from './data/CharacterLibrary';
 
 const OUT_OF_COMBAT_EVENTS = {
   PLAYER_CONNECTED: 'PLAYER_CONNECTED',
@@ -94,10 +96,26 @@ export class Service {
         if (state) {
             return;
         }
+
+        this.initializePlayerGameState(player);
         
         this.playerStates.set(player.id, player);
         console.log("New PlayerState:", player);
         console.log("All current players:", this.playerStates);
+    }
+
+    initializePlayerGameState(player) {
+        const newState = new GameState();
+        const serializableState = JSON.parse(JSON.stringify(newState));
+        this.setPlayerState(player, 'gameState', serializableState);
+    }
+
+    getPlayerGameState(player) {
+        const raw = this.getPlayerState(player, 'gameState');
+        if (!raw) return null;
+
+        const restored = Object.assign(new GameState(), raw);
+        return restored;
     }
 
     readyPlayer() {
@@ -126,7 +144,9 @@ export class Service {
             return false;
         }
 
-        this.setPlayerState(player, 'character', characterKey);
+        const gs = this.getPlayerGameState(player);
+        gs.setCharacter(CharacterLibrary[characterKey]);
+        this.setPlayerState(player, 'gameState', JSON.parse(JSON.stringify(gs)));
 
         const updatedTaken = [...takenChars, characterKey];
         this.setRoomState('takenCharacters', updatedTaken);

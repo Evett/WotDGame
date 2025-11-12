@@ -21,7 +21,7 @@ const CardLibrary = {
 
   getRandomCommonCard() {
     const pool = Object.values(cards.Common);
-    return Phaser.Utils.Array.GetRandom(pool)(); // Call the factory
+    return Phaser.Utils.Array.GetRandom(pool)();
   },
 
   getRandomCommonCards(amount = 1) {
