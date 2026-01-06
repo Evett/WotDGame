@@ -236,8 +236,7 @@ export class Service {
 
     setPlayerState(player, inState, inValue) {
         player.setState(inState, inValue);
-        console.log(`Player ${player.getProfile().name} set state ${inState} to: `);
-        console.log(inValue);
+        console.log(`Player ${player.getProfile().name} set state ${inState} to: `, inValue);
     }
 
     getRoomState(inState) {
@@ -248,7 +247,7 @@ export class Service {
 
     setRoomState(inState, inValue) {
         Playroom.setState(inState, inValue);
-        console.log(`Room set state ${inState} to ${inValue}`);
+        console.log(`Room set state ${inState} to`, inValue);
     }
 
     getChoices() {
