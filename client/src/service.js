@@ -159,6 +159,7 @@ export class Service {
         );
 
         const allPlayers = [...this.playerStates.values()];
+        console.log(`All players after select: `, allPlayers);
         const allSelected = allPlayers.length > 0 && allPlayers.every(p => p.state?.character);
 
         if (allSelected) {
