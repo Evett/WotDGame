@@ -228,14 +228,14 @@ export class Service {
     }
 
     getPlayerState(player, inState) {
-        const value = player.getState(inState);
+        const value = this.playerStates.get(player.id).getState(inState);
         console.log(value);
         console.log(`^ value gotten from player state ${inState} for player ${player.getProfile().name}`);
         return value;
     }
 
     setPlayerState(player, inState, inValue) {
-        player.setState(inState, inValue);
+        this.playerStates.get(player.id).setState(inState, inValue);
         console.log(`Player ${player.getProfile().name} set state ${inState} to: `, inValue);
     }
 
