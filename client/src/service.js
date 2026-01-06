@@ -97,9 +97,8 @@ export class Service {
             return;
         }
 
-        this.initializePlayerGameState(player);
-        
         this.playerStates.set(player.id, player);
+        this.initializePlayerGameState(player);
         console.log("New PlayerState:", player);
         console.log("All current players:", this.playerStates);
     }
