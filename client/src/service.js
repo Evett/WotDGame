@@ -160,7 +160,7 @@ export class Service {
 
         const allPlayers = [...this.playerStates.values()];
         console.log(`All players after select: `, allPlayers);
-        const allSelected = allPlayers.length > 0 && allPlayers.every(p => p.state?.character);
+        const allSelected = allPlayers.length > 0 && allPlayers.every(p => p.state?.gameState.character);
 
         if (allSelected) {
             console.log(`✅ All players have selected their characters! Moving to next scene.`);
