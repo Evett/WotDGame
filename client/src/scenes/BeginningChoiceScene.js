@@ -19,7 +19,7 @@ export class BeginningChoiceScene extends BaseScene {
     this.mapChoices = this.service.getChoices();
 
     let offsetY = y - 50;
-    this.mapChoices.forEach(choice => { 
+    this.mapChoices.forEach((choice, index) => { 
       const btn = this.add.text(x, offsetY, choice, {
         fontSize: '24px', backgroundColor: '#333', padding: { x: 10, y: 5 }, color: '#fff'
       }).setOrigin(0.5).setInteractive();
