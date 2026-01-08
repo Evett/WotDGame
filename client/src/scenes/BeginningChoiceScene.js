@@ -10,6 +10,8 @@ export class BeginningChoiceScene extends BaseScene {
     this.service = data.service;
     this.createBackground();
     this.choiceMade = false;
+    this.voteTexts = {};
+    this.lastVotesJSON = '';
     const { x, y } = this.getCenter();
 
     this.add.text(x, y - 200, 'Beginning Choice', { fontSize: '32px', color: '#fff' }).setOrigin(0.5);
@@ -30,11 +32,42 @@ export class BeginningChoiceScene extends BaseScene {
           this.service.selectChoice(choice);
         }
       });
+
+      const voteText = this.add.text(x + 160, y + index * 60, '0', {
+        fontSize: '20px',
+        color: '#ffdd88'
+      }).setOrigin(0.5);
+
+      this.voteTexts[choice] = voteText;
+
       offsetY += 50;
     });
 
     this.currentSceneKey = this.service.getRoomState('scene');
 
     this.createSceneListener(this.service, this.currentSceneKey);
+  }
+
+  update() {
+    const votes = this.service.getRoomState('votes') || {};
+    const json = JSON.stringify(votes);
+
+    if (json !== this.lastVotesJSON) {
+      this.lastVotesJSON = json;
+      this.updateVoteUI(votes);
+    }
+  }
+
+  updateVoteUI(votes) {
+    const counts = {};
+
+    Object.values(votes).forEach(choice => {
+      counts[choice] = (counts[choice] || 0) + 1;
+    });
+
+    Object.entries(this.voteTexts).forEach(([choice, text]) => {
+      const count = counts[choice] || 0;
+      text.setText(count.toString());
+    });
   }
 }
