@@ -8,6 +8,7 @@ import { DeckScene } from './scenes/DeckScene';
 import { EventScene } from './scenes/EventScene';
 import { RestScene } from './scenes/RestScene';
 import { ShopScene } from './scenes/ShopScene';
+import { BattleScene } from './scenes/BattleScene';
 
 const config = {
     title: 'WotDGame',
@@ -30,7 +31,8 @@ const config = {
         DeckScene,
         EventScene,
         RestScene,
-        ShopScene
+        ShopScene,
+        BattleScene
     ],
     dom: {
         createContainer: true
