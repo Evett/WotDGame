@@ -33,7 +33,7 @@ export class BeginningChoiceScene extends BaseScene {
         }
       });
 
-      const voteText = this.add.text(x + 160, y + index * 60, '0', {
+      const voteText = this.add.text(x + 160, y + (index - 1)* 50, '0', {
         fontSize: '20px',
         color: '#ffdd88'
       }).setOrigin(0.5);
