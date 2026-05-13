@@ -41,9 +41,7 @@ export class CharacterSelectScene extends BaseScene {
       yPos += 50;
     });
 
-    this.currentSceneKey = this.service.getRoomState('scene');
-
-    this.createSceneListener(this.service, this.currentSceneKey);
+    this.createSceneListener(this.service);
   }
 
   disableAllButtons() {

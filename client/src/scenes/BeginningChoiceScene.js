@@ -43,9 +43,7 @@ export class BeginningChoiceScene extends BaseScene {
       offsetY += 50;
     });
 
-    this.currentSceneKey = this.service.getRoomState('scene');
-
-    this.createSceneListener(this.service, this.currentSceneKey);
+    this.createSceneListener(this.service);
   }
 
   update() {

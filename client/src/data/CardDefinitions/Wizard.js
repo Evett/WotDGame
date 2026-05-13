@@ -12,9 +12,10 @@ export default {
         isOncePerDay: false,
         description: "Deal 6 damage that can't miss.",
         upgradedDescription: "Deal 10 damage that can't miss",
-        effect: (target, state) => {
+        effect: (target, state, card) => {
             if (target) {
-                target.takeTrueDamage(6);
+                const damage = card.upgraded ? 10 : 6;
+                target.takeTrueDamage(damage);
             }
         },
         upgraded: false
@@ -29,8 +30,9 @@ export default {
         isOncePerDay: true,
         description: "Deal 10 damage to all enemies.",
         upgradedDescription: "Deal 16 damage to all enemies.",
-        effect: (_, state) => {
-            state.enemies.forEach(e => e.takeDamage(10));
+        effect: (_, state, card) => {
+            const damage = card.upgraded ? 16 : 10;
+            state.enemies.forEach(e => e.takeDamage(damage));
         },
         upgraded: false
     }),
@@ -44,8 +46,9 @@ export default {
         isOncePerDay: false,
         description: "Gain 6 armor. Negate the next attack.",
         upgradedDescription: "Gain 9 armor. Negate the next attack.",
-        effect: (_, state) => {
-            state.playerArmor(6);
+        effect: (_, state, card) => {
+            const armor = card.upgraded ? 9 : 6;
+            state.playerArmor(armor);
             state.applyStatus("Shielded", 1);
         },
         upgraded: false

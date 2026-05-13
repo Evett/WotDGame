@@ -1,33 +1,44 @@
-import * as Phaser from 'phaser';
 import * as Playroom from 'playroomkit';
 import GameState from './GameState';
+import GameStateRehydrator from './data/GameStateRehydrator';
 import CharacterLibrary from './data/CharacterLibrary';
+import EnemyLibrary from './data/EnemyLibrary';
+import Enemy from './data/Enemy';
 
-const OUT_OF_COMBAT_EVENTS = {
+const EVENTS = {
   PLAYER_CONNECTED: 'PLAYER_CONNECTED',
-  NEW_GAME_STARTED: 'NEW_GAME_STARTED',
-  EXISTING_GAME: 'EXISTING_GAME',
-  READY_UP: 'READY_UP'
+  READY_UP: 'READY_UP',
+  SWITCH_SCENE: 'SWITCH_SCENE',
+  CHARACTER_LOCKED: 'CHARACTER_LOCKED',
+  SYNC_GAME_STATE: 'SYNC_GAME_STATE',
+  BATTLE_ACTION: 'BATTLE_ACTION',
+  END_TURN: 'END_TURN',
 };
 
 const SCENES = {
     MENU: 'StartingScene',
     SELECT: 'CharacterSelectScene',
-    MAP: 'MapScene',
     BEGINNING: 'BeginningChoiceScene',
+    BATTLE: 'BattleScene',
     EVENT: 'EventScene',
     REST: 'RestScene',
     SHOP: 'ShopScene',
     REWARD: 'CardRewardScene',
     ALTAR: 'AltarScene',
     DECK: 'DeckScene'
-}
+};
+
+export { SCENES };
 
 export class Service {
 
     constructor() {
         this.playerStates = new Map();
+        this.phaserGame = null;        // set by StartingScene after connect
+        this.sceneChangeCallbacks = []; // scenes register to be notified
     }
+
+    // ─── Connection ─────────────────────────────────────────
 
     async connect() { 
         try {
@@ -37,34 +48,46 @@ export class Service {
                 'assets/jooooooooel.png'
             ];
 
-            Playroom.insertCoin({
+            await Playroom.insertCoin({
                 maxPlayers: 6,
                 persistentMode: true,
                 reconnectGracePeriod: 10,
                 avatars: avatars
             });
 
-            if (!Playroom.getState('scene')) { this.setRoomState('scene', SCENES.MENU); }
+            if (!Playroom.getState('scene')) {
+                this.setRoomState('scene', SCENES.MENU);
+            }
 
             return true;
         }
         catch (error) {
-            console.error(error);
+            console.error('Failed to connect:', error);
             return false;
         }
     }
 
+    // ─── Event Listeners ────────────────────────────────────
+
     registerEventListeners() {
-        Playroom.RPC.register(OUT_OF_COMBAT_EVENTS.PLAYER_CONNECTED, async PlayerConnectedData => {
-            await this.handlePlayerConnectedEvent(PlayerConnectedData);
+        Playroom.RPC.register(EVENTS.PLAYER_CONNECTED, async data => {
+            console.log("Player connected:", data);
         });
 
-        Playroom.RPC.register(OUT_OF_COMBAT_EVENTS.READY_UP, async ReadyData => {
-            await this.readyPlayerEvent(ReadyData);
+        Playroom.RPC.register(EVENTS.SWITCH_SCENE, async data => {
+            this.handleSceneSwitch(data);
         });
 
-        Playroom.RPC.register(OUT_OF_COMBAT_EVENTS.SWITCH_SCENE, async SwitchSceneData => {
-            await this.switchScene(SwitchSceneData);
+        Playroom.RPC.register(EVENTS.CHARACTER_LOCKED, async data => {
+            console.log(`Character ${data.characterKey} locked by player ${data.playerId}`);
+        });
+
+        Playroom.RPC.register(EVENTS.SYNC_GAME_STATE, async data => {
+            this.handleGameStateSync(data);
+        });
+
+        Playroom.RPC.register(EVENTS.END_TURN, async data => {
+            this.handleEndTurn(data);
         });
 
         Playroom.onPlayerJoin(player => {
@@ -72,69 +95,146 @@ export class Service {
         });
     }
 
-    async handlePlayerConnectedEvent(data) {
-        console.log("Handling player connecting:", data);
+    // ─── Scene Management ───────────────────────────────────
+
+    onSceneChange(callback) {
+        this.sceneChangeCallbacks.push(callback);
     }
 
-    async readyPlayerEvent(scene) {
-        console.log(`All players are ready, switching scenes`);
-        let currentScene = this.getRoomState('scene');
-        this.setRoomState('scene', scene);
-        const data = { current : currentScene,
-            next : scene
-        }
-        Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.SWITCH_SCENE, data, Playroom.RPC.Mode.ALL).catch((error) => {
-            console.log(error);
-        });
+    offSceneChange(callback) {
+        this.sceneChangeCallbacks = this.sceneChangeCallbacks.filter(cb => cb !== callback);
     }
 
-    switchScene(data) {
+    handleSceneSwitch(data) {
+        const targetScene = data.scene;
+        console.log(`RPC scene switch received: -> ${targetScene}`);
+        this.setRoomState('scene', targetScene);
+        this.sceneChangeCallbacks.forEach(cb => cb(targetScene));
     }
+
+    broadcastSceneSwitch(targetScene) {
+        Playroom.RPC.call(
+            EVENTS.SWITCH_SCENE,
+            { scene: targetScene },
+            Playroom.RPC.Mode.ALL
+        ).catch(err => console.error('Scene switch RPC failed:', err));
+    }
+
+    // ─── Player Join / State ────────────────────────────────
 
     handlePlayerJoined(player) {
-        let state = this.playerStates.get(player.id);
-        if (state) {
-            return;
-        }
+        if (this.playerStates.has(player.id)) return;
 
         this.playerStates.set(player.id, player);
         this.initializePlayerGameState(player);
-        console.log("New PlayerState:", player);
-        console.log("All current players:", this.playerStates);
+        console.log(`Player joined: ${player.getProfile().name} (${player.id})`);
     }
 
     initializePlayerGameState(player) {
         const newState = new GameState();
-        const serializableState = JSON.parse(JSON.stringify(newState));
-        this.setPlayerState(player, 'gameState', serializableState);
+        this.savePlayerGameState(player, newState);
+    }
+
+    savePlayerGameState(player, gameState) {
+        const serialized = GameStateRehydrator.serialize(gameState);
+        player.setState('gameState', serialized);
     }
 
     getPlayerGameState(player) {
-        const raw = this.getPlayerState(player, 'gameState');
+        const raw = player.getState('gameState');
         if (!raw) return null;
 
-        const restored = Object.assign(new GameState(), raw);
-        return restored;
+        const rehydrated = GameStateRehydrator.rehydrate(raw);
+        const gs = new GameState();
+        Object.assign(gs, rehydrated);
+        return gs;
     }
 
-    readyPlayer() {
-        const player = Playroom.myPlayer();
-        console.log(`Player ${player.getProfile().name} with id ${player.id} is ready`);
-        this.playerStates.get(player.id).setState('ready', true);
-        console.log("All current players:", this.playerStates);
+    getMyPlayer() {
+        return Playroom.myPlayer();
+    }
 
-        const allReady = [...this.playerStates.values()].length > 0 &&
-                     [...this.playerStates.values()].every(p => p.state?.ready === true);
-        if (allReady) {
-            const data = SCENES.SELECT;
-            Playroom.RPC.call(OUT_OF_COMBAT_EVENTS.READY_UP, data, Playroom.RPC.Mode.ALL).catch((error) => {
-                console.log(error);
-            });
+    getMyGameState() {
+        const player = this.getMyPlayer();
+        if (!player) return null;
+        return this.getPlayerGameState(player);
+    }
+
+    saveMyGameState(gameState) {
+        const player = this.getMyPlayer();
+        if (!player) return;
+        this.savePlayerGameState(player, gameState);
+    }
+
+    getAllPlayers() {
+        return [...this.playerStates.values()];
+    }
+
+    getAllPlayerGameStates() {
+        const states = [];
+        for (const player of this.playerStates.values()) {
+            const gs = this.getPlayerGameState(player);
+            if (gs) {
+                states.push({ player, gameState: gs });
+            }
+        }
+        return states;
+    }
+
+    // Broadcast my game state to all players (for co-op visibility)
+    syncMyGameState() {
+        const player = this.getMyPlayer();
+        const gs = this.getMyGameState();
+        if (!player || !gs) return;
+
+        Playroom.RPC.call(
+            EVENTS.SYNC_GAME_STATE,
+            {
+                playerId: player.id,
+                gameState: GameStateRehydrator.serialize(gs)
+            },
+            Playroom.RPC.Mode.OTHERS
+        ).catch(err => console.error('Game state sync failed:', err));
+    }
+
+    handleGameStateSync(data) {
+        // Another player's state was updated — store it locally
+        const player = this.playerStates.get(data.playerId);
+        if (player) {
+            player.setState('gameState', data.gameState);
+            console.log(`Synced game state from player ${data.playerId}`);
         }
     }
 
+    // ─── Ready Up ───────────────────────────────────────────
+
+    readyPlayer() {
+        const player = this.getMyPlayer();
+        if (!player) return;
+
+        console.log(`Player ${player.getProfile().name} is ready`);
+        player.setState('ready', true);
+
+        this.checkAllReady(SCENES.SELECT);
+    }
+
+    checkAllReady(nextScene) {
+        const allPlayers = this.getAllPlayers();
+        const allReady = allPlayers.length > 0 &&
+            allPlayers.every(p => p.getState('ready') === true);
+
+        if (allReady) {
+            console.log('All players ready! Switching to:', nextScene);
+            // Reset ready state for next time
+            allPlayers.forEach(p => p.setState('ready', false));
+            this.broadcastSceneSwitch(nextScene);
+        }
+    }
+
+    // ─── Character Select ───────────────────────────────────
+
     selectCharacter(characterKey) {
-        const player = Playroom.myPlayer();
+        const player = this.getMyPlayer();
         if (!player) return false;
 
         const takenChars = this.getRoomState('takenCharacters') || [];
@@ -143,58 +243,65 @@ export class Service {
             return false;
         }
 
-        const gs = this.getPlayerGameState(player);
+        // Set character on local game state
+        const gs = this.getMyGameState();
         gs.setCharacter(CharacterLibrary[characterKey]);
-        this.setPlayerState(player, 'gameState', JSON.parse(JSON.stringify(gs)));
+        this.saveMyGameState(gs);
 
+        // Mark character as taken in room state
         const updatedTaken = [...takenChars, characterKey];
         this.setRoomState('takenCharacters', updatedTaken);
 
         console.log(`${player.getProfile().name} selected ${characterKey}`);
 
+        // Notify other players
         Playroom.RPC.call(
-            OUT_OF_COMBAT_EVENTS.CHARACTER_LOCKED,
+            EVENTS.CHARACTER_LOCKED,
             { playerId: player.id, characterKey },
             Playroom.RPC.Mode.ALL
-        );
+        ).catch(err => console.error('Character lock RPC failed:', err));
 
-        const allPlayers = [...this.playerStates.values()];
-        console.log(`All players after select: `, allPlayers);
-        const allSelected = allPlayers.length > 0 && allPlayers.every(p => p.state?.gameState.character);
-
-        if (allSelected) {
-            console.log(`✅ All players have selected their characters! Moving to next scene.`);
-
-            const nextScene = SCENES.BEGINNING;
-            Playroom.RPC.call(
-                OUT_OF_COMBAT_EVENTS.READY_UP,
-                nextScene,
-                Playroom.RPC.Mode.ALL
-            );
-        }
+        // Check if all players have selected
+        this.checkAllCharactersSelected();
 
         return true;
     }
 
+    checkAllCharactersSelected() {
+        const allPlayers = this.getAllPlayers();
+        const allSelected = allPlayers.length > 0 &&
+            allPlayers.every(p => {
+                const gs = p.getState('gameState');
+                return gs && gs.character;
+            });
+
+        if (allSelected) {
+            console.log('All players have selected characters! Moving to next scene.');
+            this.broadcastSceneSwitch(SCENES.BEGINNING);
+        }
+    }
+
+    // ─── Voting / Choices ───────────────────────────────────
+
     selectChoice(choice) {
-        const player = Playroom.myPlayer();
+        const player = this.getMyPlayer();
         if (!player) return;
 
         const currentVotes = this.getRoomState('votes') || {};
-
         currentVotes[player.id] = choice;
         this.setRoomState('votes', currentVotes);
 
         console.log(`${player.getProfile().name} voted for ${choice}`);
 
         const votesSoFar = Object.values(currentVotes).length;
-        const totalPlayers = [...this.playerStates.values()].length;
+        const totalPlayers = this.getAllPlayers().length;
 
         if (votesSoFar < totalPlayers) {
-            console.log(`Waiting for all players to vote (${votesSoFar}/${totalPlayers})...`);
+            console.log(`Waiting for votes (${votesSoFar}/${totalPlayers})...`);
             return;
         }
 
+        // Tally votes
         const voteCount = {};
         Object.values(currentVotes).forEach(c => {
             voteCount[c] = (voteCount[c] || 0) + 1;
@@ -206,48 +313,18 @@ export class Service {
         let winningChoice;
         if (topChoices.length === 1) {
             winningChoice = topChoices[0];
-            console.log(`✅ Winning choice by votes: ${winningChoice}`);
         } else {
             winningChoice = topChoices[Math.floor(Math.random() * topChoices.length)];
-            console.log(`⚖️ Tie detected. Randomly selected ${winningChoice} among`, topChoices);
+            console.log(`Tie broken randomly: ${winningChoice}`);
         }
 
-        if (winningChoice) {
-            const nextScene = this.choiceToScene(winningChoice);
-            console.log(`🎯 Majority vote reached! ${winningChoice} → ${nextScene}`);
+        const nextScene = this.choiceToScene(winningChoice);
+        console.log(`Vote result: ${winningChoice} -> ${nextScene}`);
 
-            this.setRoomState('votes', {});
-            this.setRoomState('choices', null);
+        this.setRoomState('votes', {});
+        this.setRoomState('choices', null);
 
-            Playroom.RPC.call(
-                OUT_OF_COMBAT_EVENTS.READY_UP,
-                nextScene,
-                Playroom.RPC.Mode.ALL
-            );
-        }
-    }
-
-    getPlayerState(player, inState) {
-        const value = this.playerStates.get(player.id).getState(inState);
-        console.log(value);
-        console.log(`^ value gotten from player state ${inState} for player ${player.getProfile().name}`);
-        return value;
-    }
-
-    setPlayerState(player, inState, inValue) {
-        this.playerStates.get(player.id).setState(inState, inValue);
-        console.log(`Player ${player.getProfile().name} set state ${inState} to: `, inValue);
-    }
-
-    getRoomState(inState) {
-        const value = Playroom.getState(inState);
-        console.log(`Getting value ${value} from room state ${inState}`);
-        return value;
-    }
-
-    setRoomState(inState, inValue) {
-        Playroom.setState(inState, inValue);
-        console.log(`Room set state ${inState} to`, inValue);
+        this.broadcastSceneSwitch(nextScene);
     }
 
     getChoices() {
@@ -268,17 +345,108 @@ export class Service {
             case 'Reward': return SCENES.REWARD;
             case 'Altar': return SCENES.ALTAR;
             case 'Deck': return SCENES.DECK;
-            default: return 'MapScene';
+            case 'Battle': return SCENES.BATTLE;
+            default: return SCENES.BEGINNING;
         }
     }
-    
+
+    // ─── Battle State (Shared) ──────────────────────────────
+
+    setBattleEnemies(enemies) {
+        const serialized = enemies.map(e => e.serialize());
+        this.setRoomState('battleEnemies', serialized);
+    }
+
+    getBattleEnemies() {
+        const raw = this.getRoomState('battleEnemies');
+        if (!raw) return [];
+        return raw.map(e => Enemy.rehydrate(e));
+    }
+
+    setCurrentTurnPlayer(playerId) {
+        this.setRoomState('currentTurnPlayer', playerId);
+    }
+
+    getCurrentTurnPlayer() {
+        return this.getRoomState('currentTurnPlayer');
+    }
+
+    isMyTurn() {
+        const player = this.getMyPlayer();
+        return player && this.getCurrentTurnPlayer() === player.id;
+    }
+
+    endMyTurn() {
+        const player = this.getMyPlayer();
+        if (!player) return;
+
+        // Save current state
+        this.syncMyGameState();
+
+        // Determine next player
+        const players = this.getAllPlayers();
+        const myIndex = players.findIndex(p => p.id === player.id);
+        const nextIndex = (myIndex + 1) % players.length;
+
+        if (nextIndex === 0) {
+            // All players have taken their turn — enemy turn
+            Playroom.RPC.call(
+                EVENTS.END_TURN,
+                { type: 'enemy_turn' },
+                Playroom.RPC.Mode.ALL
+            ).catch(err => console.error('End turn RPC failed:', err));
+        } else {
+            // Next player's turn
+            const nextPlayer = players[nextIndex];
+            this.setCurrentTurnPlayer(nextPlayer.id);
+            Playroom.RPC.call(
+                EVENTS.END_TURN,
+                { type: 'next_player', playerId: nextPlayer.id },
+                Playroom.RPC.Mode.ALL
+            ).catch(err => console.error('End turn RPC failed:', err));
+        }
+    }
+
+    handleEndTurn(data) {
+        console.log('End turn event:', data);
+        // Scenes listen for this via onEndTurn callbacks
+        this.endTurnCallbacks.forEach(cb => cb(data));
+    }
+
+    onEndTurn(callback) {
+        if (!this.endTurnCallbacks) this.endTurnCallbacks = [];
+        this.endTurnCallbacks.push(callback);
+    }
+
+    offEndTurn(callback) {
+        if (!this.endTurnCallbacks) return;
+        this.endTurnCallbacks = this.endTurnCallbacks.filter(cb => cb !== callback);
+    }
+
+    // ─── Room State Helpers ─────────────────────────────────
+
+    getPlayerState(player, inState) {
+        return player.getState(inState);
+    }
+
+    setPlayerState(player, inState, inValue) {
+        player.setState(inState, inValue);
+    }
+
+    getRoomState(inState) {
+        return Playroom.getState(inState);
+    }
+
+    setRoomState(inState, inValue) {
+        Playroom.setState(inState, inValue);
+    }
 }
 
 function shuffleArray(arr) {
-  const array = [...arr];
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
+    const array = [...arr];
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 }

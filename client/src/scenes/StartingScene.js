@@ -5,7 +5,6 @@ export class StartingScene extends BaseScene {
   constructor() {
     super({ key: 'StartingScene' });
     this.service = new Service();
-    this.service.setRoomState('scene', this);
   }
 
   async create() {
@@ -19,6 +18,8 @@ export class StartingScene extends BaseScene {
     }
     console.log('connected to service');
 
+    this.service.phaserGame = this.game;
+
     this.add.text(x, y - 250, 'Wars of the Defeated', { fontSize: '40px', color: '#fff' }).setOrigin(0.5);
 
     this.playerText = this.add.text(400, 200, "", { color: "#fff", fontSize: "20px" }).setOrigin(0.5);
@@ -30,8 +31,6 @@ export class StartingScene extends BaseScene {
       this.service.readyPlayer();
     });
 
-    this.currentSceneKey = this.service.getRoomState('scene');
-
-    this.createSceneListener(this.service, this.currentSceneKey);
+    this.createSceneListener(this.service);
   }
 }

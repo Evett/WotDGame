@@ -12,10 +12,11 @@ export default {
         isOncePerDay: false,
         description: "Deal 8 damage. Double if enemy is Evil.",
         upgradedDescription: "Deal 12 damage. Double if enemy is Evil.",
-        effect: (target, state) => {
+        effect: (target, state, card) => {
             if (target) {
+                const base = card.upgraded ? 12 : 8;
                 const isEvil = target.tags?.includes("Evil");
-                const damage = isEvil ? 16 : 8;
+                const damage = isEvil ? base * 2 : base;
                 target.takeDamage(damage * state.nextAttackBonus);
             }
         },
@@ -31,8 +32,9 @@ export default {
         isOncePerDay: false,
         description: "Heal 10 HP.",
         upgradedDescription: "Heal 15 HP.",
-        effect: (_, state) => {
-            state.playerHeal(10);
+        effect: (_, state, card) => {
+            const heal = card.upgraded ? 15 : 10;
+            state.playerHeal(heal);
         },
         upgraded: false
     }),
@@ -46,8 +48,9 @@ export default {
         isOncePerDay: false,
         description: "Gain 8 armor.",
         upgradedDescription: "Gain 13 armor.",
-        effect: (_, state) => {
-            state.playerArmor(8);
+        effect: (_, state, card) => {
+            const armor = card.upgraded ? 13 : 8;
+            state.playerArmor(armor);
         },
         upgraded: false
     })

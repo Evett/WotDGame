@@ -53,17 +53,21 @@ export default class BaseScene extends Phaser.Scene {
         };
     }
 
-    createSceneListener(inService, currentSceneKey) {
-        this.time.addEvent({
-            delay: 300, loop: true,
-            callback: () => {
-                const sharedScene = inService.getRoomState('scene');
-                if (sharedScene && sharedScene !== currentSceneKey) {
-                    console.log(`Scene change detected: ${currentSceneKey} -> ${sharedScene}`);
-                    currentSceneKey = sharedScene;
-                    this.scene.start(sharedScene, { service: inService });
-                }
+    createSceneListener(inService) {
+        this._sceneChangeHandler = (targetScene) => {
+            if (targetScene !== this.scene.key) {
+                console.log(`Scene change: ${this.scene.key} -> ${targetScene}`);
+                this.scene.start(targetScene, { service: inService });
             }
+        };
+        inService.onSceneChange(this._sceneChangeHandler);
+
+        // Clean up when this scene shuts down
+        this.events.once('shutdown', () => {
+            inService.offSceneChange(this._sceneChangeHandler);
+        });
+        this.events.once('destroy', () => {
+            inService.offSceneChange(this._sceneChangeHandler);
         });
     }
 }

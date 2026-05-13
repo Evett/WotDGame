@@ -4,10 +4,10 @@ class SceneManager {
     }
 
     switchScene(currentScene, targetScene) {
-        console.log(`Switching to ${targetScene} with data:`, data);
+        console.log(`Switching to ${targetScene}`);
 
-        this.service.setScene(targetScene);
-        nextSceneDate = {
+        this.service.setRoomState('scene', targetScene);
+        const nextSceneData = {
             service: this.service
         };
         currentScene.scene.start(targetScene, nextSceneData);

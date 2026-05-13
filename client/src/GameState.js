@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 export default class GameState {
     constructor() {
         this.reset();
@@ -25,6 +27,10 @@ export default class GameState {
         this.removedUntilRest = [];
 
         this.enemies = [];
+        this.allies = [];
+        this.buffs = {};
+        this.statuses = {};
+        this.hasEidolon = false;
 
         this.character = null;
         this.characterClass = null;
@@ -37,7 +43,7 @@ export default class GameState {
         this.health = character.health;
         this.maxHealth = character.health;
         this.maxActions = this.actions = character.actions;
-        this.maxMana = this. mana = character.mana;
+        this.maxMana = this.mana = character.mana;
 
         this.fullDeck = [...character.deck];
         this.drawPile = [...this.fullDeck];
@@ -77,16 +83,22 @@ export default class GameState {
         console.log(`Player gains ${amount}. HP: ${this.maxHealth}`)
     }
 
-    summonAlly() {
-
+    summonAlly(allyData) {
+        if (!this.allies) this.allies = [];
+        this.allies.push({ ...allyData, turnsRemaining: allyData.duration });
+        console.log(`Summoned ally: ${allyData.name}`);
     }
 
-    applyPlayerBuff() {
-        
+    applyPlayerBuff(buffName, amount, duration) {
+        if (!this.buffs) this.buffs = {};
+        this.buffs[buffName] = { amount, turnsRemaining: duration };
+        console.log(`Applied buff ${buffName}: +${amount} for ${duration} turns`);
     }
 
-    applyStatus() {
-        
+    applyStatus(statusName, duration) {
+        if (!this.statuses) this.statuses = {};
+        this.statuses[statusName] = (this.statuses[statusName] || 0) + duration;
+        console.log(`Applied status ${statusName} for ${this.statuses[statusName]} turns`);
     }
 
     addMagicItem(item) {
@@ -231,10 +243,10 @@ export default class GameState {
             }
 
             if (card.isOncePerDay) {
-                const handIndex = gameState.hand.findIndex(c => c.id === card.id);
+                const handIndex = this.hand.findIndex(c => c.id === card.id);
                 if (handIndex !== -1) {
-                    const [removedCard] = gameState.hand.splice(index, 1);
-                    gameState.removedUntilRest.push(removedCard);
+                    const [removedCard] = this.hand.splice(index, 1);
+                    this.removedUntilRest.push(removedCard);
                     console.log("Daily card removed from deck", removedCard);
                     return;
                 }

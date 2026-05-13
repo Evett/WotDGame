@@ -16,16 +16,25 @@ const cards = {
   Wizard
 };
 
+function shuffleArray(arr) {
+    const array = [...arr];
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 const CardLibrary = {
   cards,
 
   getRandomCommonCard() {
     const pool = Object.values(cards.Common);
-    return Phaser.Utils.Array.GetRandom(pool)();
+    return pool[Math.floor(Math.random() * pool.length)]();
   },
 
   getRandomCommonCards(amount = 1) {
-    return Phaser.Utils.Array.Shuffle(Object.values(cards.Common))
+    return shuffleArray(Object.values(cards.Common))
       .slice(0, amount)
       .map(factory => factory());
   },
@@ -35,7 +44,7 @@ const CardLibrary = {
   },
 
   getRandomCardsForClass(characterClass, amount = 1) {
-    return Phaser.Utils.Array.Shuffle(Object.values(cards[characterClass] || {}))
+    return shuffleArray(Object.values(cards[characterClass] || {}))
       .slice(0, amount)
       .map(factory => factory());
   },

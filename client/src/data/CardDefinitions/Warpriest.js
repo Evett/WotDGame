@@ -12,10 +12,11 @@ export default {
         isOncePerDay: false,
         description: "Deal 7 damage. Heal for half.",
         upgradedDescription: "Deal 12 damage. Heal for half.",
-        effect: (target, state) => {
+        effect: (target, state, card) => {
             if (target) {
-                target.takeDamage(7 * state.nextAttackBonus);
-                state.playerHeal(4);
+                const damage = card.upgraded ? 12 : 7;
+                target.takeDamage(damage * state.nextAttackBonus);
+                state.playerHeal(Math.floor(damage / 2));
             }
         },
         upgraded: false
@@ -30,8 +31,9 @@ export default {
         isOncePerDay: false,
         description: "Gain 2 strength for 2 turns.",
         upgradedDescription: "Gain 4 strength for 2 turns.",
-        effect: (_, state) => {
-            state.applyPlayerBuff("Strength", 2, 2);
+        effect: (_, state, card) => {
+            const strength = card.upgraded ? 4 : 2;
+            state.applyPlayerBuff("Strength", strength, 2);
         },
         upgraded: false
     }),
@@ -45,9 +47,11 @@ export default {
         isOncePerDay: false,
         description: "Lose 5 HP. Draw 3 cards.",
         upgradedDescription: "Lose 3 HP. Draw 5 cards.",
-        effect: (_, state, scene) => {
-            state.playerTakeDamage(5);
-            state.drawCards(3, scene);
+        effect: (_, state, card, scene) => {
+            const hpLoss = card.upgraded ? 3 : 5;
+            const draws = card.upgraded ? 5 : 3;
+            state.playerTakeDamage(hpLoss);
+            state.drawCards(draws, scene);
         },
         upgraded: false
     })
