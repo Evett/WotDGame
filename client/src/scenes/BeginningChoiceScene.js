@@ -18,6 +18,23 @@ export class BeginningChoiceScene extends BaseScene {
 
     this.mapChoices = this.service.getChoices();
 
+    if (!this.mapChoices) {
+      // Non-host: choices haven't arrived yet, wait for them
+      this.add.text(x, y, 'Waiting for choices...', { fontSize: '20px', color: '#aaa' }).setOrigin(0.5);
+      this.time.addEvent({
+        delay: 200, loop: true,
+        callback: () => {
+          const choices = this.service.getChoices();
+          if (choices) {
+            // Restart this scene now that choices are available
+            this.scene.restart(data);
+          }
+        }
+      });
+      this.createSceneListener(this.service);
+      return;
+    }
+
     let offsetY = y - 50;
     this.mapChoices.forEach((choice, index) => { 
       const btn = this.add.text(x, offsetY, choice, {

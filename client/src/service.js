@@ -51,9 +51,12 @@ export class Service {
             await Playroom.insertCoin({
                 maxPlayers: 6,
                 persistentMode: true,
-                reconnectGracePeriod: 10,
+                reconnectGracePeriod: 1800,
                 avatars: avatars
             });
+
+            // Wait briefly for room state to sync after insertCoin
+            await this.waitForRoomStateSync();
 
             if (!Playroom.getState('scene')) {
                 this.setRoomState('scene', SCENES.MENU);
@@ -149,6 +152,29 @@ export class Service {
      */
     getCurrentRoomScene() {
         return this.getRoomState('scene') || SCENES.MENU;
+    }
+
+    /**
+     * Wait for room state to be available after insertCoin.
+     * PlayroomKit may need a moment to sync state from the server.
+     */
+    waitForRoomStateSync() {
+        return new Promise(resolve => {
+            // If state is already available, resolve immediately
+            if (Playroom.getState('scene')) {
+                resolve();
+                return;
+            }
+            // Poll briefly for state to arrive (max 2 seconds)
+            let attempts = 0;
+            const interval = setInterval(() => {
+                attempts++;
+                if (Playroom.getState('scene') || attempts >= 20) {
+                    clearInterval(interval);
+                    resolve();
+                }
+            }, 100);
+        });
     }
 
     savePlayerGameState(player, gameState) {
@@ -344,12 +370,19 @@ export class Service {
     }
 
     getChoices() {
-        if (!this.getRoomState('choices')) {
+        let choices = this.getRoomState('choices');
+        if (choices) return choices;
+
+        // Only the host generates choices to avoid race conditions
+        if (Playroom.isHost()) {
             const allOptions = ['Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
             const shuffled = shuffleArray(allOptions);
             const options = shuffled.slice(0, 3);
             this.setRoomState('choices', options);
+            return options;
         }
+
+        // Non-host: return whatever is in room state (may be null briefly)
         return this.getRoomState('choices');
     }
 
