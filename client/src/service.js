@@ -126,13 +126,29 @@ export class Service {
         if (this.playerStates.has(player.id)) return;
 
         this.playerStates.set(player.id, player);
-        this.initializePlayerGameState(player);
-        console.log(`Player joined: ${player.getProfile().name} (${player.id})`);
+
+        // Only create a fresh GameState if the player doesn't already have one
+        // (PlayroomKit persists player state across reconnects)
+        const existing = player.getState('gameState');
+        if (existing) {
+            console.log(`Player reconnected with existing state: ${player.getProfile().name} (${player.id})`);
+        } else {
+            this.initializePlayerGameState(player);
+            console.log(`Player joined fresh: ${player.getProfile().name} (${player.id})`);
+        }
     }
 
     initializePlayerGameState(player) {
         const newState = new GameState();
         this.savePlayerGameState(player, newState);
+    }
+
+    /**
+     * Returns the room's current scene key.
+     * Used after connect to determine if we should skip the lobby.
+     */
+    getCurrentRoomScene() {
+        return this.getRoomState('scene') || SCENES.MENU;
     }
 
     savePlayerGameState(player, gameState) {

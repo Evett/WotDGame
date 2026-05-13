@@ -20,6 +20,15 @@ export class StartingScene extends BaseScene {
 
     this.service.phaserGame = this.game;
 
+    // If the room is already past the lobby (e.g. we're reconnecting),
+    // jump straight to whatever scene everyone else is on.
+    const currentRoomScene = this.service.getCurrentRoomScene();
+    if (currentRoomScene && currentRoomScene !== 'StartingScene') {
+      console.log(`Reconnecting — jumping to ${currentRoomScene}`);
+      this.scene.start(currentRoomScene, { service: this.service });
+      return;
+    }
+
     this.add.text(x, y - 250, 'Wars of the Defeated', { fontSize: '40px', color: '#fff' }).setOrigin(0.5);
 
     this.playerText = this.add.text(400, 200, "", { color: "#fff", fontSize: "20px" }).setOrigin(0.5);
