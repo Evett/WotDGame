@@ -375,7 +375,7 @@ export class Service {
 
         // Only the host generates choices to avoid race conditions
         if (Playroom.isHost()) {
-            const allOptions = ['Event', 'Rest', 'Shop', 'Reward', 'Altar', 'Deck'];
+            const allOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar'];
             const shuffled = shuffleArray(allOptions);
             const options = shuffled.slice(0, 3);
             this.setRoomState('choices', options);

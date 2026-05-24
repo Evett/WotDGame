@@ -165,8 +165,9 @@ export default class GameState {
     }
 
     reshuffleDiscardIntoDraw() {
-        this.drawPile = Phaser.Utils.Array.Shuffle([...this.discardPile]);
+        this.drawPile = [...this.discardPile];
         this.discardPile = [];
+        this.shuffleDeck();
     }
 
     drawCard(scene) {
@@ -226,44 +227,43 @@ export default class GameState {
         if (index >= 0 && index < this.hand.length) {
             const card = this.hand[index];
 
-            // Determine if requirements are met, I'm using both mana and actions basically
             if (this.actions < card.actionCost) {
                 console.log("Not enough actions!");
-                return;
+                return { success: false, reason: 'actions' };
             }
 
             if (this.mana < card.manaCost) {
                 console.log("Not enough mana!");
-                return;
+                return { success: false, reason: 'mana' };
             }
 
             if (card.requiresTarget && !target) {
                 console.log("No target selected!");
-                return;
+                return { success: false, reason: 'target' };
             }
 
-            if (card.isOncePerDay) {
-                const handIndex = this.hand.findIndex(c => c.id === card.id);
-                if (handIndex !== -1) {
-                    const [removedCard] = this.hand.splice(index, 1);
-                    this.removedUntilRest.push(removedCard);
-                    console.log("Daily card removed from deck", removedCard);
-                    return;
-                }
-            }
-    
             // Deduct cost
             this.actions -= card.actionCost;
             this.mana -= card.manaCost;
 
-            this.hand.splice(index, 1)[0];
+            this.hand.splice(index, 1);
             card.play(target, this, card, scene);
+
             if (card.type === "Attack") {
                 this.temporaryEffectReset();
             }
-            console.log("You just played this card:", card);
-            this.discardPile.push(card);
+
+            if (card.isOncePerDay) {
+                this.removedUntilRest.push(card);
+                console.log("Daily card removed from deck", card.name);
+            } else {
+                this.discardPile.push(card);
+            }
+
+            console.log("Played card:", card.name);
+            return { success: true, card };
         }
+        return { success: false, reason: 'invalid_index' };
     }
 
     discardHand() {
