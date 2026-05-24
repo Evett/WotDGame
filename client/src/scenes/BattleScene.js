@@ -55,8 +55,8 @@ export class BattleScene extends BaseScene {
         // Host generates enemies and shares them; others read from room state
         let enemies = this.service.getBattleEnemies();
         if (enemies.length === 0) {
-            if (this.service.getMyPlayer() && this.service.getCurrentTurnPlayer() === null) {
-                // First time entering battle: host sets up
+            if (this.service.isHost()) {
+                // Host sets up the battle
                 const difficulty = this.service.getRoomState('battleDifficulty') || 1;
                 enemies = EnemyLibrary.getRandomEncounter(difficulty);
                 enemies.forEach(e => e.decideIntent());

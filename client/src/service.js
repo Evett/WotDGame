@@ -196,6 +196,10 @@ export class Service {
         return Playroom.myPlayer();
     }
 
+    isHost() {
+        return Playroom.isHost();
+    }
+
     getMyGameState() {
         const player = this.getMyPlayer();
         if (!player) return null;
@@ -370,13 +374,15 @@ export class Service {
     }
 
     getChoices() {
+        const validOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar'];
         let choices = this.getRoomState('choices');
-        if (choices) return choices;
+
+        // Validate stored choices aren't stale (e.g. from a previous version)
+        if (choices && choices.every(c => validOptions.includes(c))) return choices;
 
         // Only the host generates choices to avoid race conditions
         if (Playroom.isHost()) {
-            const allOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar'];
-            const shuffled = shuffleArray(allOptions);
+            const shuffled = shuffleArray(validOptions);
             const options = shuffled.slice(0, 3);
             this.setRoomState('choices', options);
             return options;
@@ -388,13 +394,12 @@ export class Service {
 
     choiceToScene(choice) {
         switch (choice) {
+            case 'Battle': return SCENES.BATTLE;
             case 'Event': return SCENES.EVENT;
             case 'Rest': return SCENES.REST;
             case 'Shop': return SCENES.SHOP;
             case 'Reward': return SCENES.REWARD;
             case 'Altar': return SCENES.ALTAR;
-            case 'Deck': return SCENES.DECK;
-            case 'Battle': return SCENES.BATTLE;
             default: return SCENES.BEGINNING;
         }
     }
