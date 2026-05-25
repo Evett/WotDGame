@@ -24,11 +24,13 @@ export class BattleScene extends BaseScene {
         this.enemyObjects = [];
         this.isMyTurn = false;
         this.battleOver = false;
+        this.turnEnded = false;
 
         // Initialize battle
         this.initBattle();
 
         // Build UI
+        this.createAllyDisplay();
         this.createPlayerStatsUI();
         this.createEnemyDisplay();
         this.createHandDisplay();
@@ -44,8 +46,20 @@ export class BattleScene extends BaseScene {
             this.service.offEndTurn(this._endTurnHandler);
         });
 
-        // Check if it's our turn
-        this.checkTurn();
+        // All players start simultaneously
+        this.startMyTurn();
+
+        // Poll for all players ending turn (simultaneous turn model)
+        this.time.addEvent({
+            delay: 500, loop: true,
+            callback: () => this.checkAllTurnsEnded()
+        });
+
+        // Poll ally HP updates
+        this.time.addEvent({
+            delay: 1000, loop: true,
+            callback: () => this.updateAllyDisplay()
+        });
 
         this.createSceneListener(this.service);
     }
@@ -62,12 +76,6 @@ export class BattleScene extends BaseScene {
                 enemies = EnemyLibrary.getRandomEncounter(difficulty);
                 enemies.forEach(e => e.decideIntent());
                 this.service.setBattleEnemies(enemies);
-
-                // First player goes first
-                const players = this.service.getAllPlayers();
-                if (players.length > 0) {
-                    this.service.setCurrentTurnPlayer(players[0].id);
-                }
             } else {
                 // Non-host: wait for enemies to arrive
                 this.time.addEvent({
@@ -85,23 +93,100 @@ export class BattleScene extends BaseScene {
 
         this.gameState.startBattle(enemies);
         this.gameState.resetDeck();
+        this.gameState.actions = this.gameState.maxActions;
+        this.gameState.mana = this.gameState.maxMana;
+        this.gameState.armor = 0;
         this.gameState.drawHand(this);
         this.service.saveMyGameState(this.gameState);
+    }
+
+    // ─── Ally Display ───────────────────────────────────────
+
+    createAllyDisplay() {
+        const { width, height } = this.scale;
+        const players = this.service.getAllPlayers();
+        const myId = this.service.getMyPlayer()?.id;
+
+        this.allyObjects = [];
+        const boxW = 110;
+        const boxH = 70;
+        const gap = 10;
+        const totalW = players.length * (boxW + gap) - gap;
+        const startX = (width - totalW) / 2 + boxW / 2;
+        const y = height - 210;
+
+        players.forEach((player, index) => {
+            const x = startX + index * (boxW + gap);
+            const isMe = player.id === myId;
+            const gs = this.service.getPlayerGameState(player);
+
+            const container = this.add.container(x, y);
+
+            const bg = this.add.rectangle(0, 0, boxW, boxH, isMe ? 0x2a3a4a : 0x2a2a3a)
+                .setStrokeStyle(isMe ? 2 : 1, isMe ? 0x44aaff : 0x555555);
+
+            const charName = gs?.character?.name || player.getProfile().name || '???';
+            const nameText = this.add.text(0, -22, charName, {
+                fontSize: '12px', color: isMe ? '#44aaff' : '#ffffff', fontStyle: 'bold'
+            }).setOrigin(0.5);
+
+            const classText = this.add.text(0, -8, gs?.characterClass || '', {
+                fontSize: '10px', color: '#888'
+            }).setOrigin(0.5);
+
+            const hp = gs ? gs.health : 0;
+            const maxHp = gs ? gs.maxHealth : 1;
+            const hpBar = this.add.rectangle(0, 12, boxW - 16, 8, 0x333333);
+            const hpFill = this.add.rectangle(-(boxW - 16) / 2, 12, boxW - 16, 8, 0x44cc44)
+                .setOrigin(0, 0.5);
+
+            const hpText = this.add.text(0, 26, `${hp}/${maxHp}`, {
+                fontSize: '11px', color: '#aaffaa'
+            }).setOrigin(0.5);
+
+            container.add([bg, nameText, classText, hpBar, hpFill, hpText]);
+
+            this.allyObjects.push({
+                container, hpFill, hpText, player, barWidth: boxW - 16
+            });
+        });
+
+        this.updateAllyDisplay();
+    }
+
+    updateAllyDisplay() {
+        this.allyObjects.forEach(obj => {
+            const gs = this.service.getPlayerGameState(obj.player);
+            if (!gs) return;
+
+            const ratio = gs.health / gs.maxHealth;
+            obj.hpFill.displayWidth = obj.barWidth * Math.max(0, ratio);
+            obj.hpText.setText(`${gs.health}/${gs.maxHealth}`);
+
+            // Change color based on HP
+            if (ratio > 0.5) {
+                obj.hpFill.setFillStyle(0x44cc44);
+            } else if (ratio > 0.25) {
+                obj.hpFill.setFillStyle(0xccaa44);
+            } else {
+                obj.hpFill.setFillStyle(0xcc4444);
+            }
+        });
     }
 
     // ─── Player Stats UI ────────────────────────────────────
 
     createPlayerStatsUI() {
         const { width, height } = this.scale;
-        const y = height - 220;
+        const y = height - 285;
 
         this.statsContainer = this.add.container(20, y);
 
-        this.healthText = this.add.text(0, 0, '', { fontSize: '16px', color: '#ff6666' });
-        this.manaText = this.add.text(0, 22, '', { fontSize: '16px', color: '#6699ff' });
-        this.actionsText = this.add.text(0, 44, '', { fontSize: '16px', color: '#ffcc44' });
-        this.armorText = this.add.text(0, 66, '', { fontSize: '16px', color: '#aaaaaa' });
-        this.deckInfoText = this.add.text(0, 88, '', { fontSize: '14px', color: '#888888' });
+        this.healthText = this.add.text(0, 0, '', { fontSize: '14px', color: '#ff6666' });
+        this.manaText = this.add.text(0, 18, '', { fontSize: '14px', color: '#6699ff' });
+        this.actionsText = this.add.text(0, 36, '', { fontSize: '14px', color: '#ffcc44' });
+        this.armorText = this.add.text(0, 54, '', { fontSize: '14px', color: '#aaaaaa' });
+        this.deckInfoText = this.add.text(0, 72, '', { fontSize: '12px', color: '#888888' });
 
         this.statsContainer.add([
             this.healthText, this.manaText, this.actionsText,
@@ -171,7 +256,7 @@ export class BattleScene extends BaseScene {
             }).setOrigin(0.5);
 
             const hpBar = this.add.rectangle(0, 60, 90, 10, 0x333333);
-            const hpFill = this.add.rectangle(0, 60, 90, 10, 0xff3333).setOrigin(0.5);
+            const hpFill = this.add.rectangle(-45, 60, 90, 10, 0xff3333).setOrigin(0, 0.5);
 
             const hpText = this.add.text(0, 78, `${enemy.health}/${enemy.maxHealth}`, {
                 fontSize: '12px', color: '#fff'
@@ -200,12 +285,12 @@ export class BattleScene extends BaseScene {
                 body.disableInteractive();
                 intentText.setText('DEAD');
                 hpText.setText('0');
-                hpFill.setScale(0, 1);
+                hpFill.displayWidth = 0;
                 return;
             }
 
             const ratio = enemy.health / enemy.maxHealth;
-            hpFill.setScale(ratio, 1);
+            hpFill.displayWidth = 90 * ratio;
             hpText.setText(`${enemy.health}/${enemy.maxHealth}`);
 
             // Show intent
@@ -394,7 +479,7 @@ export class BattleScene extends BaseScene {
     createEndTurnButton() {
         const { width, height } = this.scale;
 
-        this.endTurnBtn = this.add.text(width - 120, height - 220, 'End Turn', {
+        this.endTurnBtn = this.add.text(width - 120, height - 285, 'End Turn', {
             fontSize: '20px', backgroundColor: '#cc6600',
             padding: { x: 16, y: 10 }, color: '#fff'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
@@ -413,27 +498,28 @@ export class BattleScene extends BaseScene {
     }
 
     endTurn() {
+        if (this.turnEnded) return;
+        this.turnEnded = true;
         this.isMyTurn = false;
+
         this.deselectCard();
         this.gameState.discardHand();
         this.service.saveMyGameState(this.gameState);
         this.updateHandDisplay();
         this.updateTurnUI();
-        this.service.endMyTurn();
+
+        // Mark this player as done with their turn
+        const player = this.service.getMyPlayer();
+        player.setState('turnDone', true);
     }
 
-    // ─── Turn Management ────────────────────────────────────
+    // ─── Simultaneous Turn Management ───────────────────────
 
     createTurnIndicator() {
         const { width } = this.scale;
         this.turnText = this.add.text(width / 2, 30, '', {
             fontSize: '20px', color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5);
-        this.updateTurnUI();
-    }
-
-    checkTurn() {
-        this.isMyTurn = this.service.isMyTurn();
         this.updateTurnUI();
     }
 
@@ -448,46 +534,51 @@ export class BattleScene extends BaseScene {
             this.turnText.setText('YOUR TURN');
             this.turnText.setColor('#44ff44');
             this.endTurnBtn.setStyle({ backgroundColor: '#cc6600' });
-        } else {
-            const currentTurnId = this.service.getCurrentTurnPlayer();
-            const players = this.service.getAllPlayers();
-            const turnPlayer = players.find(p => p.id === currentTurnId);
-            const name = turnPlayer ? turnPlayer.getProfile().name : 'Enemy';
-            this.turnText.setText(`${name}'s Turn`);
+        } else if (this.turnEnded) {
+            this.turnText.setText('Waiting for allies...');
             this.turnText.setColor('#aaaaaa');
+            this.endTurnBtn.setStyle({ backgroundColor: '#444444' });
+        } else {
+            this.turnText.setText('Enemy Turn');
+            this.turnText.setColor('#ff4444');
             this.endTurnBtn.setStyle({ backgroundColor: '#444444' });
         }
     }
 
+    checkAllTurnsEnded() {
+        if (this.battleOver || !this.turnEnded) return;
+
+        const allPlayers = this.service.getAllPlayers();
+        const allDone = allPlayers.length > 0 &&
+            allPlayers.every(p => p.getState('turnDone') === true);
+
+        if (allDone) {
+            // Clear turn flags
+            allPlayers.forEach(p => p.setState('turnDone', false));
+
+            // Run enemy turn (all clients run it locally)
+            this.runEnemyTurn();
+        }
+    }
+
     handleEndTurnEvent(data) {
+        // Keep this for compatibility but simultaneous model uses polling
         if (this.battleOver) return;
 
         if (data.type === 'enemy_turn') {
             this.runEnemyTurn();
-        } else if (data.type === 'next_player') {
-            // Refresh enemy display (previous player may have damaged them)
-            const enemies = this.service.getBattleEnemies();
-            this.gameState.enemies = enemies;
-            this.updateEnemyDisplay();
-
-            if (data.playerId === this.service.getMyPlayer()?.id) {
-                this.startMyTurn();
-            } else {
-                this.isMyTurn = false;
-                this.updateTurnUI();
-            }
         }
     }
 
     startMyTurn() {
         this.isMyTurn = true;
-
-        // Refresh game state
-        this.gameState = this.service.getMyGameState();
+        this.turnEnded = false;
 
         // Refresh enemies from room state
         const enemies = this.service.getBattleEnemies();
-        this.gameState.enemies = enemies;
+        if (enemies.length > 0) {
+            this.gameState.enemies = enemies;
+        }
 
         // Reset armor each turn, restore actions/mana
         this.gameState.armor = 0;
@@ -502,8 +593,6 @@ export class BattleScene extends BaseScene {
         this.updateEnemyDisplay();
         this.updateHandDisplay();
         this.updateTurnUI();
-
-        this.showMessage('Your turn!', '#44ff44');
     }
 
     // ─── Enemy Turn ─────────────────────────────────────────
@@ -520,10 +609,11 @@ export class BattleScene extends BaseScene {
         let delay = 0;
         aliveEnemies.forEach((enemy, i) => {
             this.time.delayedCall(delay, () => {
-                // Each enemy attacks the current player (co-op: enemies split attacks)
+                // Each enemy attacks this player
                 enemy.takeTurn(this.gameState);
                 this.updateStatsUI();
                 this.updateEnemyDisplay();
+                this.updateAllyDisplay();
                 this.flashEnemy(i);
 
                 // Decide next intent
@@ -532,8 +622,8 @@ export class BattleScene extends BaseScene {
             delay += 600;
         });
 
-        // After all enemies act, start the next round (first player's turn)
-        this.time.delayedCall(delay + 300, () => {
+        // After all enemies act, start the next round
+        this.time.delayedCall(delay + 400, () => {
             // Save updated enemies
             this.service.setBattleEnemies(this.gameState.enemies);
             this.service.saveMyGameState(this.gameState);
@@ -544,19 +634,9 @@ export class BattleScene extends BaseScene {
                 return;
             }
 
-            // Start first player's turn for next round
-            const players = this.service.getAllPlayers();
-            if (players.length > 0) {
-                const firstPlayer = players[0];
-                this.service.setCurrentTurnPlayer(firstPlayer.id);
-
-                if (firstPlayer.id === this.service.getMyPlayer()?.id) {
-                    this.startMyTurn();
-                } else {
-                    this.isMyTurn = false;
-                    this.updateTurnUI();
-                }
-            }
+            // Start next round — everyone acts simultaneously again
+            this.startMyTurn();
+            this.showMessage('Your turn!', '#44ff44');
         });
     }
 
