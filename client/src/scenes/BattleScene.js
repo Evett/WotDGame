@@ -14,6 +14,7 @@ export class BattleScene extends BaseScene {
         super.create();
         this.service = data.service;
         this.createBackground(0x1a1a2e);
+        this.createInventoryButton(this.service);
 
         // State
         this.gameState = this.service.getMyGameState();
@@ -606,7 +607,7 @@ export class BattleScene extends BaseScene {
             // Clear battle state
             this.service.setRoomState('battleEnemies', null);
             this.service.setCurrentTurnPlayer(null);
-            this.service.broadcastSceneSwitch('BeginningChoiceScene');
+            this.service.broadcastSceneSwitch('CardRewardScene');
         });
 
         this.updateTurnUI();

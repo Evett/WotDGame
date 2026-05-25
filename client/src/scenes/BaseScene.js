@@ -57,17 +57,39 @@ export default class BaseScene extends Phaser.Scene {
         this._sceneChangeHandler = (targetScene) => {
             if (targetScene !== this.scene.key) {
                 console.log(`Scene change: ${this.scene.key} -> ${targetScene}`);
+                // Close inventory overlay if open
+                if (this.scene.isActive('DeckScene')) {
+                    this.scene.stop('DeckScene');
+                }
                 this.scene.start(targetScene, { service: inService });
             }
         };
         inService.onSceneChange(this._sceneChangeHandler);
 
-        // Clean up when this scene shuts down
         this.events.once('shutdown', () => {
             inService.offSceneChange(this._sceneChangeHandler);
         });
         this.events.once('destroy', () => {
             inService.offSceneChange(this._sceneChangeHandler);
+        });
+    }
+
+    createInventoryButton(service) {
+        const { width } = this.scale;
+        this.inventoryBtn = this.add.text(width - 20, 20, '🎒 Inventory', {
+            fontSize: '16px', backgroundColor: '#333',
+            padding: { x: 10, y: 6 }, color: '#fff'
+        }).setOrigin(1, 0).setInteractive({ useHandCursor: true }).setDepth(900);
+
+        this.inventoryBtn.on('pointerover', () => this.inventoryBtn.setStyle({ backgroundColor: '#555' }));
+        this.inventoryBtn.on('pointerout', () => this.inventoryBtn.setStyle({ backgroundColor: '#333' }));
+        this.inventoryBtn.on('pointerdown', () => {
+            if (this.scene.isActive('DeckScene')) {
+                this.scene.stop('DeckScene');
+            } else {
+                this.scene.launch('DeckScene', { service });
+                this.scene.bringToTop('DeckScene');
+            }
         });
     }
 }

@@ -34,6 +34,8 @@ export default class GameState {
 
         this.character = null;
         this.characterClass = null;
+        this.level = 1;
+        this.heroAbilityLevel = 1;
         console.log("Initial gameState created");
     }
 
@@ -155,6 +157,15 @@ export default class GameState {
         if (this.character?.heroAbility) {
             this.character.heroAbility(this);
         }
+    }
+
+    levelUp() {
+        this.level += 1;
+        this.heroAbilityLevel += 1;
+        const hpGain = 5 + Math.floor(this.level * 2);
+        this.maxHealth += hpGain;
+        this.health += hpGain;
+        console.log(`Level up! Now level ${this.level}. +${hpGain} max HP. Ability level: ${this.heroAbilityLevel}`);
     }
 
     shuffleDeck() {

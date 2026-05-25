@@ -13,7 +13,9 @@ export default class CharacterFactory {
                 return new Character({
                     ...data,
                     deck: CardFactory.rehydrateCards(data.deck),
-                    heroAbility: char.heroAbility
+                    heroAbility: char.heroAbility,
+                    heroAbilityName: char.heroAbilityName,
+                    heroAbilityDescription: char.heroAbilityDescription
                 });
             }
         }

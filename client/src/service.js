@@ -374,7 +374,7 @@ export class Service {
     }
 
     getChoices() {
-        const validOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Reward', 'Altar'];
+        const validOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Altar'];
         let choices = this.getRoomState('choices');
 
         // Validate stored choices aren't stale (e.g. from a previous version)

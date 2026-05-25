@@ -20,9 +20,11 @@ const CharacterLibrary = {
             CardLibrary.cards.Summoner.PlanarBinding(),
             CardLibrary.cards.Summoner.SummonLesserElemental()
         ],
+        heroAbilityName: "Summon Khan",
+        heroAbilityDescription: (level) => `Gain +${level} Action(s)`,
         heroAbility: (gameState) => {
-            console.log("Alaen's Summon Khan: Gain +1 Action!");
-            gameState.actions += 1;
+            const level = gameState.heroAbilityLevel || 1;
+            gameState.actions += level;
         }
     }),
     Hassan: createCharacter({
@@ -40,8 +42,11 @@ const CharacterLibrary = {
             CardLibrary.cards.Summoner.PlanarBinding(),
             CardLibrary.cards.Summoner.SummonLesserElemental()
         ],
+        heroAbilityName: "Shadow Step",
+        heroAbilityDescription: (level) => `Gain ${3 + level * 2} Armor`,
         heroAbility: (gameState) => {
-            console.log("Hassan's Shadow Step: Gain temporary Evasion!");
+            const level = gameState.heroAbilityLevel || 1;
+            gameState.armor += 3 + level * 2;
         }
 }),
     Marcus: createCharacter({
@@ -58,9 +63,12 @@ const CharacterLibrary = {
             CardLibrary.cards.Common.Block(),
             CardLibrary.cards.Wizard.Fireball()
         ],
+        heroAbilityName: "Arcane Surge",
+        heroAbilityDescription: (level) => `Restore ${level} Action(s) and ${level} Mana`,
         heroAbility: (gameState) => {
-            console.log("Marcus's Arcane Boost: Restore 1 Action!");
-            gameState.actions += 1;
+            const level = gameState.heroAbilityLevel || 1;
+            gameState.actions += level;
+            gameState.mana += level;
         }
     }),
     Mohef: createCharacter({
@@ -78,8 +86,11 @@ const CharacterLibrary = {
             CardLibrary.cards.Bloodrager.RagingHowl(),
             CardLibrary.cards.Bloodrager.ArcaneBloodline()
         ],
+        heroAbilityName: "Bloodlust",
+        heroAbilityDescription: (level) => `Next attack deals x${1 + level} damage`,
         heroAbility: (gameState) => {
-            console.log("Mohef's Precision: Your next attack deals double damage!");
+            const level = gameState.heroAbilityLevel || 1;
+            gameState.nextAttackBonus = 1 + level;
         }
     }),
     Nephereta: createCharacter({
@@ -96,9 +107,12 @@ const CharacterLibrary = {
             ...repeat(() => CardLibrary.cards.Paladin.DivineShield(), 2),
             CardLibrary.cards.Paladin.LayOnHands()
         ],
+        heroAbilityName: "Divine Blessing",
+        heroAbilityDescription: (level) => `Heal ${5 * level} HP`,
         heroAbility: (gameState) => {
-            console.log("Nephereta's Blessing: Heal 5 HP!");
-            gameState.health = Math.min(gameState.health + 5, gameState.maxHealth);
+            const level = gameState.heroAbilityLevel || 1;
+            const heal = 5 * level;
+            gameState.health = Math.min(gameState.health + heal, gameState.maxHealth);
         }
     }),
     Urusha: createCharacter({
@@ -116,10 +130,12 @@ const CharacterLibrary = {
             CardLibrary.cards.Warpriest.BlessingOfWar(),
             CardLibrary.cards.Warpriest.Sacrifice()
         ],
+        heroAbilityName: "War Sacrifice",
+        heroAbilityDescription: (level) => `Lose 5 HP, gain ${1 + level} actions`,
         heroAbility: (gameState) => {
-            console.log("Urusha's Sacrifice: Lose 5 HP, gain 2 actions.");
+            const level = gameState.heroAbilityLevel || 1;
             gameState.health -= 5;
-            gameState.actions += 2;
+            gameState.actions += 1 + level;
         }
     }),
 };

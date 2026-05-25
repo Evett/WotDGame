@@ -9,6 +9,7 @@ export class BeginningChoiceScene extends BaseScene {
     super.create();
     this.service = data.service;
     this.createBackground();
+    this.createInventoryButton(this.service);
     this.choiceMade = false;
     this.voteTexts = {};
     this.lastVotesJSON = '';
