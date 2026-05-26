@@ -165,7 +165,7 @@ export class RestScene extends BaseScene {
       allPlayers.forEach(p => p.setState('restDone', false));
 
       if (this.service.isHost()) {
-        this.service.broadcastSceneSwitch('BeginningChoiceScene');
+        this.service.broadcastSceneSwitch('NarrativeScene');
       }
     }
   }

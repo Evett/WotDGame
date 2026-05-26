@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { StartingScene } from './scenes/StartingScene';
 import { CharacterSelectScene } from './scenes/CharacterSelectScene';
 import { BeginningChoiceScene } from './scenes/BeginningChoiceScene';
+import { NarrativeScene } from './scenes/NarrativeScene';
 import { AltarScene } from './scenes/AltarScene';
 import { CardRewardScene } from './scenes/CardRewardScene';
 import { DeckScene } from './scenes/DeckScene';
@@ -26,6 +27,7 @@ const config = {
         StartingScene,
         CharacterSelectScene,
         BeginningChoiceScene,
+        NarrativeScene,
         AltarScene,
         CardRewardScene,
         DeckScene,

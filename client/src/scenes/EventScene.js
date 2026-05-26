@@ -226,7 +226,7 @@ export class EventScene extends BaseScene {
 
       // Only host broadcasts the switch
       if (this.service.isHost()) {
-        this.service.broadcastSceneSwitch('BeginningChoiceScene');
+        this.service.broadcastSceneSwitch('NarrativeScene');
       }
     }
   }

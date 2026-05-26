@@ -238,7 +238,7 @@ export class ShopScene extends BaseScene {
       allPlayers.forEach(p => p.setState('shopDone', false));
 
       if (this.service.isHost()) {
-        this.service.broadcastSceneSwitch('BeginningChoiceScene');
+        this.service.broadcastSceneSwitch('NarrativeScene');
       }
     }
   }

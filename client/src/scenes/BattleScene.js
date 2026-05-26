@@ -69,11 +69,17 @@ export class BattleScene extends BaseScene {
     initBattle() {
         // Host generates enemies and shares them; others read from room state
         let enemies = this.service.getBattleEnemies();
+        this.isBossBattle = this.service.isBossBattle();
+
         if (enemies.length === 0) {
             if (this.service.isHost()) {
                 // Host sets up the battle
-                const difficulty = this.service.getRoomState('battleDifficulty') || 1;
-                enemies = EnemyLibrary.getRandomEncounter(difficulty);
+                if (this.isBossBattle) {
+                    enemies = EnemyLibrary.getBossEncounter();
+                } else {
+                    const difficulty = this.service.getRoomState('battleDifficulty') || 1;
+                    enemies = EnemyLibrary.getRandomEncounter(difficulty);
+                }
                 enemies.forEach(e => e.decideIntent());
                 this.service.setBattleEnemies(enemies);
             } else {
@@ -665,15 +671,19 @@ export class BattleScene extends BaseScene {
         this.battleOver = true;
         const { width, height } = this.scale;
 
-        this.add.text(width / 2, height / 2 - 50, 'VICTORY!', {
-            fontSize: '48px', color: '#44ff44', fontStyle: 'bold'
+        const goldReward = this.isBossBattle ? 75 : 25;
+        const victoryText = this.isBossBattle ? 'BOSS DEFEATED!' : 'VICTORY!';
+        const victoryColor = this.isBossBattle ? '#ffaa00' : '#44ff44';
+
+        this.add.text(width / 2, height / 2 - 50, victoryText, {
+            fontSize: '48px', color: victoryColor, fontStyle: 'bold'
         }).setOrigin(0.5);
 
         // Award gold
-        this.gameState.gainGold(25);
+        this.gameState.gainGold(goldReward);
         this.service.saveMyGameState(this.gameState);
 
-        this.add.text(width / 2, height / 2 + 10, '+25 Gold', {
+        this.add.text(width / 2, height / 2 + 10, `+${goldReward} Gold`, {
             fontSize: '24px', color: '#ffcc44'
         }).setOrigin(0.5);
 

@@ -195,7 +195,7 @@ export class AltarScene extends BaseScene {
     if (allDone) {
       // Reset altar state for next time
       players.forEach(p => p.setState('altarDone', false));
-      this.service.broadcastSceneSwitch('BeginningChoiceScene');
+      this.service.broadcastSceneSwitch('NarrativeScene');
     }
   }
 }

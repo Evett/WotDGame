@@ -74,6 +74,12 @@ const EnemyLibrary = {
             enemies.push(EnemyLibrary[key]());
         }
         return enemies;
+    },
+
+    getBossEncounter() {
+        const bosses = ['Dragon', 'Lich'];
+        const key = bosses[Math.floor(Math.random() * bosses.length)];
+        return [EnemyLibrary[key]()];
     }
 };
 

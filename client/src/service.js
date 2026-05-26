@@ -19,6 +19,7 @@ const SCENES = {
     MENU: 'StartingScene',
     SELECT: 'CharacterSelectScene',
     BEGINNING: 'BeginningChoiceScene',
+    NARRATIVE: 'NarrativeScene',
     BATTLE: 'BattleScene',
     EVENT: 'EventScene',
     REST: 'RestScene',
@@ -374,7 +375,7 @@ export class Service {
     }
 
     getChoices() {
-        const validOptions = ['Battle', 'Event', 'Rest', 'Shop', 'Altar'];
+        const validOptions = ['Event', 'Rest', 'Shop', 'Altar'];
         let choices = this.getRoomState('choices');
 
         // Validate stored choices aren't stale (e.g. from a previous version)
@@ -394,7 +395,6 @@ export class Service {
 
     choiceToScene(choice) {
         switch (choice) {
-            case 'Battle': return SCENES.BATTLE;
             case 'Event': return SCENES.EVENT;
             case 'Rest': return SCENES.REST;
             case 'Shop': return SCENES.SHOP;
@@ -402,6 +402,23 @@ export class Service {
             case 'Altar': return SCENES.ALTAR;
             default: return SCENES.BEGINNING;
         }
+    }
+
+    // ─── Battle Counter ─────────────────────────────────────
+
+    getBattleCount() {
+        return this.getRoomState('battleCount') || 0;
+    }
+
+    incrementBattleCount() {
+        const count = this.getBattleCount() + 1;
+        this.setRoomState('battleCount', count);
+        return count;
+    }
+
+    isBossBattle() {
+        const count = this.getBattleCount();
+        return count > 0 && count % 4 === 0;
     }
 
     // ─── Battle State (Shared) ──────────────────────────────
