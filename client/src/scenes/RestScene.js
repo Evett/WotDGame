@@ -153,16 +153,20 @@ export class RestScene extends BaseScene {
 
   markDone() {
     const player = this.service.getMyPlayer();
-    player.setState('restDone', true);
+    const doneMap = this.service.getRoomState('restDone') || {};
+    doneMap[player.id] = true;
+    this.service.setRoomState('restDone', doneMap);
   }
 
   checkAllDone() {
     const allPlayers = this.service.getAllPlayers();
-    const allDone = allPlayers.length > 0 &&
-      allPlayers.every(p => p.getState('restDone') === true);
+    if (allPlayers.length === 0) return;
+
+    const doneMap = this.service.getRoomState('restDone') || {};
+    const allDone = allPlayers.every(p => doneMap[p.id] === true);
 
     if (allDone) {
-      allPlayers.forEach(p => p.setState('restDone', false));
+      this.service.setRoomState('restDone', null);
 
       if (this.service.isHost()) {
         this.service.broadcastSceneSwitch('NarrativeScene');

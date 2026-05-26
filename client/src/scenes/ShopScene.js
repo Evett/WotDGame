@@ -226,16 +226,20 @@ export class ShopScene extends BaseScene {
 
   markDone() {
     const player = this.service.getMyPlayer();
-    player.setState('shopDone', true);
+    const doneMap = this.service.getRoomState('shopDone') || {};
+    doneMap[player.id] = true;
+    this.service.setRoomState('shopDone', doneMap);
   }
 
   checkAllDone() {
     const allPlayers = this.service.getAllPlayers();
-    const allDone = allPlayers.length > 0 &&
-      allPlayers.every(p => p.getState('shopDone') === true);
+    if (allPlayers.length === 0) return;
+
+    const doneMap = this.service.getRoomState('shopDone') || {};
+    const allDone = allPlayers.every(p => doneMap[p.id] === true);
 
     if (allDone) {
-      allPlayers.forEach(p => p.setState('shopDone', false));
+      this.service.setRoomState('shopDone', null);
 
       if (this.service.isHost()) {
         this.service.broadcastSceneSwitch('NarrativeScene');

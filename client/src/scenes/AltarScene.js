@@ -181,9 +181,9 @@ export class AltarScene extends BaseScene {
 
   markDone() {
     const player = this.service.getMyPlayer();
-    if (player) {
-      player.setState('altarDone', true);
-    }
+    const doneMap = this.service.getRoomState('altarDone') || {};
+    doneMap[player.id] = true;
+    this.service.setRoomState('altarDone', doneMap);
     this.waitingText.setText('Waiting for other players...');
   }
 
@@ -191,10 +191,11 @@ export class AltarScene extends BaseScene {
     const players = this.service.getAllPlayers();
     if (players.length === 0) return;
 
-    const allDone = players.every(p => p.getState('altarDone') === true);
+    const doneMap = this.service.getRoomState('altarDone') || {};
+    const allDone = players.every(p => doneMap[p.id] === true);
+
     if (allDone) {
-      // Reset altar state for next time
-      players.forEach(p => p.setState('altarDone', false));
+      this.service.setRoomState('altarDone', null);
       this.service.broadcastSceneSwitch('NarrativeScene');
     }
   }

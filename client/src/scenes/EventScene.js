@@ -205,7 +205,9 @@ export class EventScene extends BaseScene {
 
   markDone() {
     const player = this.service.getMyPlayer();
-    player.setState('eventDone', true);
+    const doneMap = this.service.getRoomState('eventDone') || {};
+    doneMap[player.id] = true;
+    this.service.setRoomState('eventDone', doneMap);
 
     this.time.addEvent({
       delay: 500, loop: true,
@@ -215,16 +217,16 @@ export class EventScene extends BaseScene {
 
   checkAllDone() {
     const allPlayers = this.service.getAllPlayers();
-    const allDone = allPlayers.length > 0 &&
-      allPlayers.every(p => p.getState('eventDone') === true);
+    if (allPlayers.length === 0) return;
+
+    const doneMap = this.service.getRoomState('eventDone') || {};
+    const allDone = allPlayers.every(p => doneMap[p.id] === true);
 
     if (allDone) {
-      // Clear event state
-      allPlayers.forEach(p => p.setState('eventDone', false));
+      this.service.setRoomState('eventDone', null);
       this.service.setRoomState('currentEvent', null);
       this.service.setRoomState('eventVotes', null);
 
-      // Only host broadcasts the switch
       if (this.service.isHost()) {
         this.service.broadcastSceneSwitch('NarrativeScene');
       }

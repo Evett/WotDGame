@@ -156,9 +156,9 @@ export class CardRewardScene extends BaseScene {
 
   markDone() {
     const player = this.service.getMyPlayer();
-    if (player) {
-      player.setState('rewardDone', true);
-    }
+    const doneMap = this.service.getRoomState('rewardDone') || {};
+    doneMap[player.id] = true;
+    this.service.setRoomState('rewardDone', doneMap);
     this.waitingText.setText('Waiting for other players...');
   }
 
@@ -166,9 +166,11 @@ export class CardRewardScene extends BaseScene {
     const players = this.service.getAllPlayers();
     if (players.length === 0) return;
 
-    const allDone = players.every(p => p.getState('rewardDone') === true);
+    const doneMap = this.service.getRoomState('rewardDone') || {};
+    const allDone = players.every(p => doneMap[p.id] === true);
+
     if (allDone) {
-      players.forEach(p => p.setState('rewardDone', false));
+      this.service.setRoomState('rewardDone', null);
       this.service.broadcastSceneSwitch('BeginningChoiceScene');
     }
   }

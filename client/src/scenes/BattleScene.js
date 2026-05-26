@@ -514,9 +514,11 @@ export class BattleScene extends BaseScene {
         this.updateHandDisplay();
         this.updateTurnUI();
 
-        // Mark this player as done with their turn
+        // Mark this player as done with their turn via room state
         const player = this.service.getMyPlayer();
-        player.setState('turnDone', true);
+        const doneMap = this.service.getRoomState('turnDone') || {};
+        doneMap[player.id] = true;
+        this.service.setRoomState('turnDone', doneMap);
     }
 
     // ─── Simultaneous Turn Management ───────────────────────
@@ -555,12 +557,14 @@ export class BattleScene extends BaseScene {
         if (this.battleOver || !this.turnEnded) return;
 
         const allPlayers = this.service.getAllPlayers();
-        const allDone = allPlayers.length > 0 &&
-            allPlayers.every(p => p.getState('turnDone') === true);
+        if (allPlayers.length === 0) return;
+
+        const doneMap = this.service.getRoomState('turnDone') || {};
+        const allDone = allPlayers.every(p => doneMap[p.id] === true);
 
         if (allDone) {
             // Clear turn flags
-            allPlayers.forEach(p => p.setState('turnDone', false));
+            this.service.setRoomState('turnDone', null);
 
             // Run enemy turn (all clients run it locally)
             this.runEnemyTurn();
