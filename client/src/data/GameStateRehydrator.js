@@ -18,6 +18,8 @@ export default class GameStateRehydrator {
             handLimit: gameState.handLimit,
             currentNode: gameState.currentNode,
             characterClass: gameState.characterClass,
+            level: gameState.level || 1,
+            heroAbilityLevel: gameState.heroAbilityLevel || 1,
 
             character: gameState.character
                 ? CharacterFactory.serializeCharacter(gameState.character)
@@ -38,7 +40,11 @@ export default class GameStateRehydrator {
                 description: item.description,
                 type: item.type,
                 isUsed: item.isUsed
-            }))
+            })),
+
+            buffs: gameState.buffs || {},
+            statuses: gameState.statuses || {},
+            hasEidolon: gameState.hasEidolon || false
         };
     }
 

@@ -216,6 +216,7 @@ export class EventScene extends BaseScene {
   }
 
   checkAllDone() {
+    if (this.transitioned) return;
     const allPlayers = this.service.getAllPlayers();
     if (allPlayers.length === 0) return;
 
@@ -223,13 +224,11 @@ export class EventScene extends BaseScene {
     const allDone = allPlayers.every(p => doneMap[p.id] === true);
 
     if (allDone) {
+      this.transitioned = true;
       this.service.setRoomState('eventDone', null);
       this.service.setRoomState('currentEvent', null);
       this.service.setRoomState('eventVotes', null);
-
-      if (this.service.isHost()) {
-        this.service.broadcastSceneSwitch('NarrativeScene');
-      }
+      this.service.broadcastSceneSwitch('NarrativeScene');
     }
   }
 

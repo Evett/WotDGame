@@ -163,6 +163,7 @@ export class CardRewardScene extends BaseScene {
   }
 
   checkAllDone() {
+    if (this.transitioned) return;
     const players = this.service.getAllPlayers();
     if (players.length === 0) return;
 
@@ -170,6 +171,7 @@ export class CardRewardScene extends BaseScene {
     const allDone = players.every(p => doneMap[p.id] === true);
 
     if (allDone) {
+      this.transitioned = true;
       this.service.setRoomState('rewardDone', null);
       this.service.broadcastSceneSwitch('BeginningChoiceScene');
     }

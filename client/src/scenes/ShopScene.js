@@ -232,6 +232,7 @@ export class ShopScene extends BaseScene {
   }
 
   checkAllDone() {
+    if (this.transitioned) return;
     const allPlayers = this.service.getAllPlayers();
     if (allPlayers.length === 0) return;
 
@@ -239,11 +240,9 @@ export class ShopScene extends BaseScene {
     const allDone = allPlayers.every(p => doneMap[p.id] === true);
 
     if (allDone) {
+      this.transitioned = true;
       this.service.setRoomState('shopDone', null);
-
-      if (this.service.isHost()) {
-        this.service.broadcastSceneSwitch('NarrativeScene');
-      }
+      this.service.broadcastSceneSwitch('NarrativeScene');
     }
   }
 }

@@ -188,6 +188,7 @@ export class AltarScene extends BaseScene {
   }
 
   checkAllDone() {
+    if (this.transitioned) return;
     const players = this.service.getAllPlayers();
     if (players.length === 0) return;
 
@@ -195,6 +196,7 @@ export class AltarScene extends BaseScene {
     const allDone = players.every(p => doneMap[p.id] === true);
 
     if (allDone) {
+      this.transitioned = true;
       this.service.setRoomState('altarDone', null);
       this.service.broadcastSceneSwitch('NarrativeScene');
     }
