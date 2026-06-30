@@ -200,6 +200,34 @@ export class Service {
         });
     }
 
+    /**
+     * Wait for the local player's game state to be available after reconnect.
+     * PlayroomKit may need time to sync player state from the server.
+     */
+    waitForPlayerStateSync() {
+        return new Promise(resolve => {
+            const player = Playroom.myPlayer();
+            if (!player) { resolve(); return; }
+
+            const existing = player.getState('gameState');
+            if (existing && existing.character) {
+                resolve();
+                return;
+            }
+
+            // Poll for player state to arrive (max 3 seconds)
+            let attempts = 0;
+            const interval = setInterval(() => {
+                attempts++;
+                const state = player.getState('gameState');
+                if ((state && state.character) || attempts >= 30) {
+                    clearInterval(interval);
+                    resolve();
+                }
+            }, 100);
+        });
+    }
+
     savePlayerGameState(player, gameState) {
         const serialized = GameStateRehydrator.serialize(gameState);
         player.setState('gameState', serialized);

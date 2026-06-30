@@ -197,13 +197,13 @@ export class EventScene extends BaseScene {
       fontSize: '16px', color: '#44ff44', fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    // Mark done and wait for all, then go back to choices
+    // Mark done and wait for all, then go to narrative/battle
     // Only host triggers the scene transition to avoid race conditions
     if (this.service.isHost()) {
       this.time.delayedCall(2000, () => {
         this.service.setRoomState('currentEvent', null);
         this.service.setRoomState('eventVotes', null);
-        this.service.broadcastSceneSwitch('BeginningChoiceScene');
+        this.service.broadcastSceneSwitch('NarrativeScene');
       });
     }
   }

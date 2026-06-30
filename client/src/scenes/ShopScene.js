@@ -13,6 +13,11 @@ export class ShopScene extends BaseScene {
     this.createInventoryButton(this.service);
     this.gameState = this.service.getMyGameState();
 
+    // Clear stale done state from previous visits
+    if (this.service.isHost()) {
+      this.service.setRoomState('shopDone', null);
+    }
+
     const { x, y } = this.getCenter();
 
     this.add.text(x, y - 290, '🛒 Shop', {
@@ -241,7 +246,7 @@ export class ShopScene extends BaseScene {
     if (allDone) {
       this.transitioned = true;
       this.service.setRoomState('shopDone', null);
-      this.service.broadcastSceneSwitch('BeginningChoiceScene');
+      this.service.broadcastSceneSwitch('NarrativeScene');
     }
   }
 }

@@ -25,6 +25,8 @@ export class StartingScene extends BaseScene {
     const currentRoomScene = this.service.getCurrentRoomScene();
     if (currentRoomScene && currentRoomScene !== 'StartingScene') {
       console.log(`Reconnecting — jumping to ${currentRoomScene}`);
+      // Wait for player state to sync before switching scenes
+      await this.service.waitForPlayerStateSync();
       this.scene.start(currentRoomScene, { service: this.service });
       return;
     }
