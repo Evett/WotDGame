@@ -80,8 +80,15 @@ export class NarrativeScene extends BaseScene {
         // Determine if this is a boss fight
         const isBoss = this.service.isBossBattle();
 
-        // Pick a narrative
-        const narrative = this.pickNarrative(isBoss);
+        // Host picks a narrative and shares it; others read from room state
+        let narrative;
+        if (this.service.isHost()) {
+            narrative = this.pickNarrative(isBoss);
+            this.service.setRoomState('currentNarrative', { title: narrative.title, text: narrative.text, boss: narrative.boss });
+        } else {
+            const stored = this.service.getRoomState('currentNarrative');
+            narrative = stored || this.pickNarrative(isBoss);
+        }
 
         // Boss indicator
         if (isBoss) {
@@ -137,6 +144,7 @@ export class NarrativeScene extends BaseScene {
         continueBtn.on('pointerover', () => continueBtn.setStyle({ backgroundColor: '#4a1a1a' }));
         continueBtn.on('pointerout', () => continueBtn.setStyle({ backgroundColor: '#2a0a0a' }));
         continueBtn.on('pointerdown', () => {
+            this.service.setRoomState('currentNarrative', null);
             this.service.broadcastSceneSwitch('BattleScene');
         });
 

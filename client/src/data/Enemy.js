@@ -9,6 +9,7 @@ class Enemy {
         this.isBoss = options.isBoss || false;
         this.isAlive = options.isAlive ?? true;
         this.statuses = options.statuses || {};
+        this.armor = options.armor || 0;
 
         this.intent = options.intent || null;
     }
@@ -39,19 +40,28 @@ class Enemy {
             }
             console.log(`${this.name} attacks for ${this.intent.damage} damage!`);
         } else if (this.intent?.type === 'block') {
-            console.log(`${this.name} blocks!`);
+            this.armor += this.intent.amount;
+            console.log(`${this.name} blocks! Gained ${this.intent.amount} armor. Total: ${this.armor}`);
         } else if (this.intent?.type === 'buff') {
             console.log(`${this.name} buffs!`);
         }
     }
 
     takeDamage(amount) {
-        this.health -= amount;
-        if (this.health <= 0) {
-            this.health = 0;
-            this.isAlive = false;
+        let remaining = amount;
+        if (this.armor > 0) {
+            const absorbed = Math.min(this.armor, remaining);
+            this.armor -= absorbed;
+            remaining -= absorbed;
         }
-        console.log(`${this.name} takes ${amount} damage. HP: ${this.health}/${this.maxHealth}`);
+        if (remaining > 0) {
+            this.health -= remaining;
+            if (this.health <= 0) {
+                this.health = 0;
+                this.isAlive = false;
+            }
+        }
+        console.log(`${this.name} takes ${amount} damage (${amount - remaining} absorbed). HP: ${this.health}/${this.maxHealth}, Armor: ${this.armor}`);
     }
 
     takeTrueDamage(amount) {
@@ -69,6 +79,7 @@ class Enemy {
             name: this.name,
             maxHealth: this.maxHealth,
             health: this.health,
+            armor: this.armor,
             intents: this.intents,
             tags: this.tags,
             isBoss: this.isBoss,

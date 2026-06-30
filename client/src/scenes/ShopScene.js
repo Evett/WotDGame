@@ -221,10 +221,7 @@ export class ShopScene extends BaseScene {
     });
 
     this.statusText.setText('Waiting for other players...').setColor('#888');
-    this.markDone();
-  }
 
-  markDone() {
     const player = this.service.getMyPlayer();
     const doneMap = this.service.getRoomState('shopDone') || {};
     doneMap[player.id] = true;
@@ -233,6 +230,8 @@ export class ShopScene extends BaseScene {
 
   checkAllDone() {
     if (this.transitioned) return;
+    if (!this.service.isHost()) return;
+
     const allPlayers = this.service.getAllPlayers();
     if (allPlayers.length === 0) return;
 
@@ -242,7 +241,7 @@ export class ShopScene extends BaseScene {
     if (allDone) {
       this.transitioned = true;
       this.service.setRoomState('shopDone', null);
-      this.service.broadcastSceneSwitch('NarrativeScene');
+      this.service.broadcastSceneSwitch('BeginningChoiceScene');
     }
   }
 }

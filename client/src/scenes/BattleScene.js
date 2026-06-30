@@ -280,10 +280,14 @@ export class BattleScene extends BaseScene {
                 fontSize: '12px', color: '#ffcc00'
             }).setOrigin(0.5);
 
-            container.add([body, nameText, hpBar, hpFill, hpText, intentText]);
+            const armorText = this.add.text(0, 95, '', {
+                fontSize: '11px', color: '#6699ff'
+            }).setOrigin(0.5);
+
+            container.add([body, nameText, hpBar, hpFill, hpText, intentText, armorText]);
 
             this.enemyObjects.push({
-                container, body, nameText, hpBar, hpFill, hpText, intentText, enemy
+                container, body, nameText, hpBar, hpFill, hpText, intentText, armorText, enemy
             });
         });
 
@@ -292,7 +296,7 @@ export class BattleScene extends BaseScene {
 
     updateEnemyDisplay() {
         this.enemyObjects.forEach(obj => {
-            const { enemy, hpFill, hpText, intentText, body, container } = obj;
+            const { enemy, hpFill, hpText, intentText, armorText, body, container } = obj;
 
             if (!enemy.isAlive) {
                 container.setAlpha(0.3);
@@ -300,12 +304,20 @@ export class BattleScene extends BaseScene {
                 intentText.setText('DEAD');
                 hpText.setText('0');
                 hpFill.displayWidth = 0;
+                armorText.setText('');
                 return;
             }
 
             const ratio = enemy.health / enemy.maxHealth;
             hpFill.displayWidth = 90 * ratio;
             hpText.setText(`${enemy.health}/${enemy.maxHealth}`);
+
+            // Show armor
+            if (enemy.armor > 0) {
+                armorText.setText(`🛡 ${enemy.armor}`);
+            } else {
+                armorText.setText('');
+            }
 
             // Show intent
             if (enemy.intent) {
