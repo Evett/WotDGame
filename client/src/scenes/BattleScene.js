@@ -25,6 +25,8 @@ export class BattleScene extends BaseScene {
         this.isMyTurn = false;
         this.battleOver = false;
         this.turnEnded = false;
+        this.currentRound = 1;
+        this.enemyTurnRunning = false;
 
         // Initialize battle
         this.initBattle();
@@ -59,6 +61,12 @@ export class BattleScene extends BaseScene {
         this.time.addEvent({
             delay: 1000, loop: true,
             callback: () => this.updateAllyDisplay()
+        });
+
+        // Poll enemy HP from room state (to see other players' damage)
+        this.time.addEvent({
+            delay: 800, loop: true,
+            callback: () => this.refreshEnemiesFromRoom()
         });
 
         this.createSceneListener(this.service);
@@ -322,6 +330,28 @@ export class BattleScene extends BaseScene {
         this.selectedTarget = null;
     }
 
+    refreshEnemiesFromRoom() {
+        if (this.battleOver || this.enemyTurnRunning) return;
+
+        const enemies = this.service.getBattleEnemies();
+        if (enemies.length === 0) return;
+
+        // Update gameState enemies and display references with latest from room
+        this.gameState.enemies = enemies;
+        enemies.forEach((enemy, i) => {
+            if (this.enemyObjects[i]) {
+                this.enemyObjects[i].enemy = enemy;
+            }
+        });
+        this.updateEnemyDisplay();
+
+        // Check if another player already won the battle
+        const allDead = enemies.every(e => !e.isAlive);
+        if (allDead && !this.battleOver) {
+            this.battleWon();
+        }
+    }
+
     // ─── Hand Display ───────────────────────────────────────
 
     createHandDisplay() {
@@ -515,9 +545,10 @@ export class BattleScene extends BaseScene {
         this.updateTurnUI();
 
         // Mark this player as done with their turn via room state
+        // Use round number instead of boolean to avoid clear-before-read race
         const player = this.service.getMyPlayer();
         const doneMap = this.service.getRoomState('turnDone') || {};
-        doneMap[player.id] = true;
+        doneMap[player.id] = this.currentRound;
         this.service.setRoomState('turnDone', doneMap);
     }
 
@@ -554,17 +585,18 @@ export class BattleScene extends BaseScene {
     }
 
     checkAllTurnsEnded() {
-        if (this.battleOver || !this.turnEnded) return;
+        if (this.battleOver || !this.turnEnded || this.enemyTurnRunning) return;
 
         const allPlayers = this.service.getAllPlayers();
         if (allPlayers.length === 0) return;
 
         const doneMap = this.service.getRoomState('turnDone') || {};
-        const allDone = allPlayers.every(p => doneMap[p.id] === true);
+        const allDone = allPlayers.every(p => doneMap[p.id] === this.currentRound);
 
         if (allDone) {
-            // Clear turn flags
-            this.service.setRoomState('turnDone', null);
+            // Don't clear turnDone — use round numbers so other clients can still detect
+            this.enemyTurnRunning = true;
+            this.currentRound++;
 
             // Run enemy turn (all clients run it locally)
             this.runEnemyTurn();
@@ -583,11 +615,18 @@ export class BattleScene extends BaseScene {
     startMyTurn() {
         this.isMyTurn = true;
         this.turnEnded = false;
+        this.enemyTurnRunning = false;
 
-        // Refresh enemies from room state
+        // Refresh enemies from room state and update display references
         const enemies = this.service.getBattleEnemies();
         if (enemies.length > 0) {
             this.gameState.enemies = enemies;
+            // Update references in enemyObjects so display reads correct HP
+            enemies.forEach((enemy, i) => {
+                if (this.enemyObjects[i]) {
+                    this.enemyObjects[i].enemy = enemy;
+                }
+            });
         }
 
         // Reset armor each turn, restore actions/mana
@@ -673,6 +712,7 @@ export class BattleScene extends BaseScene {
 
     battleWon() {
         this.battleOver = true;
+        this.service.setRoomState('turnDone', null);
         const { width, height } = this.scale;
 
         const goldReward = this.isBossBattle ? 75 : 25;

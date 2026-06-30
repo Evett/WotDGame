@@ -198,37 +198,13 @@ export class EventScene extends BaseScene {
     }).setOrigin(0.5);
 
     // Mark done and wait for all, then go back to choices
-    this.markDone();
-  }
-
-  // ─── Done / Transition ──────────────────────────────────
-
-  markDone() {
-    const player = this.service.getMyPlayer();
-    const doneMap = this.service.getRoomState('eventDone') || {};
-    doneMap[player.id] = true;
-    this.service.setRoomState('eventDone', doneMap);
-
-    this.time.addEvent({
-      delay: 500, loop: true,
-      callback: () => this.checkAllDone()
-    });
-  }
-
-  checkAllDone() {
-    if (this.transitioned) return;
-    const allPlayers = this.service.getAllPlayers();
-    if (allPlayers.length === 0) return;
-
-    const doneMap = this.service.getRoomState('eventDone') || {};
-    const allDone = allPlayers.every(p => doneMap[p.id] === true);
-
-    if (allDone) {
-      this.transitioned = true;
-      this.service.setRoomState('eventDone', null);
-      this.service.setRoomState('currentEvent', null);
-      this.service.setRoomState('eventVotes', null);
-      this.service.broadcastSceneSwitch('NarrativeScene');
+    // Only host triggers the scene transition to avoid race conditions
+    if (this.service.isHost()) {
+      this.time.delayedCall(2000, () => {
+        this.service.setRoomState('currentEvent', null);
+        this.service.setRoomState('eventVotes', null);
+        this.service.broadcastSceneSwitch('BeginningChoiceScene');
+      });
     }
   }
 
