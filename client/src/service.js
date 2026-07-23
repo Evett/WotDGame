@@ -131,36 +131,17 @@ export class Service {
 
         this.playerStates.set(player.id, player);
 
-        // Only create a fresh GameState if:
-        // 1. This is NOT the local player (remote players already have state if reconnecting)
-        // 2. OR this IS the local player and they have no existing state
-        // We must be careful not to overwrite persisted state on reconnect
-        const isMe = Playroom.myPlayer && Playroom.myPlayer()?.id === player.id;
-
-        if (isMe) {
-            // For the local player, check if state exists or if we're in an active game
-            const existing = player.getState('gameState');
-            const currentScene = Playroom.getState('scene');
-            const isActiveGame = currentScene && currentScene !== 'StartingScene' && currentScene !== 'CharacterSelectScene';
-
-            if (existing) {
-                console.log(`Player reconnected with existing state: ${player.getProfile().name} (${player.id})`);
-            } else if (isActiveGame) {
-                // Game is in progress but state hasn't synced yet — don't overwrite
-                console.log(`Player reconnecting to active game, waiting for state sync: ${player.getProfile().name} (${player.id})`);
-            } else {
-                // Only initialize if there's genuinely no state (new player joining fresh)
-                console.log(`Player joined fresh: ${player.getProfile().name} (${player.id})`);
-                this.initializePlayerGameState(player);
-            }
+        // IMPORTANT: Do NOT initialize game state here.
+        // onPlayerJoin fires during insertCoin(), before PlayroomKit has
+        // restored persisted player state and before room state has synced.
+        // Initializing here would clobber a reconnecting player's saved deck
+        // and character. Fresh state is instead created lazily in
+        // getMyGameState() and persisted when a character is selected.
+        const existing = player.getState('gameState');
+        if (existing) {
+            console.log(`Player registered with existing state: ${player.getProfile().name} (${player.id})`);
         } else {
-            // Remote player — just register them, don't touch their state
-            const existing = player.getState('gameState');
-            if (existing) {
-                console.log(`Remote player has state: ${player.getProfile().name} (${player.id})`);
-            } else {
-                console.log(`Remote player without state yet: ${player.getProfile().name} (${player.id})`);
-            }
+            console.log(`Player registered without state yet: ${player.getProfile().name} (${player.id})`);
         }
     }
 
@@ -254,7 +235,16 @@ export class Service {
     getMyGameState() {
         const player = this.getMyPlayer();
         if (!player) return null;
-        return this.getPlayerGameState(player);
+
+        let gs = this.getPlayerGameState(player);
+        if (!gs) {
+            // No persisted state yet (genuinely new player). Return a fresh
+            // GameState. It is NOT auto-persisted here to avoid clobbering a
+            // reconnecting player whose state may not have synced yet; it gets
+            // saved when the player selects a character.
+            gs = new GameState();
+        }
+        return gs;
     }
 
     saveMyGameState(gameState) {
