@@ -33,15 +33,42 @@ export class StartingScene extends BaseScene {
 
     this.add.text(x, y - 250, 'Wars of the Defeated', { fontSize: '40px', color: '#fff' }).setOrigin(0.5);
 
-    this.playerText = this.add.text(400, 200, "", { color: "#fff", fontSize: "20px" }).setOrigin(0.5);
+    this.playerListText = this.add.text(x, y - 50, '', {
+      fontSize: '18px', color: '#ccc', align: 'center', lineSpacing: 8
+    }).setOrigin(0.5);
 
-    const readyButton = this.add.text(x, y + 300, 'Not Ready', { fontSize: '24px', backgroundColor: '#ff8800', padding: { x: 20, y: 10 }, color: '#fff' })
-      .setOrigin(0.5).setInteractive();
+    this.readyButton = this.add.text(x, y + 300, 'Ready Up', {
+      fontSize: '24px', backgroundColor: '#ff8800',
+      padding: { x: 20, y: 10 }, color: '#fff'
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-    readyButton.on('pointerdown', () => {
+    this.readyButton.on('pointerdown', () => {
       this.service.readyPlayer();
+      this.readyButton.setStyle({ backgroundColor: '#006400', color: '#fff' });
+      this.readyButton.setText('✓ Ready!');
+      this.readyButton.disableInteractive();
+    });
+
+    // Poll to show who's ready
+    this.time.addEvent({
+      delay: 500, loop: true,
+      callback: () => this.updatePlayerList()
     });
 
     this.createSceneListener(this.service);
+  }
+
+  updatePlayerList() {
+    const players = this.service.getAllPlayers();
+    if (players.length === 0) return;
+
+    const lines = players.map(p => {
+      const name = p.getProfile().name || 'Player';
+      const ready = p.getState('ready') ? '✓' : '…';
+      const color = p.getState('ready') ? '🟢' : '⚪';
+      return `${color} ${name} ${ready}`;
+    });
+
+    this.playerListText.setText(lines.join('\n'));
   }
 }

@@ -80,15 +80,38 @@ export class NarrativeScene extends BaseScene {
         // Determine if this is a boss fight
         const isBoss = this.service.isBossBattle();
 
-        // Host picks a narrative and shares it; others read from room state
-        let narrative;
+        // Host picks a narrative and shares it; others wait for room state
         if (this.service.isHost()) {
-            narrative = this.pickNarrative(isBoss);
+            const narrative = this.pickNarrative(isBoss);
             this.service.setRoomState('currentNarrative', { title: narrative.title, text: narrative.text, boss: narrative.boss });
+            this.showNarrative(narrative, isBoss);
         } else {
             const stored = this.service.getRoomState('currentNarrative');
-            narrative = stored || this.pickNarrative(isBoss);
+            if (stored) {
+                this.showNarrative(stored, isBoss);
+            } else {
+                // Wait for host to set the narrative
+                this.add.text(x, y, 'Preparing encounter...', {
+                    fontSize: '18px', color: '#888'
+                }).setOrigin(0.5);
+
+                this.time.addEvent({
+                    delay: 200, loop: true,
+                    callback: () => {
+                        const narrativeData = this.service.getRoomState('currentNarrative');
+                        if (narrativeData) {
+                            this.scene.restart({ service: this.service });
+                        }
+                    }
+                });
+            }
         }
+
+        this.createSceneListener(this.service);
+    }
+
+    showNarrative(narrative, isBoss) {
+        const { x, y } = this.getCenter();
 
         // Boss indicator
         if (isBoss) {
@@ -111,8 +134,6 @@ export class NarrativeScene extends BaseScene {
         this.typewriterText(narrative.text, () => {
             this.showContinueButton(isBoss);
         });
-
-        this.createSceneListener(this.service);
     }
 
     typewriterText(fullText, onComplete) {
