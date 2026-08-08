@@ -1,6 +1,7 @@
 import CardFactory from './CardFactory.js';
 import CharacterFactory from './CharacterFactory.js';
 import Enemy from './Enemy.js';
+import MagicItemLibrary from './MagicItemLibrary.js';
 
 export default class GameStateRehydrator {
 
@@ -39,7 +40,8 @@ export default class GameStateRehydrator {
                 name: item.name,
                 description: item.description,
                 type: item.type,
-                isUsed: item.isUsed
+                isUsed: item.isUsed,
+                currentUses: item.currentUses || 0
             })),
 
             buffs: gameState.buffs || {},
@@ -67,8 +69,15 @@ export default class GameStateRehydrator {
         rehydrated.enemies = (serialized.enemies || []).map(e => Enemy.rehydrate(e));
 
         // Magic items: restore from library by id (functions can't serialize)
-        // For now keep as plain data; full rehydration would need MagicItemLibrary lookup
-        rehydrated.magicItems = serialized.magicItems || [];
+        rehydrated.magicItems = (serialized.magicItems || []).map(itemData => {
+            const item = MagicItemLibrary.getById(itemData.id);
+            if (item) {
+                item.isUsed = itemData.isUsed || false;
+                item.currentUses = itemData.currentUses || 0;
+                return item;
+            }
+            return itemData; // Fallback if item not found in library
+        });
 
         return rehydrated;
     }

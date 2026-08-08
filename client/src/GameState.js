@@ -66,6 +66,7 @@ export default class GameState {
         this.health -= amount;
         if (this.health < 0) this.health = 0;
         console.log(`Player takes ${amount} damage. HP: ${this.health}`);
+        this.runItemTriggers('onDamageTaken', amount);
     }
 
     playerHeal(amount) {
@@ -143,6 +144,13 @@ export default class GameState {
 
     startBattle(enemiesArray) {
         this.enemies = enemiesArray;
+        this.resetItemsForCombat();
+    }
+
+    resetItemsForCombat() {
+        this.magicItems.forEach(item => {
+            if (item.resetForCombat) item.resetForCombat();
+        });
     }
 
     resetDeck() {
@@ -320,8 +328,8 @@ export default class GameState {
     useMagicItem(itemIndex, target = null, scene) {
         if (itemIndex >= 0 && itemIndex < this.magicItems.length) {
             const magicItem = this.magicItems[itemIndex];
-            
-            magicItem.use(target, this, scene);
+            return magicItem.use(target, this, scene);
         }
+        return false;
     }
 }

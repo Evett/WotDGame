@@ -37,6 +37,7 @@ export class BattleScene extends BaseScene {
         this.createEnemyDisplay();
         this.createHandDisplay();
         this.createEndTurnButton();
+        this.createItemDisplay();
         this.createTurnIndicator();
 
         // Listen for turn events
@@ -111,6 +112,10 @@ export class BattleScene extends BaseScene {
         this.gameState.mana = this.gameState.maxMana;
         this.gameState.armor = 0;
         this.gameState.drawHand(this);
+
+        // Fire onBattleStart triggers for passive items
+        this.gameState.runItemTriggers('onBattleStart', this);
+
         this.service.saveMyGameState(this.gameState);
     }
 
@@ -321,15 +326,38 @@ export class BattleScene extends BaseScene {
 
             // Show intent
             if (enemy.intent) {
-                if (enemy.intent.type === 'attack') {
-                    intentText.setText(`⚔ ${enemy.intent.damage}`);
-                    intentText.setColor('#ff6666');
-                } else if (enemy.intent.type === 'block') {
-                    intentText.setText(`🛡 ${enemy.intent.amount}`);
-                    intentText.setColor('#6699ff');
-                } else if (enemy.intent.type === 'buff') {
-                    intentText.setText(`↑ Buff`);
-                    intentText.setColor('#66ff66');
+                switch (enemy.intent.type) {
+                    case 'attack':
+                        intentText.setText(`⚔ ${enemy.intent.damage + (enemy.strength || 0)}`);
+                        intentText.setColor('#ff6666');
+                        break;
+                    case 'multi_attack':
+                        intentText.setText(`⚔ ${enemy.intent.damage + (enemy.strength || 0)}x${enemy.intent.hits}`);
+                        intentText.setColor('#ff6666');
+                        break;
+                    case 'attack_and_block':
+                        intentText.setText(`⚔${enemy.intent.damage + (enemy.strength || 0)} 🛡${enemy.intent.block}`);
+                        intentText.setColor('#ffaa44');
+                        break;
+                    case 'block':
+                        intentText.setText(`🛡 ${enemy.intent.amount}`);
+                        intentText.setColor('#6699ff');
+                        break;
+                    case 'buff':
+                        intentText.setText(`↑ Buff`);
+                        intentText.setColor('#66ff66');
+                        break;
+                    case 'heal':
+                        intentText.setText(`♥ Heal ${enemy.intent.amount}`);
+                        intentText.setColor('#44ff44');
+                        break;
+                    case 'debuff':
+                        intentText.setText(`↓ ${enemy.intent.status}`);
+                        intentText.setColor('#cc44cc');
+                        break;
+                    default:
+                        intentText.setText('?');
+                        intentText.setColor('#888888');
                 }
             }
         });
@@ -506,8 +534,23 @@ export class BattleScene extends BaseScene {
             this.updateStatsUI();
             this.service.saveMyGameState(this.gameState);
 
+            // Fire onCardPlayed trigger
+            this.gameState.runItemTriggers('onCardPlayed', result.card, this);
+
+            // Fire onEnemyKilled for any enemies that just died
+            this.gameState.enemies.forEach(e => {
+                if (!e.isAlive && !e._killedTriggered) {
+                    e._killedTriggered = true;
+                    this.gameState.runItemTriggers('onEnemyKilled', e, this);
+                }
+            });
+
             // Sync enemy state to room (since cards can damage enemies)
             this.service.setBattleEnemies(this.gameState.enemies);
+
+            // Update stats again in case triggers changed them
+            this.updateStatsUI();
+            this.updateItemDisplay();
 
             // Check if battle is won
             this.checkBattleEnd();
@@ -545,10 +588,100 @@ export class BattleScene extends BaseScene {
         });
     }
 
+    // ─── Usable Items Display ───────────────────────────────
+
+    createItemDisplay() {
+        this.itemObjects = [];
+        this.itemContainer = this.add.container(0, 0);
+        this.updateItemDisplay();
+    }
+
+    updateItemDisplay() {
+        // Clear existing
+        if (this.itemObjects) {
+            this.itemObjects.forEach(obj => obj.container.destroy());
+        }
+        this.itemObjects = [];
+
+        const usableItems = this.gameState.magicItems.filter(item => item.type === 'usable');
+        if (usableItems.length === 0) return;
+
+        const { width } = this.scale;
+        const itemSize = 50;
+        const gap = 8;
+        const startX = width - 60;
+        const startY = 100;
+
+        usableItems.forEach((item, index) => {
+            const y = startY + index * (itemSize + gap);
+            const container = this.add.container(startX, y);
+
+            const canUse = item.canUse() && this.isMyTurn && !this.battleOver;
+            const bgColor = canUse ? 0x4a2a6a : 0x2a2a2a;
+            const borderColor = canUse ? 0xaa44ff : 0x555555;
+
+            const bg = this.add.rectangle(0, 0, itemSize, itemSize, bgColor)
+                .setStrokeStyle(2, borderColor)
+                .setInteractive({ useHandCursor: canUse });
+
+            const nameText = this.add.text(0, 0, item.name.substring(0, 3), {
+                fontSize: '14px', color: canUse ? '#ffffff' : '#666666', fontStyle: 'bold'
+            }).setOrigin(0.5);
+
+            const usesText = this.add.text(0, 20, `${item.currentUses}/${item.usesPerCombat}`, {
+                fontSize: '9px', color: '#aaaaaa'
+            }).setOrigin(0.5);
+
+            container.add([bg, nameText, usesText]);
+
+            // Tooltip on hover
+            bg.on('pointerover', () => {
+                if (this.itemTooltip) this.itemTooltip.destroy();
+                this.itemTooltip = this.add.text(startX - itemSize - 10, y, `${item.name}\n${item.description}`, {
+                    fontSize: '11px', color: '#ffffff', backgroundColor: '#222222',
+                    padding: { x: 8, y: 6 }, wordWrap: { width: 180 }
+                }).setOrigin(1, 0.5);
+            });
+
+            bg.on('pointerout', () => {
+                if (this.itemTooltip) {
+                    this.itemTooltip.destroy();
+                    this.itemTooltip = null;
+                }
+            });
+
+            // Click to use
+            bg.on('pointerdown', () => {
+                if (!this.isMyTurn || this.battleOver) return;
+                if (!item.canUse()) {
+                    this.showMessage('Item already used!', '#888888');
+                    return;
+                }
+
+                const realIndex = this.gameState.magicItems.indexOf(item);
+                const success = this.gameState.useMagicItem(realIndex, null, this);
+                if (success) {
+                    this.showMessage(`Used ${item.name}!`, '#aa44ff');
+                    this.updateStatsUI();
+                    this.updateEnemyDisplay();
+                    this.updateItemDisplay();
+                    this.service.saveMyGameState(this.gameState);
+                    this.service.setBattleEnemies(this.gameState.enemies);
+                    this.checkBattleEnd();
+                }
+            });
+
+            this.itemObjects.push({ container, item });
+        });
+    }
+
     endTurn() {
         if (this.turnEnded) return;
         this.turnEnded = true;
         this.isMyTurn = false;
+
+        // Fire onTurnEnd triggers for passive items
+        this.gameState.runItemTriggers('onTurnEnd', this);
 
         this.deselectCard();
         this.gameState.discardHand();
@@ -646,6 +779,9 @@ export class BattleScene extends BaseScene {
         this.gameState.actions = this.gameState.maxActions;
         this.gameState.mana = this.gameState.maxMana;
 
+        // Fire onTurnStart triggers for passive items
+        this.gameState.runItemTriggers('onTurnStart', this);
+
         // Draw new hand
         this.gameState.drawHand(this);
 
@@ -654,6 +790,7 @@ export class BattleScene extends BaseScene {
         this.updateEnemyDisplay();
         this.updateHandDisplay();
         this.updateTurnUI();
+        this.updateItemDisplay();
     }
 
     // ─── Enemy Turn ─────────────────────────────────────────
