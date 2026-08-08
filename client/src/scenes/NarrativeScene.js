@@ -67,6 +67,7 @@ export class NarrativeScene extends BaseScene {
     create(data) {
         super.create();
         this.service = data.service;
+        this.playMusic('bgm_explore');
         this.createBackground(0x0e0e1a);
         this.createInventoryButton(this.service);
 
@@ -75,14 +76,20 @@ export class NarrativeScene extends BaseScene {
         // Increment battle count (host only to avoid double-counting)
         if (this.service.isHost()) {
             this.service.incrementBattleCount();
+
+            // Scale difficulty based on progress
+            const count = this.service.getBattleCount();
+            const difficulty = Math.min(Math.ceil(count / 3), 3);
+            this.service.setRoomState('battleDifficulty', difficulty);
         }
 
-        // Determine if this is a boss fight
-        const isBoss = this.service.isBossBattle();
+        // Determine if this is the final boss or a regular boss fight
+        const isFinalBoss = this.service.isFinalBoss();
+        const isBoss = isFinalBoss || this.service.isBossBattle();
 
         // Host picks a narrative and shares it; others wait for room state
         if (this.service.isHost()) {
-            const narrative = this.pickNarrative(isBoss);
+            const narrative = isFinalBoss ? this.getFinalBossNarrative() : this.pickNarrative(isBoss);
             this.service.setRoomState('currentNarrative', { title: narrative.title, text: narrative.text, boss: narrative.boss });
             this.showNarrative(narrative, isBoss);
         } else {
@@ -181,5 +188,13 @@ export class NarrativeScene extends BaseScene {
     pickNarrative(isBoss) {
         const pool = NARRATIVES.filter(n => n.boss === isBoss);
         return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    getFinalBossNarrative() {
+        return {
+            title: "The Shadow Gate",
+            text: "The air grows cold and still. Before you looms a rift of pure darkness — the gate between the Shadow Plane and the Material Plane. Chained souls writhe at its edges, unable to pass through.\n\nA massive figure materializes from the void. Nyxaroth, the Shadow Gate Guardian, towers before you. Its eyes burn with hollow violet light.\n\n\"None shall pass. These souls are MINE.\"\n\nThis is the final battle. Everything you've fought for comes down to this moment.",
+            boss: true
+        };
     }
 }

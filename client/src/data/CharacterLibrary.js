@@ -15,10 +15,10 @@ const CharacterLibrary = {
         deck: [
             ...repeat(() => CardLibrary.cards.Common.Strike(), 2),
             ...repeat(() => CardLibrary.cards.Common.Block(), 3),
-            ...repeat(() => CardLibrary.cards.Summoner.EidolonStrike(), 2),
+            ...repeat(() => CardLibrary.cards.Soulbound.EidolonStrike(), 2),
             CardLibrary.cards.Common.Berserk(),
-            CardLibrary.cards.Summoner.PlanarBinding(),
-            CardLibrary.cards.Summoner.SummonLesserElemental()
+            CardLibrary.cards.Soulbound.SummonKhan(),
+            CardLibrary.cards.Soulbound.PhantomStrike()
         ],
         heroAbilityName: "Summon Khan",
         heroAbilityDescription: (level) => `Gain +${level} Action(s)`,
@@ -39,8 +39,8 @@ const CharacterLibrary = {
             ...repeat(() => CardLibrary.cards.Common.Block(), 3),
             ...repeat(() => CardLibrary.cards.Summoner.EidolonStrike(), 2),
             CardLibrary.cards.Common.Berserk(),
-            CardLibrary.cards.Summoner.PlanarBinding(),
-            CardLibrary.cards.Summoner.SummonLesserElemental()
+            CardLibrary.cards.Summoner.SummonKamau(),
+            CardLibrary.cards.Summoner.PlanarBinding()
         ],
         heroAbilityName: "Shadow Step",
         heroAbilityDescription: (level) => `Gain ${3 + level * 2} Armor`,

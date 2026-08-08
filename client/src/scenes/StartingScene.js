@@ -32,6 +32,7 @@ export class StartingScene extends BaseScene {
     }
 
     this.add.text(x, y - 250, 'Wars of the Defeated', { fontSize: '40px', color: '#fff' }).setOrigin(0.5);
+    this.playMusic('bgm_menu');
 
     this.playerListText = this.add.text(x, y - 50, '', {
       fontSize: '18px', color: '#ccc', align: 'center', lineSpacing: 8

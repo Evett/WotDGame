@@ -26,7 +26,9 @@ const SCENES = {
     SHOP: 'ShopScene',
     REWARD: 'CardRewardScene',
     ALTAR: 'AltarScene',
-    DECK: 'DeckScene'
+    DECK: 'DeckScene',
+    VICTORY: 'VictoryScene',
+    GAMEOVER: 'GameOverScene'
 };
 
 export { SCENES };
@@ -459,6 +461,14 @@ export class Service {
     isBossBattle() {
         const count = this.getBattleCount();
         return count > 0 && count % 4 === 0;
+    }
+
+    isFinalBoss() {
+        return !!this.getRoomState('isFinalBoss');
+    }
+
+    setFinalBoss(value) {
+        this.setRoomState('isFinalBoss', value);
     }
 
     // ─── Battle State (Shared) ──────────────────────────────

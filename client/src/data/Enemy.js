@@ -7,21 +7,29 @@ class Enemy {
         this.intents = options.intents;
         this.tags = options.tags || [];
         this.isBoss = options.isBoss || false;
+        this.isFinalBoss = options.isFinalBoss || false;
         this.isAlive = options.isAlive ?? true;
         this.statuses = options.statuses || {};
         this.armor = options.armor || 0;
         this.strength = options.strength || 0; // Bonus damage on attacks
         this.turnCount = options.turnCount || 0;
         this.intentPattern = options.intentPattern || null; // Fixed rotation (array of indices)
+        this.phasePattern = options.phasePattern || null; // Alternate pattern below 50% HP
 
         this.intent = options.intent || null;
     }
 
     decideIntent() {
-        if (this.intentPattern && this.intentPattern.length > 0) {
-            // Fixed rotation pattern for bosses
-            const patternIndex = this.turnCount % this.intentPattern.length;
-            const intentIndex = this.intentPattern[patternIndex];
+        let pattern = this.intentPattern;
+
+        // Phase 2 pattern activates below 50% HP
+        if (this.phasePattern && this.health <= this.maxHealth * 0.5) {
+            pattern = this.phasePattern;
+        }
+
+        if (pattern && pattern.length > 0) {
+            const patternIndex = this.turnCount % pattern.length;
+            const intentIndex = pattern[patternIndex];
             this.intent = this.intents[intentIndex];
         } else {
             const choice = this.intents[Math.floor(Math.random() * this.intents.length)];
@@ -147,9 +155,11 @@ class Enemy {
             strength: this.strength,
             turnCount: this.turnCount,
             intentPattern: this.intentPattern,
+            phasePattern: this.phasePattern,
             intents: this.intents,
             tags: this.tags,
             isBoss: this.isBoss,
+            isFinalBoss: this.isFinalBoss,
             isAlive: this.isAlive,
             statuses: { ...this.statuses },
             intent: this.intent

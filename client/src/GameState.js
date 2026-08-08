@@ -63,6 +63,10 @@ export default class GameState {
     }
 
     playerTakeDamage(amount) {
+        // Vulnerable: take 50% more damage
+        if (this.statuses?.Vulnerable && this.statuses.Vulnerable > 0) {
+            amount = Math.floor(amount * 1.5);
+        }
         this.health -= amount;
         if (this.health < 0) this.health = 0;
         console.log(`Player takes ${amount} damage. HP: ${this.health}`);
@@ -92,6 +96,41 @@ export default class GameState {
         console.log(`Summoned ally: ${allyData.name}`);
     }
 
+    tickAllies() {
+        if (!this.allies || this.allies.length === 0) return [];
+
+        const messages = [];
+        const aliveEnemies = this.enemies.filter(e => e.isAlive);
+
+        this.allies = this.allies.filter(ally => {
+            if (ally.turnsRemaining <= 0) return false;
+
+            // Ally attacks a random living enemy
+            if (ally.damage && aliveEnemies.length > 0) {
+                const target = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+                target.takeDamage(ally.damage);
+                messages.push(`${ally.name} deals ${ally.damage} to ${target.name}!`);
+            }
+
+            // Ally heals player
+            if (ally.heal) {
+                this.playerHeal(ally.heal);
+                messages.push(`${ally.name} heals you for ${ally.heal}!`);
+            }
+
+            // Ally grants attack bonus each turn
+            if (ally.attackBonus) {
+                this.nextAttackBonus += ally.attackBonus;
+                messages.push(`${ally.name} empowers you! (+${ally.attackBonus} next attack)`);
+            }
+
+            ally.turnsRemaining--;
+            return ally.turnsRemaining > 0;
+        });
+
+        return messages;
+    }
+
     applyPlayerBuff(buffName, amount, duration) {
         if (!this.buffs) this.buffs = {};
         this.buffs[buffName] = { amount, turnsRemaining: duration };
@@ -102,6 +141,68 @@ export default class GameState {
         if (!this.statuses) this.statuses = {};
         this.statuses[statusName] = (this.statuses[statusName] || 0) + duration;
         console.log(`Applied status ${statusName} for ${this.statuses[statusName]} turns`);
+    }
+
+    // Called at start of each player turn
+    tickStatuses() {
+        if (!this.statuses) return [];
+        const messages = [];
+
+        // Poisoned: take damage each turn
+        if (this.statuses.Poisoned && this.statuses.Poisoned > 0) {
+            const poisonDmg = 3;
+            this.health -= poisonDmg;
+            if (this.health < 0) this.health = 0;
+            messages.push(`Poisoned! -${poisonDmg} HP`);
+        }
+
+        // Weakened: handled in playCard (reduces attack damage by 25%)
+        if (this.statuses.Weakened && this.statuses.Weakened > 0) {
+            messages.push('Weakened! Attacks deal 25% less damage');
+        }
+
+        // Frozen: lose 1 action this turn
+        if (this.statuses.Frozen && this.statuses.Frozen > 0) {
+            this.actions = Math.max(0, this.actions - 1);
+            messages.push('Frozen! -1 action this turn');
+        }
+
+        // Cursed: lose 1 mana this turn
+        if (this.statuses.Cursed && this.statuses.Cursed > 0) {
+            this.mana = Math.max(0, this.mana - 1);
+            messages.push('Cursed! -1 mana this turn');
+        }
+
+        // Decrement all status durations
+        Object.keys(this.statuses).forEach(key => {
+            this.statuses[key]--;
+            if (this.statuses[key] <= 0) {
+                delete this.statuses[key];
+            }
+        });
+
+        return messages;
+    }
+
+    // Called at start of each player turn
+    tickBuffs() {
+        if (!this.buffs) return;
+
+        Object.keys(this.buffs).forEach(key => {
+            this.buffs[key].turnsRemaining--;
+            if (this.buffs[key].turnsRemaining <= 0) {
+                console.log(`Buff expired: ${key}`);
+                delete this.buffs[key];
+            }
+        });
+    }
+
+    // Weakened modifier for attack damage
+    getAttackModifier() {
+        if (this.statuses?.Weakened && this.statuses.Weakened > 0) {
+            return 0.75;
+        }
+        return 1.0;
     }
 
     addMagicItem(item) {
@@ -266,6 +367,12 @@ export default class GameState {
             this.mana -= card.manaCost;
 
             this.hand.splice(index, 1);
+
+            // Apply Weakened: reduce nextAttackBonus for this attack
+            if (card.type === "Attack" && this.getAttackModifier() < 1) {
+                this.nextAttackBonus *= this.getAttackModifier();
+            }
+
             card.play(target, this, card, scene);
 
             if (card.type === "Attack") {

@@ -3,6 +3,23 @@ import Card from '../Card.js';
 const createCard = (options) => new Card(options);
 
 export default {
+    SummonKhan: () => createCard({
+        name: "Summon Khan",
+        actionCost: 1,
+        manaCost: 2,
+        type: "Spell",
+        requiresTarget: false,
+        isOncePerDay: true,
+        description: "Summon Khan (4 dmg/turn). +2 bonus to next attack each turn. Once per combat.",
+        upgradedDescription: "Summon Khan (6 dmg/turn). +3 bonus to next attack each turn. Draw 1. Once per combat.",
+        effect: (_, state, card, scene) => {
+            state.hasEidolon = true;
+            state.summonAlly({ name: "Khan", damage: card.upgraded ? 6 : 4, duration: 99, attackBonus: card.upgraded ? 3 : 2 });
+            if (card.upgraded) state.drawCards(1, scene);
+        },
+        upgraded: false
+    }),
+
     PhantomStrike: () => createCard({
         name: "Phantom Strike",
         actionCost: 1,
@@ -16,6 +33,23 @@ export default {
                 const base = card.upgraded ? 9 : 6;
                 const bonus = state.hasEidolon ? (card.upgraded ? 6 : 4) : 0;
                 target.takeDamage((base + bonus) * state.nextAttackBonus);
+            }
+        },
+        upgraded: false
+    }),
+
+    EidolonStrike: () => createCard({
+        name: "Eidolon Strike",
+        actionCost: 1,
+        manaCost: 0,
+        type: "Attack",
+        requiresTarget: true,
+        description: "Deal 3 damage. Deal 8 if Eidolon is active.",
+        upgradedDescription: "Deal 5 damage. Deal 12 if Eidolon is active.",
+        effect: (target, state, card) => {
+            if (target) {
+                const damage = state.hasEidolon ? (card.upgraded ? 12 : 8) : (card.upgraded ? 5 : 3);
+                target.takeDamage(damage * state.nextAttackBonus);
             }
         },
         upgraded: false
@@ -43,11 +77,11 @@ export default {
         manaCost: 1,
         type: "Skill",
         requiresTarget: false,
-        description: "Lose 4 HP. Gain 8 armor.",
-        upgradedDescription: "Lose 4 HP. Gain 12 armor.",
+        description: "Lose 2 HP. Gain 10 armor.",
+        upgradedDescription: "Lose 2 HP. Gain 15 armor.",
         effect: (_, state, card) => {
-            state.playerTakeDamage(4);
-            state.playerArmor(card.upgraded ? 12 : 8);
+            state.playerTakeDamage(2);
+            state.playerArmor(card.upgraded ? 15 : 10);
         },
         upgraded: false
     }),

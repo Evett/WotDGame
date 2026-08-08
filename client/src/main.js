@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { BootScene } from './scenes/BootScene';
 import { StartingScene } from './scenes/StartingScene';
 import { CharacterSelectScene } from './scenes/CharacterSelectScene';
 import { BeginningChoiceScene } from './scenes/BeginningChoiceScene';
@@ -10,6 +11,8 @@ import { EventScene } from './scenes/EventScene';
 import { RestScene } from './scenes/RestScene';
 import { ShopScene } from './scenes/ShopScene';
 import { BattleScene } from './scenes/BattleScene';
+import { VictoryScene } from './scenes/VictoryScene';
+import { GameOverScene } from './scenes/GameOverScene';
 
 const config = {
     title: 'WotDGame',
@@ -24,6 +27,7 @@ const config = {
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
     scene: [
+        BootScene,
         StartingScene,
         CharacterSelectScene,
         BeginningChoiceScene,
@@ -34,7 +38,9 @@ const config = {
         EventScene,
         RestScene,
         ShopScene,
-        BattleScene
+        BattleScene,
+        VictoryScene,
+        GameOverScene
     ],
     dom: {
         createContainer: true

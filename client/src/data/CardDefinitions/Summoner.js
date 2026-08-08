@@ -3,6 +3,23 @@ import Card from '../Card.js';
 const createCard = (options) => new Card(options);
 
 export default {
+    SummonKamau: () => createCard({
+        name: "Summon Kamau",
+        actionCost: 1,
+        manaCost: 2,
+        type: "Spell",
+        requiresTarget: false,
+        isOncePerDay: true,
+        description: "Summon your Eidolon, Kamau. It attacks for 5 each turn. Once per combat.",
+        upgradedDescription: "Summon Kamau. Attacks for 8/turn. Draw 1 card. Once per combat.",
+        effect: (_, state, card, scene) => {
+            state.hasEidolon = true;
+            state.summonAlly({ name: "Kamau", damage: card.upgraded ? 8 : 5, duration: 99 });
+            if (card.upgraded) state.drawCards(1, scene);
+        },
+        upgraded: false
+    }),
+
     SummonLesserElemental: () => createCard({
         name: "Summon Lesser Elemental",
         actionCost: 1,
@@ -12,6 +29,7 @@ export default {
         description: "Summon an elemental that attacks for 4 each turn (3 turns).",
         upgradedDescription: "Summon an elemental that attacks for 6 each turn (3 turns).",
         effect: (_, state, card) => {
+            state.hasEidolon = true;
             state.summonAlly({ name: "Lesser Elemental", damage: card.upgraded ? 6 : 4, duration: 3 });
         },
         upgraded: false
@@ -23,11 +41,12 @@ export default {
         manaCost: 0,
         type: "Attack",
         requiresTarget: true,
-        description: "Your Eidolon deals 5 damage.",
-        upgradedDescription: "Your Eidolon deals 9 damage.",
+        description: "Deal 3 damage. Deal 8 if Eidolon is active.",
+        upgradedDescription: "Deal 5 damage. Deal 12 if Eidolon is active.",
         effect: (target, state, card) => {
-            if (target && state.hasEidolon) {
-                target.takeDamage((card.upgraded ? 9 : 5) * state.nextAttackBonus);
+            if (target) {
+                const damage = state.hasEidolon ? (card.upgraded ? 12 : 8) : (card.upgraded ? 5 : 3);
+                target.takeDamage(damage * state.nextAttackBonus);
             }
         },
         upgraded: false
@@ -87,6 +106,7 @@ export default {
         description: "Summon a hound that deals 3 damage (4 turns).",
         upgradedDescription: "Summon a hound that deals 5 damage (4 turns).",
         effect: (_, state, card) => {
+            state.hasEidolon = true;
             state.summonAlly({ name: "Summoned Hound", damage: card.upgraded ? 5 : 3, duration: 4 });
         },
         upgraded: false
@@ -168,6 +188,7 @@ export default {
         description: "Summon a powerful elemental (8 damage, 4 turns).",
         upgradedDescription: "Summon a powerful elemental (12 damage, 4 turns).",
         effect: (_, state, card) => {
+            state.hasEidolon = true;
             state.summonAlly({ name: "Greater Elemental", damage: card.upgraded ? 12 : 8, duration: 4 });
         },
         upgraded: false
@@ -236,16 +257,16 @@ export default {
 
     SummonAngel: () => createCard({
         name: "Summon Angel",
-        actionCost: 2,
-        manaCost: 3,
+        actionCost: 3,
+        manaCost: 2,
         type: "Spell",
         requiresTarget: false,
         isOncePerDay: true,
         description: "Summon an angel (6 damage, heals 4 HP/turn, 3 turns).",
         upgradedDescription: "Summon an angel (9 damage, heals 6 HP/turn, 3 turns).",
         effect: (_, state, card) => {
-            state.summonAlly({ name: "Celestial Angel", damage: card.upgraded ? 9 : 6, duration: 3 });
-            state.playerHeal(card.upgraded ? 6 : 4);
+            state.hasEidolon = true;
+            state.summonAlly({ name: "Celestial Angel", damage: card.upgraded ? 9 : 6, heal: card.upgraded ? 6 : 4, duration: 3 });
         },
         upgraded: false
     }),
@@ -296,6 +317,7 @@ export default {
         description: "Summon an ally (4 damage, 2 turns). Draw 1 card.",
         upgradedDescription: "Summon an ally (6 damage, 3 turns). Draw 1 card.",
         effect: (_, state, card, scene) => {
+            state.hasEidolon = true;
             state.summonAlly({ name: "Planar Ally", damage: card.upgraded ? 6 : 4, duration: card.upgraded ? 3 : 2 });
             state.drawCards(1, scene);
         },
@@ -326,6 +348,7 @@ export default {
         description: "Summon a shadow (3 damage, applies Weakened, 2 turns).",
         upgradedDescription: "Summon a shadow (5 damage, applies Weakened, 3 turns).",
         effect: (_, state, card) => {
+            state.hasEidolon = true;
             state.summonAlly({ name: "Shadow", damage: card.upgraded ? 5 : 3, duration: card.upgraded ? 3 : 2 });
         },
         upgraded: false
@@ -381,13 +404,14 @@ export default {
     GateKeeper: () => createCard({
         name: "Gate Keeper",
         actionCost: 2,
-        manaCost: 3,
+        manaCost: 2,
         type: "Spell",
         requiresTarget: false,
         isOncePerDay: true,
         description: "Summon 3 allies (4 damage each, 2 turns).",
         upgradedDescription: "Summon 3 allies (6 damage each, 3 turns).",
         effect: (_, state, card) => {
+            state.hasEidolon = true;
             for (let i = 0; i < 3; i++) {
                 state.summonAlly({ name: `Gate Minion ${i+1}`, damage: card.upgraded ? 6 : 4, duration: card.upgraded ? 3 : 2 });
             }
@@ -437,6 +461,7 @@ export default {
         upgradedDescription: "Gain 12 armor. Summon a tiny guardian (3 damage, 3 turns).",
         effect: (_, state, card) => {
             state.playerArmor(card.upgraded ? 12 : 8);
+            state.hasEidolon = true;
             state.summonAlly({ name: "Tiny Guardian", damage: card.upgraded ? 3 : 2, duration: card.upgraded ? 3 : 2 });
         },
         upgraded: false

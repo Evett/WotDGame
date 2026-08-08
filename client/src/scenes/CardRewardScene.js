@@ -173,7 +173,15 @@ export class CardRewardScene extends BaseScene {
     if (allDone) {
       this.transitioned = true;
       this.service.setRoomState('rewardDone', null);
-      this.service.broadcastSceneSwitch('BeginningChoiceScene');
+
+      // After the 3rd boss (battle 12), route to final boss sequence
+      const battleCount = this.service.getBattleCount();
+      if (battleCount >= 12 && battleCount % 4 === 0 && !this.service.isFinalBoss()) {
+        this.service.setFinalBoss(true);
+        this.service.broadcastSceneSwitch('AltarScene');
+      } else {
+        this.service.broadcastSceneSwitch('BeginningChoiceScene');
+      }
     }
   }
 

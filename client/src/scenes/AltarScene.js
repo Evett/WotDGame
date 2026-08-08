@@ -198,7 +198,11 @@ export class AltarScene extends BaseScene {
     if (allDone) {
       this.transitioned = true;
       this.service.setRoomState('altarDone', null);
-      this.service.broadcastSceneSwitch('NarrativeScene');
+      if (this.service.isFinalBoss()) {
+        this.service.broadcastSceneSwitch('RestScene');
+      } else {
+        this.service.broadcastSceneSwitch('NarrativeScene');
+      }
     }
   }
 }

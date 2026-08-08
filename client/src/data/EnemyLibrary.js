@@ -287,6 +287,35 @@ const EnemyLibrary = {
         tags: ["Evil"]
     }),
 
+    // ─── FINAL BOSS ─────────────────────────────────────────
+
+    // Nyxaroth — Guardian of the Shadow Plane gate, preventing souls from returning.
+    // Gimmick: Phases. First half: heavy armor + debuffs. Below 50% HP: drops defense,
+    // goes all-out with multi-attacks and self-healing. Predictable but brutal.
+    // Pattern Phase 1: Block → Debuff → Attack → Block → Heavy Attack
+    // Pattern Phase 2: Buff → Multi-Attack → Heal → Multi-Attack → Heavy Attack
+    Nyxaroth: () => new Enemy({
+        name: "Nyxaroth, Shadow Gate Guardian",
+        maxHealth: 350,
+        isBoss: true,
+        isFinalBoss: true,
+        intents: [
+            { type: 'block', amount: 30 },                    // 0: Shadow Barrier
+            { type: 'debuff', status: 'Weakened', duration: 2 }, // 1: Soul Drain
+            { type: 'attack', damage: 18 },                   // 2: Void Lash
+            { type: 'block', amount: 20 },                    // 3: Umbral Shield
+            { type: 'attack', damage: 28 },                   // 4: Gate Slam
+            { type: 'buff', amount: 5 },                      // 5: Consume Souls (phase 2)
+            { type: 'multi_attack', damage: 7, hits: 5 },     // 6: Shadow Barrage (phase 2)
+            { type: 'heal', amount: 30 },                     // 7: Absorb Spirit (phase 2)
+            { type: 'multi_attack', damage: 9, hits: 4 },     // 8: Void Tendrils (phase 2)
+            { type: 'attack', damage: 35 }                    // 9: Annihilate (phase 2)
+        ],
+        intentPattern: [0, 1, 2, 3, 4],
+        phasePattern: [5, 6, 7, 8, 9],
+        tags: ["Evil", "Undead"]
+    }),
+
     // ─── Encounter Generators ───────────────────────────────
 
     getRandomEncounter(difficulty = 1) {
@@ -316,6 +345,10 @@ const EnemyLibrary = {
         const bosses = ['Dragon', 'LichKing', 'IronColossus', 'DemonPrince'];
         const key = bosses[Math.floor(Math.random() * bosses.length)];
         return [EnemyLibrary[key]()];
+    },
+
+    getFinalBossEncounter() {
+        return [EnemyLibrary.Nyxaroth()];
     }
 };
 

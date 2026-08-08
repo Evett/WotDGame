@@ -74,6 +74,24 @@ export default class BaseScene extends Phaser.Scene {
         });
     }
 
+    // ─── Music Helpers ─────────────────────────────────────
+
+    playMusic(key, { volume = 0.4, loop = true } = {}) {
+        if (!this.cache.audio.exists(key)) return;
+        if (this.sound.get(key)?.isPlaying) return;
+        this.stopMusic();
+        this.currentMusic = this.sound.add(key, { volume, loop });
+        this.currentMusic.play();
+    }
+
+    stopMusic() {
+        if (this.currentMusic) {
+            this.currentMusic.stop();
+            this.currentMusic.destroy();
+            this.currentMusic = null;
+        }
+    }
+
     createInventoryButton(service) {
         const { width } = this.scale;
         this.inventoryBtn = this.add.text(width - 20, 20, '🎒 Inventory', {

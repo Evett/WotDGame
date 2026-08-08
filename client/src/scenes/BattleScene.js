@@ -88,6 +88,10 @@ export class BattleScene extends BaseScene {
     // ─── Battle Init ────────────────────────────────────────
 
     initBattle() {
+        // Play battle music (boss or normal)
+        const isBoss = this.service.isFinalBoss() || this.service.isBossBattle();
+        this.playMusic(isBoss ? 'bgm_boss' : 'bgm_battle');
+
         // Host generates enemies and shares them; others read from room state
         let enemies = this.service.getBattleEnemies();
         this.isBossBattle = this.service.isBossBattle();
@@ -95,7 +99,9 @@ export class BattleScene extends BaseScene {
         if (enemies.length === 0) {
             if (this.service.isHost()) {
                 // Host sets up the battle
-                if (this.isBossBattle) {
+                if (this.service.isFinalBoss()) {
+                    enemies = EnemyLibrary.getFinalBossEncounter();
+                } else if (this.isBossBattle) {
                     enemies = EnemyLibrary.getBossEncounter();
                 } else {
                     const difficulty = this.service.getRoomState('battleDifficulty') || 1;
@@ -145,8 +151,7 @@ export class BattleScene extends BaseScene {
             this.generateCharacterTexture(charName, textureKey);
         }
 
-        // Place character sprite at bottom-left, above the cards
-        this.characterSprite = this.add.image(80, height - 240, textureKey)
+        this.characterSprite = this.add.image(80, height - 340, textureKey)
             .setScale(2.5)
             .setOrigin(0.5, 1);
     }
@@ -727,6 +732,58 @@ export class BattleScene extends BaseScene {
         });
     }
 
+    updateAllyDisplay() {
+        if (this.allyDisplayObjects) {
+            this.allyDisplayObjects.forEach(obj => obj.destroy());
+        }
+        this.allyDisplayObjects = [];
+
+        const allies = this.gameState.allies || [];
+        if (allies.length === 0) return;
+
+        const startX = 20;
+        const startY = 140;
+
+        allies.forEach((ally, i) => {
+            const y = startY + i * 28;
+            const txt = this.add.text(startX, y, `🗡 ${ally.name} (${ally.turnsRemaining} turns | ATK ${ally.attackPower})`, {
+                fontSize: '12px', color: '#66ffaa'
+            });
+            this.allyDisplayObjects.push(txt);
+        });
+    }
+
+    updateStatusDisplay() {
+        if (this.statusDisplayObjects) {
+            this.statusDisplayObjects.forEach(obj => obj.destroy());
+        }
+        this.statusDisplayObjects = [];
+
+        const statuses = this.gameState.statuses || [];
+        const buffs = this.gameState.buffs || [];
+        if (statuses.length === 0 && buffs.length === 0) return;
+
+        const startX = 20;
+        const startY = this.scale.height - 100;
+
+        let y = startY;
+        statuses.forEach(status => {
+            const txt = this.add.text(startX, y, `⚠ ${status.name} (${status.duration} turns)`, {
+                fontSize: '11px', color: '#ff6688'
+            });
+            this.statusDisplayObjects.push(txt);
+            y += 18;
+        });
+
+        buffs.forEach(buff => {
+            const txt = this.add.text(startX, y, `✦ ${buff.name} (${buff.turnsRemaining} turns)`, {
+                fontSize: '11px', color: '#88ccff'
+            });
+            this.statusDisplayObjects.push(txt);
+            y += 18;
+        });
+    }
+
     endTurn() {
         if (this.turnEnded) return;
         this.turnEnded = true;
@@ -818,7 +875,6 @@ export class BattleScene extends BaseScene {
         const enemies = this.service.getBattleEnemies();
         if (enemies.length > 0) {
             this.gameState.enemies = enemies;
-            // Update references in enemyObjects so display reads correct HP
             enemies.forEach((enemy, i) => {
                 if (this.enemyObjects[i]) {
                     this.enemyObjects[i].enemy = enemy;
@@ -831,8 +887,34 @@ export class BattleScene extends BaseScene {
         this.gameState.actions = this.gameState.maxActions;
         this.gameState.mana = this.gameState.maxMana;
 
+        // Tick player statuses (poison damage, frozen, cursed, etc.)
+        const statusMessages = this.gameState.tickStatuses();
+        statusMessages.forEach((msg, i) => {
+            this.time.delayedCall(i * 400, () => this.showMessage(msg, '#ff66aa'));
+        });
+
+        // Tick buff durations
+        this.gameState.tickBuffs();
+
+        // Check if poison killed the player
+        if (this.gameState.isDead()) {
+            this.battleLost();
+            return;
+        }
+
         // Fire onTurnStart triggers for passive items
         this.gameState.runItemTriggers('onTurnStart', this);
+
+        // Summoned allies act
+        const allyMessages = this.gameState.tickAllies();
+        allyMessages.forEach((msg, i) => {
+            this.time.delayedCall(i * 300 + statusMessages.length * 400, () => this.showMessage(msg, '#66ffaa'));
+        });
+
+        // Sync enemies after ally attacks
+        this.service.setBattleEnemies(this.gameState.enemies);
+        this.updateEnemyDisplay();
+        this.checkBattleEnd();
 
         // Draw new hand
         this.gameState.drawHand(this);
@@ -843,6 +925,8 @@ export class BattleScene extends BaseScene {
         this.updateHandDisplay();
         this.updateTurnUI();
         this.updateItemDisplay();
+        this.updateAllyDisplay();
+        this.updateStatusDisplay();
     }
 
     // ─── Enemy Turn ─────────────────────────────────────────
@@ -916,33 +1000,41 @@ export class BattleScene extends BaseScene {
         this.service.setRoomState('turnDone', null);
         const { width, height } = this.scale;
 
-        const goldReward = this.isBossBattle ? 75 : 25;
-        const victoryText = this.isBossBattle ? 'BOSS DEFEATED!' : 'VICTORY!';
-        const victoryColor = this.isBossBattle ? '#ffaa00' : '#44ff44';
+        // Check if this was the final boss
+        const isFinalBoss = this.gameState.enemies.some(e => e.isFinalBoss);
+
+        const goldReward = isFinalBoss ? 0 : (this.isBossBattle ? 75 : 25);
+        const victoryText = isFinalBoss ? 'NYXAROTH DEFEATED!' : (this.isBossBattle ? 'BOSS DEFEATED!' : 'VICTORY!');
+        const victoryColor = isFinalBoss ? '#ff44ff' : (this.isBossBattle ? '#ffaa00' : '#44ff44');
 
         this.add.text(width / 2, height / 2 - 50, victoryText, {
             fontSize: '48px', color: victoryColor, fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        // Award gold
-        this.gameState.gainGold(goldReward);
-        this.service.saveMyGameState(this.gameState);
+        if (goldReward > 0) {
+            this.gameState.gainGold(goldReward);
+            this.service.saveMyGameState(this.gameState);
 
-        this.add.text(width / 2, height / 2 + 10, `+${goldReward} Gold`, {
-            fontSize: '24px', color: '#ffcc44'
-        }).setOrigin(0.5);
+            this.add.text(width / 2, height / 2 + 10, `+${goldReward} Gold`, {
+                fontSize: '24px', color: '#ffcc44'
+            }).setOrigin(0.5);
+        }
 
         // Continue button
-        const continueBtn = this.add.text(width / 2, height / 2 + 70, 'Continue', {
+        const btnText = isFinalBoss ? 'To Victory!' : 'Continue';
+        const continueBtn = this.add.text(width / 2, height / 2 + 70, btnText, {
             fontSize: '24px', backgroundColor: '#006400',
             padding: { x: 20, y: 10 }, color: '#fff'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
         continueBtn.on('pointerdown', () => {
-            // Clear battle state
             this.service.setRoomState('battleEnemies', null);
             this.service.setCurrentTurnPlayer(null);
-            this.service.broadcastSceneSwitch('CardRewardScene');
+            if (isFinalBoss) {
+                this.service.broadcastSceneSwitch('VictoryScene');
+            } else {
+                this.service.broadcastSceneSwitch('CardRewardScene');
+            }
         });
 
         this.updateTurnUI();
@@ -952,9 +1044,24 @@ export class BattleScene extends BaseScene {
         this.battleOver = true;
         const { width, height } = this.scale;
 
-        this.add.text(width / 2, height / 2, 'DEFEATED', {
+        this.add.text(width / 2, height / 2 - 30, 'DEFEATED', {
             fontSize: '48px', color: '#ff4444', fontStyle: 'bold'
         }).setOrigin(0.5);
+
+        this.add.text(width / 2, height / 2 + 30, 'Your soul fades into the darkness...', {
+            fontSize: '18px', color: '#aa4444'
+        }).setOrigin(0.5);
+
+        const retryBtn = this.add.text(width / 2, height / 2 + 90, 'Game Over', {
+            fontSize: '24px', backgroundColor: '#440000',
+            padding: { x: 20, y: 10 }, color: '#fff'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        retryBtn.on('pointerdown', () => {
+            this.service.setRoomState('battleEnemies', null);
+            this.service.setCurrentTurnPlayer(null);
+            this.service.broadcastSceneSwitch('GameOverScene');
+        });
 
         this.updateTurnUI();
     }
