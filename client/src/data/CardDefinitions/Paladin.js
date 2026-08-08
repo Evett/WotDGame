@@ -25,7 +25,7 @@ export default {
     LayOnHands: () => createCard({
         name: "Lay on Hands",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Skill",
         requiresTarget: false,
         description: "Heal 10 HP.",
@@ -53,7 +53,7 @@ export default {
     HolySmite: () => createCard({
         name: "Holy Smite",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Attack",
         requiresTarget: true,
         description: "Deal 12 true damage to Evil enemies. 6 to others.",
@@ -93,7 +93,7 @@ export default {
     DivineGrace: () => createCard({
         name: "Divine Grace",
         actionCost: 0,
-        manaCost: 2,
+        manaCost: 1,
         type: "Power",
         requiresTarget: false,
         description: "Heal 5 HP. Gain 5 armor.",
@@ -124,7 +124,7 @@ export default {
     ChannelPositiveEnergy: () => createCard({
         name: "Channel Positive Energy",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: false,
         description: "Heal 8 HP. Deal 8 damage to Undead enemies.",
@@ -156,7 +156,7 @@ export default {
     RighteousMight: () => createCard({
         name: "Righteous Might",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Power",
         requiresTarget: false,
         isOncePerDay: true,
@@ -171,7 +171,7 @@ export default {
     HolyAvenger: () => createCard({
         name: "Holy Avenger",
         actionCost: 2,
-        manaCost: 2,
+        manaCost: 1,
         type: "Attack",
         requiresTarget: true,
         isOncePerDay: true,
@@ -205,7 +205,7 @@ export default {
     Consecrate: () => createCard({
         name: "Consecrate",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: false,
         description: "Deal 5 damage to all enemies. Gain 5 armor.",
@@ -268,7 +268,7 @@ export default {
     ProtectionFromEvil: () => createCard({
         name: "Protection from Evil",
         actionCost: 0,
-        manaCost: 2,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: false,
         description: "Gain 12 armor.",
@@ -299,7 +299,7 @@ export default {
     HandOfTheHealer: () => createCard({
         name: "Hand of the Healer",
         actionCost: 2,
-        manaCost: 3,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: false,
         isOncePerDay: true,
@@ -315,7 +315,7 @@ export default {
     JudgmentOfLight: () => createCard({
         name: "Judgment of Light",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: true,
         description: "Deal 10 damage. Heal 10 HP.",
@@ -409,7 +409,7 @@ export default {
     DivineJustice: () => createCard({
         name: "Divine Justice",
         actionCost: 2,
-        manaCost: 2,
+        manaCost: 1,
         type: "Attack",
         requiresTarget: false,
         isOncePerDay: true,
@@ -440,7 +440,7 @@ export default {
     HolyWord: () => createCard({
         name: "Holy Word",
         actionCost: 1,
-        manaCost: 3,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: true,
         isOncePerDay: true,
@@ -472,7 +472,7 @@ export default {
     AuraOfJustice: () => createCard({
         name: "Aura of Justice",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Power",
         requiresTarget: false,
         description: "All attacks deal +3 vs Evil for rest of combat.",

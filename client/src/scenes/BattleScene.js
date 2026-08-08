@@ -22,12 +22,12 @@ export class BattleScene extends BaseScene {
     }
 
     preload() {
-        this.load.image('char_alaen', 'src/assets/characters/char_alaen.png');
-        this.load.image('char_hassan', 'src/assets/characters/char_alaen.png');
-        this.load.image('char_marcus', 'src/assets/characters/char_alaen.png');
-        this.load.image('char_mohef', 'src/assets/characters/char_alaen.png');
-        this.load.image('char_nephereta', 'src/assets/characters/char_alaen.png');
-        this.load.image('char_urusha', 'src/assets/characters/char_alaen.png');
+        this.load.image('char_alaen', 'characters/char_alaen.png');
+        this.load.image('char_hassan', 'characters/char_alaen.png');
+        this.load.image('char_marcus', 'characters/char_alaen.png');
+        this.load.image('char_mohef', 'characters/char_alaen.png');
+        this.load.image('char_nephereta', 'characters/char_alaen.png');
+        this.load.image('char_urusha', 'characters/char_alaen.png');
     }
 
     create(data) {
@@ -45,8 +45,11 @@ export class BattleScene extends BaseScene {
         this.isMyTurn = false;
         this.battleOver = false;
         this.turnEnded = false;
-        this.currentRound = 1;
         this.enemyTurnRunning = false;
+
+        // Sync round from room state so reconnecting players stay in sync
+        const roomRound = this.service.getRoomState('battleRound');
+        this.currentRound = roomRound || 1;
 
         // Initialize battle
         this.initBattle();
@@ -77,6 +80,12 @@ export class BattleScene extends BaseScene {
         this.time.addEvent({
             delay: 500, loop: true,
             callback: () => this.checkAllTurnsEnded()
+        });
+
+        // Detect if room advanced a round while we were disconnected
+        this.time.addEvent({
+            delay: 600, loop: true,
+            callback: () => this.syncRoundFromRoom()
         });
 
         // Poll ally HP updates
@@ -117,7 +126,9 @@ export class BattleScene extends BaseScene {
                     enemies = EnemyLibrary.getRandomEncounter(difficulty);
                 }
                 enemies.forEach(e => e.decideIntent());
-                this.service.setBattleEnemies(enemies);
+                this.service.setBattleEnemiesForce(enemies);
+                this.service.setRoomState('battleRound', 1);
+                this.service.setRoomState('turnDone', null);
             } else {
                 // Non-host: wait for enemies to arrive
                 this.time.addEvent({
@@ -131,17 +142,23 @@ export class BattleScene extends BaseScene {
                 });
                 return;
             }
+
+            // Fresh battle setup
+            this.gameState.startBattle(enemies);
+            this.gameState.resetDeck();
+            this.gameState.actions = this.gameState.maxActions;
+            this.gameState.mana = this.gameState.maxMana;
+            this.gameState.armor = 0;
+            this.gameState.drawHand(this);
+            this.gameState.runItemTriggers('onBattleStart', this);
+        } else {
+            // Reconnecting to existing battle — use enemies from room state
+            this.gameState.enemies = enemies;
+            // Only draw a hand if we have none (reconnect case)
+            if (!this.gameState.hand || this.gameState.hand.length === 0) {
+                this.gameState.drawHand(this);
+            }
         }
-
-        this.gameState.startBattle(enemies);
-        this.gameState.resetDeck();
-        this.gameState.actions = this.gameState.maxActions;
-        this.gameState.mana = this.gameState.maxMana;
-        this.gameState.armor = 0;
-        this.gameState.drawHand(this);
-
-        // Fire onBattleStart triggers for passive items
-        this.gameState.runItemTriggers('onBattleStart', this);
 
         this.service.saveMyGameState(this.gameState);
     }
@@ -854,14 +871,14 @@ export class BattleScene extends BaseScene {
         if (allPlayers.length === 0) return;
 
         const doneMap = this.service.getRoomState('turnDone') || {};
-        const allDone = allPlayers.every(p => doneMap[p.id] === this.currentRound);
+        // A player counts as done if their turnDone >= this round
+        const allDone = allPlayers.every(p => doneMap[p.id] >= this.currentRound);
 
         if (allDone) {
-            // Don't clear turnDone — use round numbers so other clients can still detect
             this.enemyTurnRunning = true;
             this.currentRound++;
+            this.service.setRoomState('battleRound', this.currentRound);
 
-            // Run enemy turn (all clients run it locally)
             this.runEnemyTurn();
         }
     }
@@ -872,6 +889,22 @@ export class BattleScene extends BaseScene {
 
         if (data.type === 'enemy_turn') {
             this.runEnemyTurn();
+        }
+    }
+
+    syncRoundFromRoom() {
+        if (this.battleOver) return;
+        const roomRound = this.service.getRoomState('battleRound');
+        if (!roomRound) return;
+
+        // If room advanced past us while we were waiting, catch up
+        if (roomRound > this.currentRound && !this.enemyTurnRunning) {
+            this.currentRound = roomRound;
+            // If we were waiting for the other player to end turn, just start fresh
+            if (this.turnEnded) {
+                this.enemyTurnRunning = true;
+                this.runEnemyTurn();
+            }
         }
     }
 
@@ -967,8 +1000,8 @@ export class BattleScene extends BaseScene {
 
         // After all enemies act, start the next round
         this.time.delayedCall(delay + 400, () => {
-            // Save updated enemies
-            this.service.setBattleEnemies(this.gameState.enemies);
+            // Save updated enemies (force write — enemy turn is authoritative)
+            this.service.setBattleEnemiesForce(this.gameState.enemies);
             this.service.saveMyGameState(this.gameState);
 
             // Check if player died
@@ -1007,6 +1040,7 @@ export class BattleScene extends BaseScene {
     battleWon() {
         this.battleOver = true;
         this.service.setRoomState('turnDone', null);
+        this.service.setRoomState('battleRound', null);
         const { width, height } = this.scale;
 
         // Check if this was the final boss

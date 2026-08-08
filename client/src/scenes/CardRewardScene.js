@@ -37,6 +37,13 @@ export class CardRewardScene extends BaseScene {
       offerings = CardLibrary.getRandomCommonCards(3);
     }
 
+    // Chance to upgrade offered cards scales with progress
+    const battleCount = this.service.getBattleCount();
+    const upgradeChance = Math.min(0.1 + battleCount * 0.05, 0.5);
+    offerings.forEach(card => {
+      if (Math.random() < upgradeChance) card.upgraded = true;
+    });
+
     // Display cards
     const cardWidth = 160;
     const cardHeight = 220;
@@ -50,12 +57,13 @@ export class CardRewardScene extends BaseScene {
 
       const container = this.add.container(cx, cy);
 
-      const bg = this.add.rectangle(0, 0, cardWidth, cardHeight, 0x1a2a1a)
-        .setStrokeStyle(2, this.getCardTypeColor(card.type))
+      const bg = this.add.rectangle(0, 0, cardWidth, cardHeight, card.upgraded ? 0x1a2a2a : 0x1a2a1a)
+        .setStrokeStyle(2, card.upgraded ? 0x44ffff : this.getCardTypeColor(card.type))
         .setInteractive({ useHandCursor: true });
 
-      const nameText = this.add.text(0, -80, card.name, {
-        fontSize: '15px', color: '#fff', fontStyle: 'bold',
+      const displayName = card.upgraded ? `${card.name}+` : card.name;
+      const nameText = this.add.text(0, -80, displayName, {
+        fontSize: '15px', color: card.upgraded ? '#44ffff' : '#fff', fontStyle: 'bold',
         wordWrap: { width: cardWidth - 16 }, align: 'center'
       }).setOrigin(0.5);
 

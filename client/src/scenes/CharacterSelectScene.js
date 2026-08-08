@@ -1,28 +1,18 @@
 import BaseScene from './BaseScene';
 import CharacterLibrary from '../data/CharacterLibrary';
 
-// Color map for placeholder character sprites
-const CHARACTER_COLORS = {
-    Alaen: 0x7744aa,
-    Hassan: 0x44aa77,
-    Marcus: 0x4466ff,
-    Mohef: 0xcc2222,
-    Nephereta: 0xffcc00,
-    Urusha: 0xcc6600
-};
-
 export class CharacterSelectScene extends BaseScene {
   constructor() {
     super({ key: 'CharacterSelectScene' });
   }
 
   preload() {
-    this.load.image('char_alaen', 'src/assets/characters/char_alaen.png');
-    this.load.image('char_hassan', 'src/assets/characters/char_alaen.png');
-    this.load.image('char_marcus', 'src/assets/characters/char_alaen.png');
-    this.load.image('char_mohef', 'src/assets/characters/char_alaen.png');
-    this.load.image('char_nephereta', 'src/assets/characters/char_alaen.png');
-    this.load.image('char_urusha', 'src/assets/characters/char_alaen.png');
+    this.load.image('char_alaen', 'characters/char_alaen.png');
+    this.load.image('char_hassan', 'characters/char_alaen.png');
+    this.load.image('char_marcus', 'characters/char_alaen.png');
+    this.load.image('char_mohef', 'characters/char_alaen.png');
+    this.load.image('char_nephereta', 'characters/char_alaen.png');
+    this.load.image('char_urusha', 'characters/char_alaen.png');
   }
 
   create(data) {
@@ -37,8 +27,7 @@ export class CharacterSelectScene extends BaseScene {
     this.previewName = null;
     this.previewStats = null;
 
-    // Generate placeholder textures if not yet created
-    this.generateCharacterTextures();
+
 
     this.add.text(x, y - 200, 'Choose Your Character', { fontSize: '32px', color: '#fff' }).setOrigin(0.5);
 
@@ -86,32 +75,6 @@ export class CharacterSelectScene extends BaseScene {
     this.updateTakenDisplay();
 
     this.createSceneListener(this.service);
-  }
-
-  generateCharacterTextures() {
-    Object.keys(CharacterLibrary).forEach(charKey => {
-      const textureKey = `char_${charKey.toLowerCase()}`;
-      if (this.textures.exists(textureKey)) return;
-
-      const color = CHARACTER_COLORS[charKey] || 0x888888;
-      const graphics = this.make.graphics({ x: 0, y: 0, add: false });
-
-      // Draw a simple character silhouette placeholder
-      // Head
-      graphics.fillStyle(color, 1);
-      graphics.fillCircle(32, 16, 14);
-      // Body
-      graphics.fillRoundedRect(16, 30, 32, 44, 6);
-      // Arms
-      graphics.fillRoundedRect(6, 34, 12, 32, 4);
-      graphics.fillRoundedRect(46, 34, 12, 32, 4);
-      // Legs
-      graphics.fillRoundedRect(18, 72, 12, 28, 4);
-      graphics.fillRoundedRect(34, 72, 12, 28, 4);
-
-      graphics.generateTexture(textureKey, 64, 100);
-      graphics.destroy();
-    });
   }
 
   showCharacterPreview(charKey, character) {

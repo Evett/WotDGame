@@ -314,7 +314,7 @@ export default {
     SoulStorm: () => createCard({
         name: "Soul Storm",
         actionCost: 2,
-        manaCost: 3,
+        manaCost: 2,
         type: "Spell",
         requiresTarget: false,
         isOncePerDay: true,

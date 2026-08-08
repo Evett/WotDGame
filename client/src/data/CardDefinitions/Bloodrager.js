@@ -91,7 +91,7 @@ export default {
     PrimalRage: () => createCard({
         name: "Primal Rage",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Power",
         requiresTarget: false,
         description: "Gain +4 attack for 3 turns. Lose 5 HP.",
@@ -122,7 +122,7 @@ export default {
     BloodlineSurge: () => createCard({
         name: "Bloodline Surge",
         actionCost: 0,
-        manaCost: 2,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: false,
         description: "Gain 2 actions. Lose 4 HP.",
@@ -233,7 +233,7 @@ export default {
     AberrantBloodline: () => createCard({
         name: "Aberrant Bloodline",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: true,
         description: "Deal 12 true damage.",
@@ -310,7 +310,7 @@ export default {
     CelestialBloodline: () => createCard({
         name: "Celestial Bloodline",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: false,
         isOncePerDay: true,
@@ -326,7 +326,7 @@ export default {
     Bloodbath: () => createCard({
         name: "Bloodbath",
         actionCost: 2,
-        manaCost: 2,
+        manaCost: 1,
         type: "Attack",
         requiresTarget: false,
         isOncePerDay: true,
@@ -348,7 +348,7 @@ export default {
     DraconicBloodline: () => createCard({
         name: "Draconic Bloodline",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: false,
         description: "Gain 8 armor. Deal 5 damage to all enemies.",
@@ -428,7 +428,7 @@ export default {
     UndyingRage: () => createCard({
         name: "Undying Rage",
         actionCost: 0,
-        manaCost: 2,
+        manaCost: 1,
         type: "Power",
         requiresTarget: false,
         isOncePerDay: true,
@@ -478,7 +478,7 @@ export default {
     GreaterBloodrage: () => createCard({
         name: "Greater Bloodrage",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Power",
         requiresTarget: false,
         isOncePerDay: true,

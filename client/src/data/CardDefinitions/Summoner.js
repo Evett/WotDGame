@@ -55,7 +55,7 @@ export default {
     PlanarBinding: () => createCard({
         name: "Planar Binding",
         actionCost: 2,
-        manaCost: 3,
+        manaCost: 2,
         type: "Spell",
         requiresTarget: true,
         description: "Stun a non-boss enemy for 1 turn.",
@@ -181,7 +181,7 @@ export default {
     SummonGreaterElemental: () => createCard({
         name: "Summon Greater Elemental",
         actionCost: 2,
-        manaCost: 3,
+        manaCost: 2,
         type: "Spell",
         requiresTarget: false,
         isOncePerDay: true,
@@ -485,7 +485,7 @@ export default {
     TwinEidolon: () => createCard({
         name: "Twin Eidolon",
         actionCost: 2,
-        manaCost: 3,
+        manaCost: 2,
         type: "Power",
         requiresTarget: false,
         isOncePerDay: true,

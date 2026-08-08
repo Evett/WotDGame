@@ -474,6 +474,21 @@ export class Service {
     // ─── Battle State (Shared) ──────────────────────────────
 
     setBattleEnemies(enemies) {
+        // Merge with room state to avoid overwriting another player's damage
+        const existing = this.getRoomState('battleEnemies');
+        const serialized = enemies.map((e, i) => {
+            const s = e.serialize();
+            if (existing && existing[i]) {
+                // Take the lower HP to preserve damage from either player
+                s.currentHealth = Math.min(s.currentHealth, existing[i].currentHealth);
+                if (s.currentHealth <= 0) s.isAlive = false;
+            }
+            return s;
+        });
+        this.setRoomState('battleEnemies', serialized);
+    }
+
+    setBattleEnemiesForce(enemies) {
         const serialized = enemies.map(e => e.serialize());
         this.setRoomState('battleEnemies', serialized);
     }

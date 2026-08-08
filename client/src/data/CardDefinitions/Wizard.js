@@ -326,7 +326,7 @@ export default {
     MeteorSwarm: () => createCard({
         name: "Meteor Swarm",
         actionCost: 3,
-        manaCost: 4,
+        manaCost: 3,
         type: "Spell",
         requiresTarget: false,
         isOncePerDay: true,
@@ -469,7 +469,7 @@ export default {
     Wish: () => createCard({
         name: "Wish",
         actionCost: 2,
-        manaCost: 4,
+        manaCost: 3,
         type: "Spell",
         requiresTarget: false,
         isOncePerDay: true,
