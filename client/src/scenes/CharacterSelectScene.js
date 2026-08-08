@@ -16,6 +16,15 @@ export class CharacterSelectScene extends BaseScene {
     super({ key: 'CharacterSelectScene' });
   }
 
+  preload() {
+    this.load.image('char_alaen', 'src/assets/characters/char_alaen.png');
+    this.load.image('char_hassan', 'src/assets/characters/char_alaen.png');
+    this.load.image('char_marcus', 'src/assets/characters/char_alaen.png');
+    this.load.image('char_mohef', 'src/assets/characters/char_alaen.png');
+    this.load.image('char_nephereta', 'src/assets/characters/char_alaen.png');
+    this.load.image('char_urusha', 'src/assets/characters/char_alaen.png');
+  }
+
   create(data) {
     super.create();
     this.service = data.service;
