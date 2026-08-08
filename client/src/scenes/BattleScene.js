@@ -1,9 +1,20 @@
 import BaseScene from './BaseScene';
 import EnemyLibrary from '../data/EnemyLibrary';
+import CharacterLibrary from '../data/CharacterLibrary';
 
 const CARD_WIDTH = 120;
 const CARD_HEIGHT = 170;
 const CARD_SPACING = 10;
+
+// Color map for placeholder character sprites (must match CharacterSelectScene)
+const CHARACTER_COLORS = {
+    Alaen: 0x7744aa,
+    Hassan: 0x44aa77,
+    Marcus: 0x4466ff,
+    Mohef: 0xcc2222,
+    Nephereta: 0xffcc00,
+    Urusha: 0xcc6600
+};
 
 export class BattleScene extends BaseScene {
     constructor() {
@@ -38,6 +49,7 @@ export class BattleScene extends BaseScene {
         this.createHandDisplay();
         this.createEndTurnButton();
         this.createItemDisplay();
+        this.createCharacterSprite();
         this.createTurnIndicator();
 
         // Listen for turn events
@@ -117,6 +129,46 @@ export class BattleScene extends BaseScene {
         this.gameState.runItemTriggers('onBattleStart', this);
 
         this.service.saveMyGameState(this.gameState);
+    }
+
+    // ─── Character Sprite ───────────────────────────────────
+
+    createCharacterSprite() {
+        const { height } = this.scale;
+        const charName = this.gameState.character?.name;
+        if (!charName) return;
+
+        const textureKey = `char_${charName.toLowerCase()}`;
+
+        // Generate placeholder texture if it doesn't exist yet
+        if (!this.textures.exists(textureKey)) {
+            this.generateCharacterTexture(charName, textureKey);
+        }
+
+        // Place character sprite at bottom-left, above the cards
+        this.characterSprite = this.add.image(80, height - 240, textureKey)
+            .setScale(2.5)
+            .setOrigin(0.5, 1);
+    }
+
+    generateCharacterTexture(charName, textureKey) {
+        const color = CHARACTER_COLORS[charName] || 0x888888;
+        const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+
+        // Head
+        graphics.fillStyle(color, 1);
+        graphics.fillCircle(32, 16, 14);
+        // Body
+        graphics.fillRoundedRect(16, 30, 32, 44, 6);
+        // Arms
+        graphics.fillRoundedRect(6, 34, 12, 32, 4);
+        graphics.fillRoundedRect(46, 34, 12, 32, 4);
+        // Legs
+        graphics.fillRoundedRect(18, 72, 12, 28, 4);
+        graphics.fillRoundedRect(34, 72, 12, 28, 4);
+
+        graphics.generateTexture(textureKey, 64, 100);
+        graphics.destroy();
     }
 
     // ─── Ally Display ───────────────────────────────────────
