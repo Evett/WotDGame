@@ -339,14 +339,20 @@ export class BattleScene extends BaseScene {
 
         this.statsContainer = this.add.container(20, y);
 
-        this.healthText = this.add.text(0, 0, '', { fontSize: '14px', color: '#ff6666' });
+        // HP bar
+        const barWidth = 120;
+        this.hpBarBg = this.add.rectangle(barWidth / 2, 0, barWidth, 14, 0x333333);
+        this.hpBarFill = this.add.rectangle(0, 0, barWidth, 14, 0xcc3333).setOrigin(0, 0.5);
+        this.healthText = this.add.text(barWidth / 2, 0, '', { fontSize: '12px', color: '#ffffff' }).setOrigin(0.5);
+
         this.manaText = this.add.text(0, 18, '', { fontSize: '14px', color: '#6699ff' });
         this.actionsText = this.add.text(0, 36, '', { fontSize: '14px', color: '#ffcc44' });
         this.armorText = this.add.text(0, 54, '', { fontSize: '14px', color: '#aaaaaa' });
         this.deckInfoText = this.add.text(0, 72, '', { fontSize: '12px', color: '#888888' });
 
         this.statsContainer.add([
-            this.healthText, this.manaText, this.actionsText,
+            this.hpBarBg, this.hpBarFill, this.healthText,
+            this.manaText, this.actionsText,
             this.armorText, this.deckInfoText
         ]);
 
@@ -355,7 +361,12 @@ export class BattleScene extends BaseScene {
 
     updateStatsUI() {
         const gs = this.gameState;
-        this.healthText.setText(`♥ HP: ${gs.health}/${gs.maxHealth}`);
+        const ratio = gs.health / gs.maxHealth;
+        this.hpBarFill.displayWidth = 120 * Math.max(0, ratio);
+        if (ratio > 0.5) this.hpBarFill.setFillStyle(0x44cc44);
+        else if (ratio > 0.25) this.hpBarFill.setFillStyle(0xccaa44);
+        else this.hpBarFill.setFillStyle(0xcc3333);
+        this.healthText.setText(`${gs.health}/${gs.maxHealth}`);
         this.manaText.setText(`✦ Mana: ${gs.mana}/${gs.maxMana}`);
         this.actionsText.setText(`⚡ Actions: ${gs.actions}/${gs.maxActions}`);
         this.armorText.setText(`🛡 Armor: ${gs.armor}`);
