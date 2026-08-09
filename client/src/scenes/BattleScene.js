@@ -135,13 +135,14 @@ export class BattleScene extends BaseScene {
         if (enemies.length === 0) {
             if (this.service.isHost()) {
                 // Host sets up the battle
+                const playerCount = this.service.getAllPlayers().length || 1;
                 if (this.service.isFinalBoss()) {
-                    enemies = EnemyLibrary.getFinalBossEncounter();
+                    enemies = EnemyLibrary.getFinalBossEncounter(playerCount);
                 } else if (this.isBossBattle) {
-                    enemies = EnemyLibrary.getBossEncounter();
+                    enemies = EnemyLibrary.getBossEncounter(playerCount);
                 } else {
                     const difficulty = this.service.getRoomState('battleDifficulty') || 1;
-                    enemies = EnemyLibrary.getRandomEncounter(difficulty);
+                    enemies = EnemyLibrary.getRandomEncounter(difficulty, playerCount);
                 }
                 enemies.forEach(e => e.decideIntent());
                 this.service.setBattleEnemiesForce(enemies);

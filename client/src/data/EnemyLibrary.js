@@ -306,7 +306,16 @@ const EnemyLibrary = {
 
     // ─── Encounter Generators ───────────────────────────────
 
-    getRandomEncounter(difficulty = 1) {
+    scaleForPlayers(enemies, playerCount) {
+        const scale = playerCount / 6;
+        enemies.forEach(e => {
+            e.maxHealth = Math.round(e.maxHealth * scale);
+            e.health = e.maxHealth;
+        });
+        return enemies;
+    },
+
+    getRandomEncounter(difficulty = 1, playerCount = 6) {
         const tierOne = ['Goblin', 'Slime', 'Skeleton', 'Bandit', 'WolfPack'];
         const tierTwo = ['Orc', 'GiantSpider', 'Wraith', 'DarkCultist', 'FrostWitch', 'Harpy', 'ShadowAssassin'];
         const tierThree = ['OgreBrute', 'StoneGolem', 'FireElemental', 'VampireSpawn', 'Minotaur', 'PlagueBear', 'BoneKnight'];
@@ -326,17 +335,17 @@ const EnemyLibrary = {
             const key = pool[Math.floor(Math.random() * pool.length)];
             enemies.push(EnemyLibrary[key]());
         }
-        return enemies;
+        return this.scaleForPlayers(enemies, playerCount);
     },
 
-    getBossEncounter() {
+    getBossEncounter(playerCount = 6) {
         const bosses = ['Dragon', 'LichKing', 'IronColossus', 'DemonPrince'];
         const key = bosses[Math.floor(Math.random() * bosses.length)];
-        return [EnemyLibrary[key]()];
+        return this.scaleForPlayers([EnemyLibrary[key]()], playerCount);
     },
 
-    getFinalBossEncounter() {
-        return [EnemyLibrary.Nyxaroth()];
+    getFinalBossEncounter(playerCount = 6) {
+        return this.scaleForPlayers([EnemyLibrary.Nyxaroth()], playerCount);
     }
 };
 
