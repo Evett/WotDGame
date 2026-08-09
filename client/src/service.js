@@ -13,6 +13,9 @@ const EVENTS = {
   SYNC_GAME_STATE: 'SYNC_GAME_STATE',
   BATTLE_ACTION: 'BATTLE_ACTION',
   END_TURN: 'END_TURN',
+  BATTLE_READY: 'BATTLE_READY',
+  ENEMY_DAMAGE: 'ENEMY_DAMAGE',
+  PLAYER_ENDED_TURN: 'PLAYER_ENDED_TURN',
 };
 
 const SCENES = {
@@ -39,6 +42,7 @@ export class Service {
         this.playerStates = new Map();
         this.phaserGame = null;        // set by StartingScene after connect
         this.sceneChangeCallbacks = []; // scenes register to be notified
+        this.battleCallbacks = [];
     }
 
     // ─── Connection ─────────────────────────────────────────
@@ -94,6 +98,18 @@ export class Service {
 
         Playroom.RPC.register(EVENTS.END_TURN, async data => {
             this.handleEndTurn(data);
+        });
+
+        Playroom.RPC.register(EVENTS.BATTLE_READY, async data => {
+            this.battleCallbacks.forEach(cb => cb('battle_ready', data));
+        });
+
+        Playroom.RPC.register(EVENTS.ENEMY_DAMAGE, async data => {
+            this.battleCallbacks.forEach(cb => cb('enemy_damage', data));
+        });
+
+        Playroom.RPC.register(EVENTS.PLAYER_ENDED_TURN, async data => {
+            this.battleCallbacks.forEach(cb => cb('player_ended_turn', data));
         });
 
         Playroom.onPlayerJoin(player => {
@@ -473,17 +489,33 @@ export class Service {
 
     // ─── Battle State (Shared) ──────────────────────────────
 
+    onBattleEvent(callback) {
+        this.battleCallbacks.push(callback);
+    }
+
+    offBattleEvent(callback) {
+        this.battleCallbacks = this.battleCallbacks.filter(cb => cb !== callback);
+    }
+
+    broadcastBattleReady(enemies) {
+        const serialized = enemies.map(e => e.serialize());
+        this.setRoomState('battleEnemies', serialized);
+        Playroom.RPC.call(EVENTS.BATTLE_READY, { enemies: serialized }, Playroom.RPC.Mode.OTHERS)
+            .catch(err => console.error('Battle ready RPC failed:', err));
+    }
+
+    broadcastEnemyDamage(enemyIndex, newHealth, isAlive) {
+        Playroom.RPC.call(EVENTS.ENEMY_DAMAGE, { enemyIndex, newHealth, isAlive }, Playroom.RPC.Mode.OTHERS)
+            .catch(err => console.error('Enemy damage RPC failed:', err));
+    }
+
+    broadcastEndTurn(playerId) {
+        Playroom.RPC.call(EVENTS.PLAYER_ENDED_TURN, { playerId }, Playroom.RPC.Mode.ALL)
+            .catch(err => console.error('Player end turn RPC failed:', err));
+    }
+
     setBattleEnemies(enemies) {
-        // Merge with room state — take the lower HP to preserve damage from either player
-        const existing = this.getRoomState('battleEnemies');
-        const serialized = enemies.map((e, i) => {
-            const s = e.serialize();
-            if (existing && existing[i]) {
-                s.health = Math.min(s.health, existing[i].health);
-                if (s.health <= 0) s.isAlive = false;
-            }
-            return s;
-        });
+        const serialized = enemies.map(e => e.serialize());
         this.setRoomState('battleEnemies', serialized);
     }
 
