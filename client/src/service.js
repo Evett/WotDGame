@@ -480,8 +480,8 @@ export class Service {
             const s = e.serialize();
             if (existing && existing[i]) {
                 // Take the lower HP to preserve damage from either player
-                s.currentHealth = Math.min(s.currentHealth, existing[i].currentHealth);
-                if (s.currentHealth <= 0) s.isAlive = false;
+                s.health = Math.min(s.health, existing[i].health);
+                if (s.health <= 0) s.isAlive = false;
             }
             return s;
         });

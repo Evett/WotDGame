@@ -245,6 +245,8 @@ export default class GameState {
 
     startBattle(enemiesArray) {
         this.enemies = enemiesArray;
+        this.hasEidolon = false;
+        this.allies = [];
         this.resetItemsForCombat();
     }
 

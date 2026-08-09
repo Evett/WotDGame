@@ -91,8 +91,20 @@ export class BattleScene extends BaseScene {
             this.service.offEndTurn(this._endTurnHandler);
         });
 
-        // All players start simultaneously
-        this.startMyTurn();
+        // Start turn or resume from reconnect
+        if (this.isReconnect) {
+            // Reconnecting mid-battle: restore UI state without resetting turn
+            this.isMyTurn = true;
+            this.updateStatsUI();
+            this.updateEnemyDisplay();
+            this.updateHandDisplay();
+            this.updateTurnUI();
+            this.updateItemDisplay();
+            this.updateAllyDisplay();
+            this.updateStatusDisplay();
+        } else {
+            this.startMyTurn();
+        }
 
         // Poll for all players ending turn (simultaneous turn model)
         this.time.addEvent({
@@ -147,7 +159,6 @@ export class BattleScene extends BaseScene {
                 enemies.forEach(e => e.decideIntent());
                 this.service.setBattleEnemiesForce(enemies);
                 this.service.setRoomState('battleRound', 1);
-                this.service.setRoomState('turnDone', null);
             } else {
                 // Non-host: wait for enemies to arrive
                 this.time.addEvent({
@@ -163,6 +174,7 @@ export class BattleScene extends BaseScene {
             }
 
             // Fresh battle setup
+            this.isReconnect = false;
             this.gameState.startBattle(enemies);
             this.gameState.resetDeck();
             this.gameState.actions = this.gameState.maxActions;
@@ -171,11 +183,28 @@ export class BattleScene extends BaseScene {
             this.gameState.drawHand(this);
             this.gameState.runItemTriggers('onBattleStart', this);
         } else {
-            // Reconnecting to existing battle — use enemies from room state
-            this.gameState.enemies = enemies;
-            // Only draw a hand if we have none (reconnect case)
-            if (!this.gameState.hand || this.gameState.hand.length === 0) {
+            // Enemies already exist in room state — determine if first entry or reconnect
+            const myTurnDone = this.service.getMyPlayer().getState('turnDone') || 0;
+            const roomRound = this.service.getRoomState('battleRound') || 1;
+            const alreadyPlayed = myTurnDone >= 1 || roomRound > 1;
+
+            if (alreadyPlayed) {
+                // Reconnecting mid-battle — preserve hand and state
+                this.isReconnect = true;
+                this.gameState.enemies = enemies;
+                if (!this.gameState.hand || this.gameState.hand.length === 0) {
+                    this.gameState.drawHand(this);
+                }
+            } else {
+                // Non-host first time entering battle
+                this.isReconnect = false;
+                this.gameState.startBattle(enemies);
+                this.gameState.resetDeck();
+                this.gameState.actions = this.gameState.maxActions;
+                this.gameState.mana = this.gameState.maxMana;
+                this.gameState.armor = 0;
                 this.gameState.drawHand(this);
+                this.gameState.runItemTriggers('onBattleStart', this);
             }
         }
 
@@ -855,12 +884,9 @@ export class BattleScene extends BaseScene {
         this.updateHandDisplay();
         this.updateTurnUI();
 
-        // Mark this player as done with their turn via room state
-        // Use round number instead of boolean to avoid clear-before-read race
+        // Mark this player as done with their turn via player state
         const player = this.service.getMyPlayer();
-        const doneMap = this.service.getRoomState('turnDone') || {};
-        doneMap[player.id] = this.currentRound;
-        this.service.setRoomState('turnDone', doneMap);
+        player.setState('turnDone', this.currentRound);
     }
 
     // ─── Simultaneous Turn Management ───────────────────────
@@ -901,9 +927,8 @@ export class BattleScene extends BaseScene {
         const allPlayers = this.service.getAllPlayers();
         if (allPlayers.length === 0) return;
 
-        const doneMap = this.service.getRoomState('turnDone') || {};
-        // A player counts as done if their turnDone >= this round
-        const allDone = allPlayers.every(p => doneMap[p.id] >= this.currentRound);
+        // Each player stores their turnDone round in their own player state
+        const allDone = allPlayers.every(p => p.getState('turnDone') >= this.currentRound);
 
         if (allDone) {
             this.enemyTurnRunning = true;
@@ -1070,7 +1095,6 @@ export class BattleScene extends BaseScene {
 
     battleWon() {
         this.battleOver = true;
-        this.service.setRoomState('turnDone', null);
         this.service.setRoomState('battleRound', null);
         const { width, height } = this.scale;
 
