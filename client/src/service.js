@@ -474,23 +474,56 @@ export class Service {
     // ─── Battle State (Shared) ──────────────────────────────
 
     setBattleEnemies(enemies) {
-        // Merge with room state to avoid overwriting another player's damage
-        const existing = this.getRoomState('battleEnemies');
-        const serialized = enemies.map((e, i) => {
-            const s = e.serialize();
-            if (existing && existing[i]) {
-                // Take the lower HP to preserve damage from either player
-                s.health = Math.min(s.health, existing[i].health);
-                if (s.health <= 0) s.isAlive = false;
+        // Each player writes their own enemy state to a per-player key.
+        // The canonical 'battleEnemies' is computed by taking the MINIMUM HP
+        // across the base (start-of-turn) value and all per-player views.
+        // Since all players start the turn with the same HP (from startMyTurn refresh),
+        // each player's local HP = startHP - theirDamage. The correct combined HP is
+        // startHP - allDamage = startHP - (startHP - playerA_HP) - (startHP - playerB_HP) ...
+        // But we approximate with min() for simplicity — this works because refreshEnemiesFromRoom
+        // syncs the local state every 800ms, so damage is cumulative across poll cycles.
+        const player = this.getMyPlayer();
+        const serialized = enemies.map(e => e.serialize());
+        console.log(`[SET ENEMIES] Player ${player.id} writing HP: ${serialized.map(e => e.health).join(', ')}`);
+        this.setRoomState(`battleEnemies_${player.id}`, serialized);
+
+        // Merge all player views into canonical state
+        this._mergeAllPlayerEnemies();
+    }
+
+    _mergeAllPlayerEnemies() {
+        // Compute combined enemy HP by summing damage from all players.
+        // Each player's stored HP represents their local view after dealing damage.
+        // Damage dealt by player P = turnStartHP - playerP_HP
+        // Total HP = turnStartHP - sum(all player damages)
+        const allPlayers = this.getAllPlayers();
+        const baseEnemies = this.getRoomState('battleEnemies_base');
+        if (!baseEnemies || baseEnemies.length === 0) return;
+
+        const merged = baseEnemies.map((base, i) => {
+            let totalDamage = 0;
+            for (const p of allPlayers) {
+                const playerEnemies = this.getRoomState(`battleEnemies_${p.id}`);
+                if (playerEnemies && playerEnemies[i]) {
+                    const playerDmg = base.health - playerEnemies[i].health;
+                    if (playerDmg > 0) totalDamage += playerDmg;
+                }
             }
-            return s;
+            const finalHealth = Math.max(0, base.health - totalDamage);
+            return { ...base, health: finalHealth, isAlive: finalHealth > 0 };
         });
-        this.setRoomState('battleEnemies', serialized);
+        this.setRoomState('battleEnemies', merged);
     }
 
     setBattleEnemiesForce(enemies) {
         const serialized = enemies.map(e => e.serialize());
         this.setRoomState('battleEnemies', serialized);
+        // Set as base for next turn's damage calculation
+        this.setRoomState('battleEnemies_base', serialized);
+        // Clear per-player damage states
+        for (const p of this.getAllPlayers()) {
+            this.setRoomState(`battleEnemies_${p.id}`, null);
+        }
     }
 
     getBattleEnemies() {
