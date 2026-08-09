@@ -28,6 +28,24 @@ export class BattleScene extends BaseScene {
         this.load.image('char_mohef', 'characters/char_alaen.png');
         this.load.image('char_nephereta', 'characters/char_alaen.png');
         this.load.image('char_urusha', 'characters/char_alaen.png');
+
+        // Enemy sprites — all point to placeholder until real art is added
+        const enemyNames = [
+            'goblin', 'orc', 'slime', 'skeleton', 'bandit',
+            'giant_spider', 'wraith', 'ogre_brute', 'dark_cultist', 'wolf_pack',
+            'stone_golem', 'fire_elemental', 'vampire_spawn', 'minotaur', 'frost_witch',
+            'shadow_assassin', 'plague_bear', 'bone_knight', 'harpy',
+            'ancient_dragon', 'lich_king', 'iron_colossus', 'demon_prince', 'nyxaroth'
+        ];
+        enemyNames.forEach(name => {
+            this.load.image(`enemy_${name}`, `enemies/${name}.png`);
+        });
+
+        this.load.on('loaderror', (file) => {
+            if (file.key.startsWith('enemy_')) {
+                console.warn(`[BattleScene] Enemy sprite not found: ${file.key}`);
+            }
+        });
     }
 
     create(data) {
@@ -178,7 +196,7 @@ export class BattleScene extends BaseScene {
         }
 
         this.characterSprite = this.add.image(80, height - 340, textureKey)
-            .setScale(2.5)
+            .setScale(1.5)
             .setOrigin(0.5, 1);
     }
 
@@ -200,6 +218,10 @@ export class BattleScene extends BaseScene {
 
         graphics.generateTexture(textureKey, 64, 100);
         graphics.destroy();
+    }
+
+    getEnemySpriteKey(enemyName) {
+        return 'enemy_' + enemyName.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/_$/, '');
     }
 
     // ─── Ally Display ───────────────────────────────────────
@@ -322,9 +344,17 @@ export class BattleScene extends BaseScene {
             const x = startX + index * 140;
             const container = this.add.container(x, y);
 
-            // Enemy body (clickable)
-            const body = this.add.rectangle(0, 0, 100, 100, 0x8b0000)
-                .setInteractive({ useHandCursor: true });
+            // Enemy sprite or fallback colored box
+            const textureKey = this.getEnemySpriteKey(enemy.name);
+            let body;
+            if (this.textures.exists(textureKey) && this.textures.get(textureKey).key !== '__MISSING') {
+                body = this.add.image(0, 0, textureKey)
+                    .setDisplaySize(100, 100)
+                    .setInteractive({ useHandCursor: true });
+            } else {
+                body = this.add.rectangle(0, 0, 100, 100, enemy.isBoss ? 0x660066 : 0x8b0000)
+                    .setInteractive({ useHandCursor: true });
+            }
 
             // Highlight on hover
             body.on('pointerover', () => {

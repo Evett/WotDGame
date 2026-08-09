@@ -86,7 +86,7 @@ export class CharacterSelectScene extends BaseScene {
     const textureKey = `char_${charKey.toLowerCase()}`;
 
     this.previewSprite = this.add.image(previewX, previewY, textureKey)
-      .setScale(2)
+      .setScale(1.2)
       .setOrigin(0.5);
 
     this.previewName = this.add.text(previewX, previewY - 120, character.name, {
