@@ -159,10 +159,7 @@ export class BattleScene extends BaseScene {
                 enemies.forEach(e => e.decideIntent());
                 this.service.setBattleEnemiesForce(enemies);
                 this.service.setRoomState('battleRound', 1);
-                // Clear turnDone from previous battles
-                this.service.getAllPlayers().forEach(p => {
-                    this.service.setRoomState(`turnDone_${p.id}`, 0);
-                });
+                this.service.setRoomState('turnDone', null);
             } else {
                 // Non-host: wait for enemies to arrive
                 this.time.addEvent({
@@ -189,7 +186,8 @@ export class BattleScene extends BaseScene {
         } else {
             // Enemies already exist in room state — determine if first entry or reconnect
             const myPlayer = this.service.getMyPlayer();
-            const myTurnDone = this.service.getRoomState(`turnDone_${myPlayer.id}`) || 0;
+            const doneMap = this.service.getRoomState('turnDone') || {};
+            const myTurnDone = doneMap[myPlayer.id] || 0;
             const roomRound = this.service.getRoomState('battleRound') || 1;
             const alreadyPlayed = myTurnDone >= 1 || roomRound > 1;
 
@@ -524,14 +522,10 @@ export class BattleScene extends BaseScene {
         const enemies = this.service.getBattleEnemies();
         if (enemies.length === 0) return;
 
-        console.log(`[ENEMY SYNC] Room enemies HP: ${enemies.map(e => e.health).join(', ')}`);
-
-        // DON'T replace local gameState.enemies during the turn — that would
-        // corrupt per-player damage tracking. Only update the DISPLAY to show
-        // combined damage from all players.
+        // Update gameState enemies and display references with latest from room
+        this.gameState.enemies = enemies;
         enemies.forEach((enemy, i) => {
             if (this.enemyObjects[i]) {
-                // Update display enemy reference for visual only
                 this.enemyObjects[i].enemy = enemy;
             }
         });
@@ -893,9 +887,11 @@ export class BattleScene extends BaseScene {
         this.updateHandDisplay();
         this.updateTurnUI();
 
-        // Mark this player as done with their turn via room state (per-player key)
+        // Mark this player as done with their turn via shared room state map
         const player = this.service.getMyPlayer();
-        this.service.setRoomState(`turnDone_${player.id}`, this.currentRound);
+        const doneMap = this.service.getRoomState('turnDone') || {};
+        doneMap[player.id] = this.currentRound;
+        this.service.setRoomState('turnDone', doneMap);
     }
 
     // ─── Simultaneous Turn Management ───────────────────────
@@ -936,14 +932,8 @@ export class BattleScene extends BaseScene {
         const allPlayers = this.service.getAllPlayers();
         if (allPlayers.length === 0) return;
 
-        // Each player writes to their own room state key to avoid race conditions
-        const allDone = allPlayers.every(p => {
-            const val = this.service.getRoomState(`turnDone_${p.id}`);
-            console.log(`[TURN CHECK] Player ${p.id} turnDone=${val}, need=${this.currentRound}`);
-            return val >= this.currentRound;
-        });
-
-        console.log(`[TURN CHECK] allPlayers=${allPlayers.length}, allDone=${allDone}, round=${this.currentRound}`);
+        const doneMap = this.service.getRoomState('turnDone') || {};
+        const allDone = allPlayers.every(p => doneMap[p.id] >= this.currentRound);
 
         if (allDone) {
             this.enemyTurnRunning = true;
@@ -1111,6 +1101,8 @@ export class BattleScene extends BaseScene {
     battleWon() {
         this.battleOver = true;
         this.service.setRoomState('battleRound', null);
+        this.service.setRoomState('battleEnemies', null);
+        this.service.setRoomState('turnDone', null);
         const { width, height } = this.scale;
 
         // Check if this was the final boss
