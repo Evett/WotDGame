@@ -492,6 +492,12 @@ export class Service {
         this.setRoomState('battleEnemies', serialized);
     }
 
+    clearTurnDone() {
+        for (const p of this.getAllPlayers()) {
+            this.setRoomState(`td_${p.id}`, 0);
+        }
+    }
+
     getBattleEnemies() {
         const raw = this.getRoomState('battleEnemies');
         if (!raw) return [];
