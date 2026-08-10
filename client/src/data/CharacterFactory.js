@@ -15,7 +15,8 @@ export default class CharacterFactory {
                     deck: CardFactory.rehydrateCards(data.deck),
                     heroAbility: char.heroAbility,
                     heroAbilityName: char.heroAbilityName,
-                    heroAbilityDescription: char.heroAbilityDescription
+                    heroAbilityDescription: char.heroAbilityDescription,
+                    levelBonuses: char.levelBonuses
                 });
             }
         }

@@ -25,7 +25,13 @@ const CharacterLibrary = {
         heroAbility: (gameState) => {
             const level = gameState.heroAbilityLevel || 1;
             gameState.actions += level;
-        }
+        },
+        levelBonuses: [
+            { level: 2, description: "+1 Hand Size", stat: 'handLimit', value: 1 },
+            { level: 3, description: "+1 Max Mana", stat: 'maxMana', value: 1 },
+            { level: 4, description: "Allies deal +2 damage", passive: 'allyDamageBonus', value: 2 },
+            { level: 5, description: "Start combat with Khan summoned", passive: 'autoSummonEidolon', value: true }
+        ]
     }),
     Hassan: createCharacter({
         name: "Hassan",
@@ -47,8 +53,14 @@ const CharacterLibrary = {
         heroAbility: (gameState) => {
             const level = gameState.heroAbilityLevel || 1;
             gameState.armor += 3 + level * 2;
-        }
-}),
+        },
+        levelBonuses: [
+            { level: 2, description: "Allies deal +1 damage", passive: 'allyDamageBonus', value: 1 },
+            { level: 3, description: "+1 Hand Size", stat: 'handLimit', value: 1 },
+            { level: 4, description: "Allies deal +2 more damage", passive: 'allyDamageBonus', value: 2 },
+            { level: 5, description: "+1 Max Mana", stat: 'maxMana', value: 1 }
+        ]
+    }),
     Marcus: createCharacter({
         name: "Marcus",
         characterClass: "Wizard",
@@ -69,7 +81,13 @@ const CharacterLibrary = {
             const level = gameState.heroAbilityLevel || 1;
             gameState.actions += level;
             gameState.mana += level;
-        }
+        },
+        levelBonuses: [
+            { level: 2, description: "+1 Max Mana", stat: 'maxMana', value: 1 },
+            { level: 3, description: "+1 Hand Size", stat: 'handLimit', value: 1 },
+            { level: 4, description: "+1 Max Mana", stat: 'maxMana', value: 1 },
+            { level: 5, description: "Draw 1 extra card each turn", passive: 'extraDraw', value: 1 }
+        ]
     }),
     Mohef: createCharacter({
         name: "Mohef",
@@ -91,7 +109,13 @@ const CharacterLibrary = {
         heroAbility: (gameState) => {
             const level = gameState.heroAbilityLevel || 1;
             gameState.nextAttackBonus = 1 + level;
-        }
+        },
+        levelBonuses: [
+            { level: 2, description: "+1 Max Actions", stat: 'maxActions', value: 1 },
+            { level: 3, description: "Start combat with 5 armor", passive: 'startArmor', value: 5 },
+            { level: 4, description: "+1 Max Actions", stat: 'maxActions', value: 1 },
+            { level: 5, description: "Start combat with +2 Strength", passive: 'startStrength', value: 2 }
+        ]
     }),
     Nephereta: createCharacter({
         name: "Nephereta",
@@ -113,7 +137,13 @@ const CharacterLibrary = {
             const level = gameState.heroAbilityLevel || 1;
             const heal = 5 * level;
             gameState.health = Math.min(gameState.health + heal, gameState.maxHealth);
-        }
+        },
+        levelBonuses: [
+            { level: 2, description: "Start combat with 5 armor", passive: 'startArmor', value: 5 },
+            { level: 3, description: "+1 Max Mana", stat: 'maxMana', value: 1 },
+            { level: 4, description: "Start combat with +10 armor", passive: 'startArmor', value: 10 },
+            { level: 5, description: "Heal 3 HP at start of each turn", passive: 'turnHeal', value: 3 }
+        ]
     }),
     Urusha: createCharacter({
         name: "Urusha",
@@ -136,7 +166,13 @@ const CharacterLibrary = {
             const level = gameState.heroAbilityLevel || 1;
             gameState.health -= 5;
             gameState.actions += 1 + level;
-        }
+        },
+        levelBonuses: [
+            { level: 2, description: "+1 Max Actions", stat: 'maxActions', value: 1 },
+            { level: 3, description: "Heal 2 HP at start of each turn", passive: 'turnHeal', value: 2 },
+            { level: 4, description: "+1 Max Mana", stat: 'maxMana', value: 1 },
+            { level: 5, description: "Heal 3 more HP at start of turn", passive: 'turnHeal', value: 3 }
+        ]
     }),
 };
 

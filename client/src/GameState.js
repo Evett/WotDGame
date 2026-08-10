@@ -31,6 +31,7 @@ export default class GameState {
         this.buffs = {};
         this.statuses = {};
         this.hasEidolon = false;
+        this.passives = {};
 
         this.character = null;
         this.characterClass = null;
@@ -101,6 +102,7 @@ export default class GameState {
 
         const messages = [];
         const aliveEnemies = this.enemies.filter(e => e.isAlive);
+        const damageBonus = (this.passives?.allyDamageBonus) || 0;
 
         this.allies = this.allies.filter(ally => {
             if (ally.turnsRemaining <= 0) return false;
@@ -108,8 +110,9 @@ export default class GameState {
             // Ally attacks a random living enemy
             if (ally.damage && aliveEnemies.length > 0) {
                 const target = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
-                target.takeDamage(ally.damage);
-                messages.push(`${ally.name} deals ${ally.damage} to ${target.name}!`);
+                const totalDmg = ally.damage + damageBonus;
+                target.takeDamage(totalDmg);
+                messages.push(`${ally.name} deals ${totalDmg} to ${target.name}!`);
             }
 
             // Ally heals player
@@ -248,6 +251,18 @@ export default class GameState {
         this.hasEidolon = false;
         this.allies = [];
         this.resetItemsForCombat();
+
+        // Apply combat-start passives from leveling
+        const p = this.passives || {};
+        if (p.startArmor) this.armor = (this.armor || 0) + p.startArmor;
+        if (p.startStrength) this.nextAttackBonus = 1 + p.startStrength;
+        if (p.autoSummonEidolon) {
+            this.hasEidolon = true;
+            const charName = this.character?.name;
+            const allyName = charName === 'Hassan' ? 'Kamau' : 'Khan';
+            const dmg = charName === 'Hassan' ? 5 : 4;
+            this.summonAlly({ name: allyName, damage: dmg, duration: 99, attackBonus: charName === 'Alaen' ? 2 : 0 });
+        }
     }
 
     resetItemsForCombat() {
@@ -271,12 +286,28 @@ export default class GameState {
     }
 
     levelUp() {
+        if (this.level >= 5) return;
         this.level += 1;
         this.heroAbilityLevel += 1;
-        const hpGain = 5 + Math.floor(this.level * 2);
+        const hpGain = 8 + Math.floor(this.level * 3);
         this.maxHealth += hpGain;
         this.health += hpGain;
-        console.log(`Level up! Now level ${this.level}. +${hpGain} max HP. Ability level: ${this.heroAbilityLevel}`);
+
+        // Apply character-specific level bonus
+        const bonus = this.character?.levelBonuses?.find(b => b.level === this.level);
+        if (bonus) {
+            if (bonus.stat) {
+                this[bonus.stat] = (this[bonus.stat] || 0) + bonus.value;
+                if (bonus.stat === 'maxMana') this.mana = this.maxMana;
+                if (bonus.stat === 'maxActions') this.actions = this.maxActions;
+            }
+            if (bonus.passive) {
+                if (!this.passives) this.passives = {};
+                this.passives[bonus.passive] = (this.passives[bonus.passive] || 0) + bonus.value;
+            }
+        }
+
+        console.log(`Level up! Now level ${this.level}. +${hpGain} max HP.`, bonus?.description || '');
     }
 
     shuffleDeck() {

@@ -1,5 +1,6 @@
 import BaseScene from './BaseScene';
 import EnemyLibrary from '../data/EnemyLibrary';
+import Enemy from '../data/Enemy';
 import CharacterLibrary from '../data/CharacterLibrary';
 
 const CARD_WIDTH = 120;
@@ -187,12 +188,18 @@ export class BattleScene extends BaseScene {
                 return;
             }
 
-            // Fresh battle — clear stale state and generate enemies
+            // Fresh battle — use pre-rolled encounter from NarrativeScene if available
             this.service.setRoomState('battleEnemies', null);
 
             const playerCount = this.service.getAllPlayers().length || 1;
             let enemies;
-            if (this.service.isFinalBoss()) {
+            const preRolled = this.service.getRoomState('preRolledEncounter');
+
+            if (preRolled && preRolled.length > 0) {
+                // Use the encounter that was pre-rolled to match the narrative
+                enemies = preRolled.map(e => Enemy.rehydrate(e));
+                this.service.setRoomState('preRolledEncounter', null);
+            } else if (this.service.isFinalBoss()) {
                 enemies = EnemyLibrary.getFinalBossEncounter(playerCount);
             } else if (this.isBossBattle) {
                 enemies = EnemyLibrary.getBossEncounter(playerCount);
@@ -1022,6 +1029,13 @@ export class BattleScene extends BaseScene {
         // Fire onTurnStart triggers for passive items
         this.gameState.runItemTriggers('onTurnStart', this);
 
+        // Apply level-up passive: heal at start of turn
+        const turnHeal = this.gameState.passives?.turnHeal || 0;
+        if (turnHeal > 0) {
+            this.gameState.playerHeal(turnHeal);
+            this.showMessage(`Passive: +${turnHeal} HP`, '#44ff44');
+        }
+
         // Summoned allies act
         const hpBeforeAllies = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive, statuses: { ...e.statuses } }));
         const allyMessages = this.gameState.tickAllies();
@@ -1036,6 +1050,10 @@ export class BattleScene extends BaseScene {
 
         // Draw new hand
         this.gameState.drawHand(this);
+
+        // Apply level-up passive: extra draw
+        const extraDraw = this.gameState.passives?.extraDraw || 0;
+        if (extraDraw > 0) this.gameState.drawCards(extraDraw, this);
 
         this.service.saveMyGameState(this.gameState);
         this.updateStatsUI();
