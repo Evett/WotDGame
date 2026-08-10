@@ -134,7 +134,7 @@ export class BattleScene extends BaseScene {
 
             case 'enemy_damage':
                 // Another player dealt damage — update local enemy state
-                this.applyEnemyDamage(data.enemyIndex, data.newHealth, data.isAlive);
+                this.applyEnemyDamage(data.enemyIndex, data.newHealth, data.isAlive, data.statuses);
                 break;
 
             case 'player_ended_turn':
@@ -145,12 +145,15 @@ export class BattleScene extends BaseScene {
         }
     }
 
-    applyEnemyDamage(enemyIndex, newHealth, isAlive) {
+    applyEnemyDamage(enemyIndex, newHealth, isAlive, statuses) {
         const enemy = this.gameState.enemies[enemyIndex];
         if (!enemy) return;
 
         enemy.health = newHealth;
         enemy.isAlive = isAlive;
+        if (statuses) {
+            enemy.statuses = { ...statuses };
+        }
 
         if (this.enemyObjects[enemyIndex]) {
             this.enemyObjects[enemyIndex].enemy = enemy;
@@ -497,7 +500,10 @@ export class BattleScene extends BaseScene {
             }
 
             // Show intent
-            if (enemy.intent) {
+            if (enemy.statuses?.Stunned && enemy.statuses.Stunned > 0) {
+                intentText.setText(`💫 STUNNED (${enemy.statuses.Stunned})`);
+                intentText.setColor('#ffff44');
+            } else if (enemy.intent) {
                 switch (enemy.intent.type) {
                     case 'attack':
                         intentText.setText(`⚔ ${enemy.intent.damage + (enemy.strength || 0)}`);
@@ -680,8 +686,8 @@ export class BattleScene extends BaseScene {
 
         const index = this.selectedCardIndex;
 
-        // Snapshot enemy HP before card play
-        const hpBefore = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive }));
+        // Snapshot enemy state before card play
+        const hpBefore = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive, statuses: { ...e.statuses } }));
 
         const result = this.gameState.playCard(index, target, this);
 
@@ -725,8 +731,11 @@ export class BattleScene extends BaseScene {
 
     broadcastEnemyChanges(hpBefore) {
         this.gameState.enemies.forEach((enemy, i) => {
-            if (enemy.health !== hpBefore[i].health || enemy.isAlive !== hpBefore[i].isAlive) {
-                this.service.broadcastEnemyDamage(i, enemy.health, enemy.isAlive);
+            const changed = enemy.health !== hpBefore[i].health ||
+                enemy.isAlive !== hpBefore[i].isAlive ||
+                JSON.stringify(enemy.statuses) !== JSON.stringify(hpBefore[i].statuses);
+            if (changed) {
+                this.service.broadcastEnemyDamage(i, enemy.health, enemy.isAlive, { ...enemy.statuses });
             }
         });
         // Also persist to room state for reconnection
@@ -827,7 +836,7 @@ export class BattleScene extends BaseScene {
                 }
 
                 const realIndex = this.gameState.magicItems.indexOf(item);
-                const hpBefore = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive }));
+                const hpBefore = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive, statuses: { ...e.statuses } }));
                 const success = this.gameState.useMagicItem(realIndex, null, this);
                 if (success) {
                     this.showMessage(`Used ${item.name}!`, '#aa44ff');
@@ -850,18 +859,36 @@ export class BattleScene extends BaseScene {
         }
         this.allyDisplayObjects = [];
 
-        const allies = this.gameState.allies || [];
-        if (allies.length === 0) return;
-
         const startX = 20;
         const startY = 140;
+        let y = startY;
 
-        allies.forEach((ally, i) => {
-            const y = startY + i * 28;
-            const txt = this.add.text(startX, y, `🗡 ${ally.name} (${ally.turnsRemaining} turns | ATK ${ally.damage})`, {
-                fontSize: '12px', color: '#66ffaa'
+        const players = this.service.getAllPlayers();
+        const myId = this.service.getMyPlayer()?.id;
+
+        players.forEach(player => {
+            const isMe = player.id === myId;
+            const gs = isMe ? this.gameState : this.service.getPlayerGameState(player);
+            const allies = gs?.allies || [];
+            if (allies.length === 0) return;
+
+            const playerName = gs?.character?.name || player.getProfile().name || '???';
+            if (!isMe) {
+                const label = this.add.text(startX, y, `${playerName}'s summons:`, {
+                    fontSize: '11px', color: '#aaaaaa'
+                });
+                this.allyDisplayObjects.push(label);
+                y += 18;
+            }
+
+            allies.forEach(ally => {
+                const color = isMe ? '#66ffaa' : '#88ccff';
+                const txt = this.add.text(startX, y, `⚔ ${ally.name} (${ally.turnsRemaining} turns | ATK ${ally.damage})`, {
+                    fontSize: '12px', color
+                });
+                this.allyDisplayObjects.push(txt);
+                y += 20;
             });
-            this.allyDisplayObjects.push(txt);
         });
     }
 
@@ -996,7 +1023,7 @@ export class BattleScene extends BaseScene {
         this.gameState.runItemTriggers('onTurnStart', this);
 
         // Summoned allies act
-        const hpBeforeAllies = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive }));
+        const hpBeforeAllies = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive, statuses: { ...e.statuses } }));
         const allyMessages = this.gameState.tickAllies();
         allyMessages.forEach((msg, i) => {
             this.time.delayedCall(i * 300 + statusMessages.length * 400, () => this.showMessage(msg, '#66ffaa'));

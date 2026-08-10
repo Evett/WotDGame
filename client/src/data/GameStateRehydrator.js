@@ -46,7 +46,8 @@ export default class GameStateRehydrator {
 
             buffs: gameState.buffs || {},
             statuses: gameState.statuses || {},
-            hasEidolon: gameState.hasEidolon || false
+            hasEidolon: gameState.hasEidolon || false,
+            allies: gameState.allies || []
         };
     }
 

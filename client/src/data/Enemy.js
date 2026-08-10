@@ -32,10 +32,21 @@ class Enemy {
             const intentIndex = pattern[patternIndex];
             this.intent = this.intents[intentIndex];
         } else {
-            const choice = this.intents[Math.floor(Math.random() * this.intents.length)];
-            this.intent = choice;
+            // Deterministic pick so all clients see the same intent
+            const seed = this.hashSeed(this.name, this.turnCount);
+            const index = seed % this.intents.length;
+            this.intent = this.intents[index];
         }
         this.turnCount++;
+    }
+
+    // Simple deterministic hash from name + turn for consistent multiplayer intent
+    hashSeed(name, turn) {
+        let h = turn * 2654435761;
+        for (let i = 0; i < name.length; i++) {
+            h = ((h << 5) - h + name.charCodeAt(i)) | 0;
+        }
+        return Math.abs(h);
     }
 
     takeTurn(target) {
