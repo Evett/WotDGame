@@ -176,7 +176,15 @@ export class BattleScene extends BaseScene {
         this.waitingForHost = false;
 
         if (this.service.isHost()) {
-            // Host clears stale state and generates fresh enemies
+            // Check if a battle is already in progress (reconnect case)
+            const existingEnemies = this.service.getBattleEnemies();
+            if (existingEnemies.length > 0 && existingEnemies.some(e => e.isAlive)) {
+                // Resume existing battle
+                this.gameState.enemies = existingEnemies;
+                return;
+            }
+
+            // Fresh battle — clear stale state and generate enemies
             this.service.setRoomState('battleEnemies', null);
 
             const playerCount = this.service.getAllPlayers().length || 1;
@@ -200,7 +208,7 @@ export class BattleScene extends BaseScene {
             this.gameState.runItemTriggers('onBattleStart', this);
             this.service.saveMyGameState(this.gameState);
 
-            // Broadcast to all (including self) that battle is ready
+            // Broadcast to others that battle is ready
             this.service.broadcastBattleReady(enemies);
         } else {
             // Non-host: check if host already set up, otherwise wait for RPC
@@ -836,7 +844,7 @@ export class BattleScene extends BaseScene {
         });
     }
 
-    updateAllyDisplay() {
+    updateSummonedAllies() {
         if (this.allyDisplayObjects) {
             this.allyDisplayObjects.forEach(obj => obj.destroy());
         }
@@ -850,7 +858,7 @@ export class BattleScene extends BaseScene {
 
         allies.forEach((ally, i) => {
             const y = startY + i * 28;
-            const txt = this.add.text(startX, y, `🗡 ${ally.name} (${ally.turnsRemaining} turns | ATK ${ally.attackPower})`, {
+            const txt = this.add.text(startX, y, `🗡 ${ally.name} (${ally.turnsRemaining} turns | ATK ${ally.damage})`, {
                 fontSize: '12px', color: '#66ffaa'
             });
             this.allyDisplayObjects.push(txt);
@@ -902,9 +910,11 @@ export class BattleScene extends BaseScene {
         this.updateHandDisplay();
         this.updateTurnUI();
 
-        // Broadcast via RPC — all clients (including self) will receive this
+        // Track self immediately (don't rely on RPC loopback)
         const player = this.service.getMyPlayer();
+        this.playersEndedTurn.add(player.id);
         this.service.broadcastEndTurn(player.id);
+        this.checkAllTurnsEnded();
     }
 
     // ─── Simultaneous Turn Management ───────────────────────
@@ -1005,6 +1015,7 @@ export class BattleScene extends BaseScene {
         this.updateTurnUI();
         this.updateItemDisplay();
         this.updateAllyDisplay();
+        this.updateSummonedAllies();
         this.updateStatusDisplay();
     }
 
@@ -1023,7 +1034,7 @@ export class BattleScene extends BaseScene {
                 enemy.takeTurn(this.gameState);
                 this.updateStatsUI();
                 this.updateEnemyDisplay();
-                this.updateAllyDisplay();
+                this.updateSummonedAllies();
                 this.flashEnemy(i);
                 enemy.decideIntent();
             });
