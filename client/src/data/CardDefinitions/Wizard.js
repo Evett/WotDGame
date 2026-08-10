@@ -27,7 +27,7 @@ export default {
         description: "Deal 10 damage to all enemies.",
         upgradedDescription: "Deal 16 damage to all enemies.",
         effect: (_, state, card) => {
-            const damage = card.upgraded ? 16 : 10;
+            const damage = (card.upgraded ? 16 : 10) * state.nextAttackBonus;
             state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage); });
         },
         upgraded: false
@@ -162,7 +162,7 @@ export default {
         description: "Deal 7 damage to all enemies.",
         upgradedDescription: "Deal 11 damage to all enemies.",
         effect: (_, state, card) => {
-            const damage = card.upgraded ? 11 : 7;
+            const damage = (card.upgraded ? 11 : 7) * state.nextAttackBonus;
             state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage); });
         },
         upgraded: false
@@ -237,7 +237,7 @@ export default {
         description: "Deal 6 damage to all. Apply Frozen 1 turn.",
         upgradedDescription: "Deal 9 damage to all. Apply Frozen 1 turn.",
         effect: (_, state, card) => {
-            const damage = card.upgraded ? 9 : 6;
+            const damage = (card.upgraded ? 9 : 6) * state.nextAttackBonus;
             state.enemies.forEach(e => {
                 if (e.isAlive) {
                     e.takeDamage(damage);
@@ -333,7 +333,7 @@ export default {
         description: "Deal 20 damage to all enemies.",
         upgradedDescription: "Deal 30 damage to all enemies.",
         effect: (_, state, card) => {
-            const damage = card.upgraded ? 30 : 20;
+            const damage = (card.upgraded ? 30 : 20) * state.nextAttackBonus;
             state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage); });
         },
         upgraded: false
@@ -460,7 +460,7 @@ export default {
         upgradedDescription: "Deal 8 damage to all enemies. Gain 8 armor.",
         effect: (_, state, card) => {
             const amount = card.upgraded ? 8 : 5;
-            state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(amount); });
+            state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(amount * state.nextAttackBonus); });
             state.playerArmor(amount);
         },
         upgraded: false

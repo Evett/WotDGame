@@ -77,6 +77,7 @@ export default class GameState {
     playerHeal(amount) {
         this.health += amount;
         if (this.health > this.maxHealth) this.health = this.maxHealth;
+        this.healedThisTurn = true;
         console.log(`Player heals ${amount}. HP: ${this.health}`);
     }
 
@@ -103,6 +104,7 @@ export default class GameState {
         const messages = [];
         const aliveEnemies = this.enemies.filter(e => e.isAlive);
         const damageBonus = (this.passives?.allyDamageBonus) || 0;
+        const eidolonBonus = this.buffs?.EidolonBonus?.amount || 0;
 
         this.allies = this.allies.filter(ally => {
             if (ally.turnsRemaining <= 0) return false;
@@ -110,8 +112,9 @@ export default class GameState {
             // Ally attacks a random living enemy
             if (ally.damage && aliveEnemies.length > 0) {
                 const target = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
-                const totalDmg = ally.damage + damageBonus;
+                const totalDmg = ally.damage + damageBonus + eidolonBonus;
                 target.takeDamage(totalDmg);
+                if (ally.debuff) target.applyStatus(ally.debuff, 1);
                 messages.push(`${ally.name} deals ${totalDmg} to ${target.name}!`);
             }
 
@@ -187,10 +190,34 @@ export default class GameState {
         return messages;
     }
 
-    // Called at start of each player turn
+    // Called at start of each player turn — applies and ticks buffs
     tickBuffs() {
         if (!this.buffs) return;
+        this.healedThisTurn = false;
 
+        // Apply active buff effects
+        Object.keys(this.buffs).forEach(key => {
+            const buff = this.buffs[key];
+            switch (key) {
+                case 'AttackBonus':
+                    this.nextAttackBonus += buff.amount;
+                    break;
+                case 'ArmorGain':
+                    this.armor += buff.amount;
+                    break;
+                case 'ManaGain':
+                    this.mana = Math.min(this.mana + buff.amount, this.maxMana + 3);
+                    break;
+                case 'Strength':
+                    this.nextAttackBonus += buff.amount;
+                    break;
+                case 'HolyDamage':
+                    this.nextAttackBonus += buff.amount;
+                    break;
+            }
+        });
+
+        // Decrement durations
         Object.keys(this.buffs).forEach(key => {
             this.buffs[key].turnsRemaining--;
             if (this.buffs[key].turnsRemaining <= 0) {
@@ -250,6 +277,7 @@ export default class GameState {
         this.enemies = enemiesArray;
         this.hasEidolon = false;
         this.allies = [];
+        this.heroAbilityUsed = false;
         this.resetItemsForCombat();
 
         // Apply combat-start passives from leveling
@@ -280,9 +308,13 @@ export default class GameState {
     }
 
     useHeroAbility() {
+        if (this.heroAbilityUsed) return false;
         if (this.character?.heroAbility) {
             this.character.heroAbility(this);
+            this.heroAbilityUsed = true;
+            return true;
         }
+        return false;
     }
 
     levelUp() {
@@ -406,9 +438,38 @@ export default class GameState {
                 this.nextAttackBonus *= this.getAttackModifier();
             }
 
+            // ArmorPierce: temporarily remove all enemy armor before attack resolves
+            let armorPierceTargets = [];
+            if (card.type === "Attack" && this.buffs?.ArmorPierce) {
+                armorPierceTargets = this.enemies.filter(e => e.isAlive).map(e => ({ enemy: e, savedArmor: e.armor }));
+                armorPierceTargets.forEach(t => { t.enemy.armor = 0; });
+                this.buffs.ArmorPierce.amount--;
+                if (this.buffs.ArmorPierce.amount <= 0) delete this.buffs.ArmorPierce;
+            }
+
+            // Track health before attack for Lifesteal
+            const preHealth = target ? target.health : 0;
+
             card.play(target, this, card, scene);
 
-            if (card.type === "Attack") {
+            // Lifesteal: heal for damage dealt
+            if (card.type === "Attack" && this.buffs?.Lifesteal && target) {
+                const damageDealt = preHealth - target.health;
+                if (damageDealt > 0) {
+                    this.playerHeal(damageDealt);
+                }
+                this.buffs.Lifesteal.amount--;
+                if (this.buffs.Lifesteal.amount <= 0) delete this.buffs.Lifesteal;
+            }
+
+            // Restore armor that wasn't destroyed by the attack (for untargeted enemies)
+            armorPierceTargets.forEach(t => {
+                if (t.enemy.isAlive && t.enemy !== target) {
+                    t.enemy.armor = t.savedArmor;
+                }
+            });
+
+            if (card.type === "Attack" || card.type === "Spell") {
                 this.temporaryEffectReset();
             }
 

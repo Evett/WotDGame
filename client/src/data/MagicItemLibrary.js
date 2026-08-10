@@ -275,6 +275,208 @@ const magicItems = {
             state.playerArmor(5);
             state.mana += 2;
         }
+    }),
+
+    // ─── New Passive Items ──────────────────────────────────
+
+    CloakOfDisplacement: () => createMagicItem({
+        id: "cloak_of_displacement",
+        name: "Cloak of Displacement",
+        description: "Gain 3 armor at the start of each combat.",
+        type: "passive",
+        triggers: {
+            onBattleStart: (state) => {
+                state.playerArmor(3);
+            }
+        }
+    }),
+
+    HelmOfBrilliance: () => createMagicItem({
+        id: "helm_of_brilliance",
+        name: "Helm of Brilliance",
+        description: "When you play a Spell, deal 2 damage to all enemies.",
+        type: "passive",
+        triggers: {
+            onCardPlayed: (state, card) => {
+                if (card && card.type === 'Spell') {
+                    state.enemies.filter(e => e.isAlive).forEach(e => e.takeDamage(2));
+                }
+            }
+        }
+    }),
+
+    GauntletsOfOgrePower: () => createMagicItem({
+        id: "gauntlets_of_ogre_power",
+        name: "Gauntlets of Ogre Power",
+        description: "Attack cards deal +2 damage (applied as bonus to next attack each turn).",
+        type: "passive",
+        triggers: {
+            onTurnStart: (state) => {
+                state.nextAttackBonus += 2;
+            }
+        }
+    }),
+
+    RingOfEvasion: () => createMagicItem({
+        id: "ring_of_evasion",
+        name: "Ring of Evasion",
+        description: "When you take damage, 25% chance to negate it entirely.",
+        type: "passive",
+        triggers: {
+            onDamageTaken: (state, amount) => {
+                if (Math.random() < 0.25) {
+                    state.playerHeal(amount);
+                }
+            }
+        }
+    }),
+
+    AmuletOfNaturalArmor: () => createMagicItem({
+        id: "amulet_of_natural_armor",
+        name: "Amulet of Natural Armor",
+        description: "Gain 1 armor whenever you play a card.",
+        type: "passive",
+        triggers: {
+            onCardPlayed: (state) => {
+                state.playerArmor(1);
+            }
+        }
+    }),
+
+    CloakOfTheMontebank: () => createMagicItem({
+        id: "cloak_of_the_mountebank",
+        name: "Cloak of the Mountebank",
+        description: "When an enemy dies, draw 1 card.",
+        type: "passive",
+        triggers: {
+            onEnemyKilled: (state, _enemy, scene) => {
+                state.drawCards(1, scene);
+            }
+        }
+    }),
+
+    FlametongueSword: () => createMagicItem({
+        id: "flametongue_sword",
+        name: "Flametongue Sword",
+        description: "After playing an Attack card, deal 3 fire damage to a random enemy.",
+        type: "passive",
+        triggers: {
+            onCardPlayed: (state, card) => {
+                if (card && card.type === 'Attack') {
+                    const alive = state.enemies.filter(e => e.isAlive);
+                    if (alive.length > 0) {
+                        alive[Math.floor(Math.random() * alive.length)].takeDamage(3);
+                    }
+                }
+            }
+        }
+    }),
+
+    WingedBoots: () => createMagicItem({
+        id: "winged_boots",
+        name: "Winged Boots",
+        description: "At end of turn, if you have unspent actions, gain 2 armor per action.",
+        type: "passive",
+        triggers: {
+            onTurnEnd: (state) => {
+                if (state.actions > 0) {
+                    state.playerArmor(state.actions * 2);
+                }
+            }
+        }
+    }),
+
+    VestOfEscape: () => createMagicItem({
+        id: "vest_of_escape",
+        name: "Vest of Escape",
+        description: "Start each combat with +1 action.",
+        type: "passive",
+        triggers: {
+            onBattleStart: (state) => {
+                state.maxActions += 1;
+                state.actions += 1;
+            }
+        }
+    }),
+
+    RuneOfWarding: () => createMagicItem({
+        id: "rune_of_warding",
+        name: "Rune of Warding",
+        description: "The first time you take damage each turn, gain 4 armor.",
+        type: "passive",
+        triggers: {
+            onTurnStart: (state) => {
+                state._wardingActive = true;
+            },
+            onDamageTaken: (state) => {
+                if (state._wardingActive) {
+                    state.playerArmor(4);
+                    state._wardingActive = false;
+                }
+            }
+        }
+    }),
+
+    // ─── New Usable Items ───────────────────────────────────
+
+    ElixirOfLifeBreath: () => createMagicItem({
+        id: "elixir_of_life_breath",
+        name: "Elixir of Life's Breath",
+        description: "Heal 30 HP. Usable once per combat.",
+        type: "usable",
+        usesPerCombat: 1,
+        effect: (_, state) => {
+            state.playerHeal(30);
+        }
+    }),
+
+    StaffOfThunder: () => createMagicItem({
+        id: "staff_of_thunder",
+        name: "Staff of Thunder",
+        description: "Deal 12 damage to all enemies. Usable once per combat.",
+        type: "usable",
+        usesPerCombat: 1,
+        effect: (_, state) => {
+            state.enemies.filter(e => e.isAlive).forEach(e => e.takeDamage(12));
+        }
+    }),
+
+    ScarabOfProtection: () => createMagicItem({
+        id: "scarab_of_protection",
+        name: "Scarab of Protection",
+        description: "Gain 15 armor and cleanse all debuffs. Usable once per combat.",
+        type: "usable",
+        usesPerCombat: 1,
+        effect: (_, state) => {
+            state.playerArmor(15);
+            state.statuses = {};
+        }
+    }),
+
+    RodOfWonder: () => createMagicItem({
+        id: "rod_of_wonder",
+        name: "Rod of Wonder",
+        description: "Deal 5-20 random damage to a random enemy. Usable twice per combat.",
+        type: "usable",
+        usesPerCombat: 2,
+        effect: (_, state) => {
+            const alive = state.enemies.filter(e => e.isAlive);
+            if (alive.length > 0) {
+                const dmg = 5 + Math.floor(Math.random() * 16);
+                alive[Math.floor(Math.random() * alive.length)].takeDamage(dmg);
+            }
+        }
+    }),
+
+    CrystalBallOfMindReading: () => createMagicItem({
+        id: "crystal_ball_of_mind_reading",
+        name: "Crystal Ball of Mind Reading",
+        description: "Draw 4 cards. Usable once per combat.",
+        type: "usable",
+        usesPerCombat: 1,
+        effect: (_, state, scene) => {
+            state.drawCards(4, scene);
+        }
     })
 };
 

@@ -163,6 +163,7 @@ const CharacterLibrary = {
         heroAbilityName: "War Sacrifice",
         heroAbilityDescription: (level) => `Lose 5 HP, gain ${1 + level} actions`,
         heroAbility: (gameState) => {
+            if (gameState.health <= 5) return;
             const level = gameState.heroAbilityLevel || 1;
             gameState.health -= 5;
             gameState.actions += 1 + level;

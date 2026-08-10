@@ -504,8 +504,8 @@ export class Service {
             .catch(err => console.error('Battle ready RPC failed:', err));
     }
 
-    broadcastEnemyDamage(enemyIndex, newHealth, isAlive, statuses) {
-        Playroom.RPC.call(EVENTS.ENEMY_DAMAGE, { enemyIndex, newHealth, isAlive, statuses }, Playroom.RPC.Mode.OTHERS)
+    broadcastEnemyDamage(enemyIndex, newHealth, isAlive, statuses, armor) {
+        Playroom.RPC.call(EVENTS.ENEMY_DAMAGE, { enemyIndex, newHealth, isAlive, statuses, armor }, Playroom.RPC.Mode.OTHERS)
             .catch(err => console.error('Enemy damage RPC failed:', err));
     }
 

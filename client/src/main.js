@@ -13,6 +13,7 @@ import { ShopScene } from './scenes/ShopScene';
 import { BattleScene } from './scenes/BattleScene';
 import { VictoryScene } from './scenes/VictoryScene';
 import { GameOverScene } from './scenes/GameOverScene';
+import { BossRewardScene } from './scenes/BossRewardScene';
 
 const config = {
     title: 'WotDGame',
@@ -39,6 +40,7 @@ const config = {
         RestScene,
         ShopScene,
         BattleScene,
+        BossRewardScene,
         VictoryScene,
         GameOverScene
     ],

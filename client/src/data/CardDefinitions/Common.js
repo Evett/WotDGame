@@ -139,10 +139,10 @@ export default {
         manaCost: 0,
         type: "Skill",
         requiresTarget: false,
-        description: "Next attack deals +4 damage.",
-        upgradedDescription: "Next attack deals +7 damage.",
+        description: "Next attack deals double damage.",
+        upgradedDescription: "Next attack deals triple damage.",
         effect: (_, state, card) => {
-            state.nextAttackBonus += card.upgraded ? 7 : 4;
+            state.nextAttackBonus *= card.upgraded ? 3 : 2;
         },
         upgraded: false
     }),
@@ -171,7 +171,7 @@ export default {
         upgradedDescription: "Deal 7 damage to all enemies.",
         effect: (_, state, card) => {
             const damage = card.upgraded ? 7 : 4;
-            state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage); });
+            state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage * state.nextAttackBonus); });
         },
         upgraded: false
     }),

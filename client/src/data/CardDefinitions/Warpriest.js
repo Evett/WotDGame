@@ -56,10 +56,10 @@ export default {
         manaCost: 1,
         type: "Power",
         requiresTarget: false,
-        description: "Next attack deals +6 damage.",
-        upgradedDescription: "Next attack deals +10 damage.",
+        description: "Next attack deals double damage.",
+        upgradedDescription: "Next attack deals triple damage.",
         effect: (_, state, card) => {
-            state.nextAttackBonus += card.upgraded ? 10 : 6;
+            state.nextAttackBonus *= card.upgraded ? 3 : 2;
         },
         upgraded: false
     }),

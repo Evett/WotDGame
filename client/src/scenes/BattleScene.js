@@ -135,7 +135,7 @@ export class BattleScene extends BaseScene {
 
             case 'enemy_damage':
                 // Another player dealt damage — update local enemy state
-                this.applyEnemyDamage(data.enemyIndex, data.newHealth, data.isAlive, data.statuses);
+                this.applyEnemyDamage(data.enemyIndex, data.newHealth, data.isAlive, data.statuses, data.armor);
                 break;
 
             case 'player_ended_turn':
@@ -146,7 +146,7 @@ export class BattleScene extends BaseScene {
         }
     }
 
-    applyEnemyDamage(enemyIndex, newHealth, isAlive, statuses) {
+    applyEnemyDamage(enemyIndex, newHealth, isAlive, statuses, armor) {
         const enemy = this.gameState.enemies[enemyIndex];
         if (!enemy) return;
 
@@ -154,6 +154,9 @@ export class BattleScene extends BaseScene {
         enemy.isAlive = isAlive;
         if (statuses) {
             enemy.statuses = { ...statuses };
+        }
+        if (armor !== undefined) {
+            enemy.armor = armor;
         }
 
         if (this.enemyObjects[enemyIndex]) {
@@ -694,7 +697,7 @@ export class BattleScene extends BaseScene {
         const index = this.selectedCardIndex;
 
         // Snapshot enemy state before card play
-        const hpBefore = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive, statuses: { ...e.statuses } }));
+        const hpBefore = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive, armor: e.armor, statuses: { ...e.statuses } }));
 
         const result = this.gameState.playCard(index, target, this);
 
@@ -740,9 +743,10 @@ export class BattleScene extends BaseScene {
         this.gameState.enemies.forEach((enemy, i) => {
             const changed = enemy.health !== hpBefore[i].health ||
                 enemy.isAlive !== hpBefore[i].isAlive ||
+                enemy.armor !== hpBefore[i].armor ||
                 JSON.stringify(enemy.statuses) !== JSON.stringify(hpBefore[i].statuses);
             if (changed) {
-                this.service.broadcastEnemyDamage(i, enemy.health, enemy.isAlive, { ...enemy.statuses });
+                this.service.broadcastEnemyDamage(i, enemy.health, enemy.isAlive, { ...enemy.statuses }, enemy.armor);
             }
         });
         // Also persist to room state for reconnection
@@ -769,6 +773,33 @@ export class BattleScene extends BaseScene {
         });
         this.endTurnBtn.on('pointerout', () => {
             this.endTurnBtn.setStyle({ backgroundColor: this.isMyTurn ? '#cc6600' : '#444444' });
+        });
+
+        // Hero Ability button
+        const abilityName = this.gameState.character?.heroAbilityName || 'Hero Ability';
+        const abilityDesc = this.gameState.character?.heroAbilityDescription?.(this.gameState.heroAbilityLevel) || '';
+        this.heroAbilityBtn = this.add.text(width - 120, height - 230, abilityName, {
+            fontSize: '16px', backgroundColor: '#6633cc',
+            padding: { x: 12, y: 8 }, color: '#fff'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        this.heroAbilityBtn.setData('tooltip', abilityDesc);
+
+        this.heroAbilityBtn.on('pointerdown', () => {
+            if (!this.isMyTurn || this.battleOver || this.gameState.heroAbilityUsed) return;
+            const success = this.gameState.useHeroAbility();
+            if (success) {
+                this.heroAbilityBtn.setStyle({ backgroundColor: '#333333' });
+                this.heroAbilityBtn.setAlpha(0.5);
+                this.heroAbilityBtn.disableInteractive();
+                this.updateResourceDisplay();
+                this.showBattleMessage(`Used ${abilityName}!`);
+            }
+        });
+        this.heroAbilityBtn.on('pointerover', () => {
+            if (!this.gameState.heroAbilityUsed) this.heroAbilityBtn.setStyle({ backgroundColor: '#8844ff' });
+        });
+        this.heroAbilityBtn.on('pointerout', () => {
+            if (!this.gameState.heroAbilityUsed) this.heroAbilityBtn.setStyle({ backgroundColor: '#6633cc' });
         });
     }
 
@@ -843,7 +874,7 @@ export class BattleScene extends BaseScene {
                 }
 
                 const realIndex = this.gameState.magicItems.indexOf(item);
-                const hpBefore = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive, statuses: { ...e.statuses } }));
+                const hpBefore = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive, armor: e.armor, statuses: { ...e.statuses } }));
                 const success = this.gameState.useMagicItem(realIndex, null, this);
                 if (success) {
                     this.showMessage(`Used ${item.name}!`, '#aa44ff');
@@ -1037,7 +1068,7 @@ export class BattleScene extends BaseScene {
         }
 
         // Summoned allies act
-        const hpBeforeAllies = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive, statuses: { ...e.statuses } }));
+        const hpBeforeAllies = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive, armor: e.armor, statuses: { ...e.statuses } }));
         const allyMessages = this.gameState.tickAllies();
         allyMessages.forEach((msg, i) => {
             this.time.delayedCall(i * 300 + statusMessages.length * 400, () => this.showMessage(msg, '#66ffaa'));
@@ -1138,18 +1169,24 @@ export class BattleScene extends BaseScene {
         const victoryText = isFinalBoss ? 'NYXAROTH DEFEATED!' : (this.isBossBattle ? 'BOSS DEFEATED!' : 'VICTORY!');
         const victoryColor = isFinalBoss ? '#ff44ff' : (this.isBossBattle ? '#ffaa00' : '#44ff44');
 
+        // Full heal after boss fights
+        if (this.isBossBattle || isFinalBoss) {
+            this.gameState.health = this.gameState.maxHealth;
+        }
+
         this.add.text(width / 2, height / 2 - 50, victoryText, {
             fontSize: '48px', color: victoryColor, fontStyle: 'bold'
         }).setOrigin(0.5);
 
         if (goldReward > 0) {
             this.gameState.gainGold(goldReward);
-            this.service.saveMyGameState(this.gameState);
 
             this.add.text(width / 2, height / 2 + 10, `+${goldReward} Gold`, {
                 fontSize: '24px', color: '#ffcc44'
             }).setOrigin(0.5);
         }
+
+        this.service.saveMyGameState(this.gameState);
 
         // Continue button
         const btnText = isFinalBoss ? 'To Victory!' : 'Continue';
@@ -1163,6 +1200,8 @@ export class BattleScene extends BaseScene {
             this.service.setCurrentTurnPlayer(null);
             if (isFinalBoss) {
                 this.service.broadcastSceneSwitch('VictoryScene');
+            } else if (this.isBossBattle) {
+                this.service.broadcastSceneSwitch('BossRewardScene');
             } else {
                 this.service.broadcastSceneSwitch('CardRewardScene');
             }

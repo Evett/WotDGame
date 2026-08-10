@@ -113,7 +113,7 @@ export default {
         upgradedDescription: "Deal 10 damage to all enemies. Take 2 damage.",
         effect: (_, state, card) => {
             const damage = card.upgraded ? 10 : 6;
-            state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage); });
+            state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage * state.nextAttackBonus); });
             state.playerTakeDamage(2);
         },
         upgraded: false
@@ -206,10 +206,10 @@ export default {
         manaCost: 0,
         type: "Power",
         requiresTarget: false,
-        description: "Next attack ignores armor.",
-        upgradedDescription: "Next 2 attacks ignore armor.",
+        description: "Next attack deals true damage (ignores armor).",
+        upgradedDescription: "Next 2 attacks deal true damage (ignores armor).",
         effect: (_, state, card) => {
-            state.applyPlayerBuff("ArmorPierce", 1, card.upgraded ? 2 : 1);
+            state.applyPlayerBuff("ArmorPierce", card.upgraded ? 2 : 1, 1);
         },
         upgraded: false
     }),
@@ -482,11 +482,10 @@ export default {
         type: "Power",
         requiresTarget: false,
         isOncePerDay: true,
-        description: "Double your attack bonus for the rest of combat.",
-        upgradedDescription: "Triple your attack bonus for the rest of combat.",
+        description: "Gain +3 attack damage for the rest of combat.",
+        upgradedDescription: "Gain +5 attack damage for the rest of combat.",
         effect: (_, state, card) => {
-            state.nextAttackBonus *= card.upgraded ? 3 : 2;
-            state.applyPlayerBuff("AttackBonus", card.upgraded ? 6 : 4, 99);
+            state.applyPlayerBuff("AttackBonus", card.upgraded ? 5 : 3, 99);
         },
         upgraded: false
     }),

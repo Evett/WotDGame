@@ -46,29 +46,31 @@ export class RestScene extends BaseScene {
 
     // ─── Option 2: Level Up ─────────────────────────────
     const nextLevel = this.gameState.level + 1;
-    const hpGain = 5 + Math.floor(nextLevel * 2);
-    const abilityLevel = (this.gameState.heroAbilityLevel || 1) + 1;
+    const hpGain = 8 + Math.floor(nextLevel * 3);
 
-    // Get ability description for next level
-    let abilityDesc = '';
-    if (this.gameState.character && this.gameState.character.heroAbilityDescription) {
-      abilityDesc = this.gameState.character.heroAbilityDescription(abilityLevel);
-    }
-    const abilityName = this.gameState.character?.heroAbilityName || 'Ability';
+    // Get the level bonus description for next level
+    const bonus = this.gameState.character?.levelBonuses?.find(b => b.level === nextLevel);
+    const bonusDesc = bonus ? bonus.description : '';
 
-    const levelBtn = this.add.text(x, y + 0, `⬆️ Level Up (Lv${nextLevel}, +${hpGain} max HP)`, {
+    const canLevel = this.gameState.level < 5;
+
+    const levelBtn = this.add.text(x, y + 0, canLevel ? `⬆️ Level Up (Lv${nextLevel}, +${hpGain} max HP)` : '⬆️ MAX LEVEL', {
       fontSize: '22px', backgroundColor: '#0a1a2a',
-      padding: { x: 24, y: 14 }, color: '#88ccff'
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      padding: { x: 24, y: 14 }, color: canLevel ? '#88ccff' : '#666666'
+    }).setOrigin(0.5).setInteractive({ useHandCursor: canLevel });
 
-    levelBtn.on('pointerover', () => levelBtn.setStyle({ backgroundColor: '#1a2a3a' }));
-    levelBtn.on('pointerout', () => levelBtn.setStyle({ backgroundColor: '#0a1a2a' }));
-    levelBtn.on('pointerdown', () => this.chooseLevelUp());
+    if (canLevel) {
+      levelBtn.on('pointerover', () => levelBtn.setStyle({ backgroundColor: '#1a2a3a' }));
+      levelBtn.on('pointerout', () => levelBtn.setStyle({ backgroundColor: '#0a1a2a' }));
+      levelBtn.on('pointerdown', () => this.chooseLevelUp());
+    }
 
-    // Show ability upgrade preview
-    this.add.text(x, y + 55, `${abilityName}: ${abilityDesc}`, {
-      fontSize: '14px', color: '#aaccff'
-    }).setOrigin(0.5);
+    // Show passive bonus preview
+    if (bonusDesc) {
+      this.add.text(x, y + 55, `New Passive: ${bonusDesc}`, {
+        fontSize: '14px', color: '#aaccff'
+      }).setOrigin(0.5);
+    }
 
     this.healBtn = healBtn;
     this.levelBtn = levelBtn;
@@ -117,6 +119,7 @@ export class RestScene extends BaseScene {
 
   chooseLevelUp() {
     if (this.choiceMade) return;
+    if (this.gameState.level >= 5) return;
     this.choiceMade = true;
 
     const { x, y } = this.getCenter();
@@ -127,11 +130,7 @@ export class RestScene extends BaseScene {
     this.gameState.levelUp();
     this.service.saveMyGameState(this.gameState);
 
-    const abilityName = this.gameState.character?.heroAbilityName || 'Ability';
-    let abilityDesc = '';
-    if (this.gameState.character && this.gameState.character.heroAbilityDescription) {
-      abilityDesc = this.gameState.character.heroAbilityDescription(this.gameState.heroAbilityLevel);
-    }
+    const bonus = this.gameState.character?.levelBonuses?.find(b => b.level === this.gameState.level);
 
     this.add.text(x, y - 60, `Leveled Up to ${this.gameState.level}!`, {
       fontSize: '22px', color: '#44aaff'
@@ -141,9 +140,11 @@ export class RestScene extends BaseScene {
       fontSize: '16px', color: '#cccccc'
     }).setOrigin(0.5);
 
-    this.add.text(x, y + 15, `${abilityName}: ${abilityDesc}`, {
-      fontSize: '15px', color: '#aaccff'
-    }).setOrigin(0.5);
+    if (bonus) {
+      this.add.text(x, y + 15, `New Passive: ${bonus.description}`, {
+        fontSize: '15px', color: '#aaccff'
+      }).setOrigin(0.5);
+    }
 
     this.waitingText.setText('Waiting for other players...');
     this.markDone();

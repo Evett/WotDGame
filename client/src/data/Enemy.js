@@ -148,7 +148,12 @@ class Enemy {
     }
 
     takeTrueDamage(amount) {
-        this.takeDamage(amount);
+        this.health -= amount;
+        if (this.health <= 0) {
+            this.health = 0;
+            this.isAlive = false;
+        }
+        console.log(`${this.name} takes ${amount} TRUE damage (ignores armor). HP: ${this.health}/${this.maxHealth}`);
     }
 
     applyStatus(statusName, duration) {

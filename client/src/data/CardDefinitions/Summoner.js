@@ -230,10 +230,10 @@ export default {
         manaCost: 1,
         type: "Power",
         requiresTarget: false,
-        description: "Next attack deals +8.",
-        upgradedDescription: "Next attack deals +12.",
+        description: "Next attack deals double damage.",
+        upgradedDescription: "Next attack deals triple damage.",
         effect: (_, state, card) => {
-            state.nextAttackBonus += card.upgraded ? 12 : 8;
+            state.nextAttackBonus *= card.upgraded ? 3 : 2;
         },
         upgraded: false
     }),
@@ -349,7 +349,7 @@ export default {
         upgradedDescription: "Summon a shadow (5 damage, applies Weakened, 3 turns).",
         effect: (_, state, card) => {
             state.hasEidolon = true;
-            state.summonAlly({ name: "Shadow", damage: card.upgraded ? 5 : 3, duration: card.upgraded ? 3 : 2 });
+            state.summonAlly({ name: "Shadow", damage: card.upgraded ? 5 : 3, debuff: "Weakened", duration: card.upgraded ? 3 : 2 });
         },
         upgraded: false
     }),

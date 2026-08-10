@@ -384,7 +384,7 @@ export default {
         description: "Deal 9 damage. If you healed this turn, deal 14 instead.",
         upgradedDescription: "Deal 12 damage. If you healed this turn, deal 20 instead.",
         effect: (target, state, card) => {
-            const healed = state.buffs?.Lifesteal || state.health > state.maxHealth * 0.9;
+            const healed = state.healedThisTurn || false;
             const damage = healed ? (card.upgraded ? 20 : 14) : (card.upgraded ? 12 : 9);
             if (target) target.takeDamage(damage * state.nextAttackBonus);
         },
