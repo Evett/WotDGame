@@ -871,24 +871,26 @@ export class BattleScene extends BaseScene {
         }
         this.statusDisplayObjects = [];
 
-        const statuses = this.gameState.statuses || [];
-        const buffs = this.gameState.buffs || [];
-        if (statuses.length === 0 && buffs.length === 0) return;
+        const statuses = this.gameState.statuses || {};
+        const buffs = this.gameState.buffs || {};
+        const statusKeys = Object.keys(statuses);
+        const buffKeys = Object.keys(buffs);
+        if (statusKeys.length === 0 && buffKeys.length === 0) return;
 
         const startX = 20;
         const startY = this.scale.height - 100;
 
         let y = startY;
-        statuses.forEach(status => {
-            const txt = this.add.text(startX, y, `⚠ ${status.name} (${status.duration} turns)`, {
+        statusKeys.forEach(name => {
+            const txt = this.add.text(startX, y, `⚠ ${name} (${statuses[name]} turns)`, {
                 fontSize: '11px', color: '#ff6688'
             });
             this.statusDisplayObjects.push(txt);
             y += 18;
         });
 
-        buffs.forEach(buff => {
-            const txt = this.add.text(startX, y, `✦ ${buff.name} (${buff.turnsRemaining} turns)`, {
+        buffKeys.forEach(name => {
+            const txt = this.add.text(startX, y, `✦ ${name} (${buffs[name].turnsRemaining} turns)`, {
                 fontSize: '11px', color: '#88ccff'
             });
             this.statusDisplayObjects.push(txt);
