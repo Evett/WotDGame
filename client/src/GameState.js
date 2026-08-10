@@ -413,7 +413,6 @@ export default class GameState {
 
     restoreDailyCards() {
         console.log("Restored daily cards");
-        this.fullDeck.push(...this.removedUntilRest);
         this.removedUntilRest = [];
     }
 

@@ -510,7 +510,7 @@ export class Service {
     }
 
     broadcastEndTurn(playerId) {
-        Playroom.RPC.call(EVENTS.PLAYER_ENDED_TURN, { playerId }, Playroom.RPC.Mode.ALL)
+        Playroom.RPC.call(EVENTS.PLAYER_ENDED_TURN, { playerId }, Playroom.RPC.Mode.OTHERS)
             .catch(err => console.error('Player end turn RPC failed:', err));
     }
 
