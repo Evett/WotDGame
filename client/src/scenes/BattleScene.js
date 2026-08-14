@@ -797,9 +797,20 @@ export class BattleScene extends BaseScene {
         });
         this.heroAbilityBtn.on('pointerover', () => {
             if (!this.gameState.heroAbilityUsed) this.heroAbilityBtn.setStyle({ backgroundColor: '#8844ff' });
+            if (this.heroAbilityTooltip) this.heroAbilityTooltip.destroy();
+            const used = this.gameState.heroAbilityUsed ? ' (Used)' : ' (Once per combat)';
+            this.heroAbilityTooltip = this.add.text(
+                this.heroAbilityBtn.x, this.heroAbilityBtn.y - 30,
+                `${abilityDesc}${used}`,
+                { fontSize: '12px', color: '#fff', backgroundColor: '#222222', padding: { x: 8, y: 4 } }
+            ).setOrigin(0.5);
         });
         this.heroAbilityBtn.on('pointerout', () => {
             if (!this.gameState.heroAbilityUsed) this.heroAbilityBtn.setStyle({ backgroundColor: '#6633cc' });
+            if (this.heroAbilityTooltip) {
+                this.heroAbilityTooltip.destroy();
+                this.heroAbilityTooltip = null;
+            }
         });
     }
 
