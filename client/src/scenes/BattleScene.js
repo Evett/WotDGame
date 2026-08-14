@@ -419,6 +419,12 @@ export class BattleScene extends BaseScene {
             // Enemy sprite or fallback colored box
             const textureKey = this.getEnemySpriteKey(enemy.name);
             let body;
+            // Highlight border (works for both Image and Rectangle bodies)
+            const highlight = this.add.rectangle(0, 0, 106, 106)
+                .setStrokeStyle(3, 0xffff00)
+                .setFillStyle(0x000000, 0)
+                .setVisible(false);
+
             if (this.textures.exists(textureKey) && this.textures.get(textureKey).key !== '__MISSING') {
                 body = this.add.image(0, 0, textureKey)
                     .setDisplaySize(100, 100)
@@ -431,12 +437,12 @@ export class BattleScene extends BaseScene {
             // Highlight on hover
             body.on('pointerover', () => {
                 if (this.selectedCardIndex !== null && enemy.isAlive) {
-                    body.setStrokeStyle(3, 0xffff00);
+                    highlight.setStrokeStyle(3, 0xffff00).setVisible(true);
                 }
             });
             body.on('pointerout', () => {
                 if (this.selectedTarget !== enemy) {
-                    body.setStrokeStyle(0);
+                    highlight.setVisible(false);
                 }
             });
 
@@ -448,10 +454,9 @@ export class BattleScene extends BaseScene {
                 if (this.selectedCardIndex !== null) {
                     this.selectTarget(index);
                 } else {
-                    // Clicking enemy without card selected — just highlight as target
                     this.clearTargetHighlights();
                     this.selectedTarget = enemy;
-                    body.setStrokeStyle(3, 0xff4444);
+                    highlight.setStrokeStyle(3, 0xff4444).setVisible(true);
                 }
             });
 
@@ -474,10 +479,10 @@ export class BattleScene extends BaseScene {
                 fontSize: '11px', color: '#6699ff'
             }).setOrigin(0.5);
 
-            container.add([body, nameText, hpBar, hpFill, hpText, intentText, armorText]);
+            container.add([highlight, body, nameText, hpBar, hpFill, hpText, intentText, armorText]);
 
             this.enemyObjects.push({
-                container, body, nameText, hpBar, hpFill, hpText, intentText, armorText, enemy
+                container, body, highlight, nameText, hpBar, hpFill, hpText, intentText, armorText, enemy
             });
         });
 
@@ -553,7 +558,7 @@ export class BattleScene extends BaseScene {
 
     clearTargetHighlights() {
         this.enemyObjects.forEach(obj => {
-            obj.body.setStrokeStyle(0);
+            obj.highlight.setVisible(false);
         });
         this.selectedTarget = null;
     }
@@ -791,26 +796,15 @@ export class BattleScene extends BaseScene {
                 this.heroAbilityBtn.setStyle({ backgroundColor: '#333333' });
                 this.heroAbilityBtn.setAlpha(0.5);
                 this.heroAbilityBtn.disableInteractive();
-                this.updateResourceDisplay();
-                this.showBattleMessage(`Used ${abilityName}!`);
+                this.updateStatsUI();
+                this.showMessage(`Used ${abilityName}!`, '#aa44ff');
             }
         });
         this.heroAbilityBtn.on('pointerover', () => {
             if (!this.gameState.heroAbilityUsed) this.heroAbilityBtn.setStyle({ backgroundColor: '#8844ff' });
-            if (this.heroAbilityTooltip) this.heroAbilityTooltip.destroy();
-            const used = this.gameState.heroAbilityUsed ? ' (Used)' : ' (Once per combat)';
-            this.heroAbilityTooltip = this.add.text(
-                this.heroAbilityBtn.x, this.heroAbilityBtn.y - 30,
-                `${abilityDesc}${used}`,
-                { fontSize: '12px', color: '#fff', backgroundColor: '#222222', padding: { x: 8, y: 4 } }
-            ).setOrigin(0.5);
         });
         this.heroAbilityBtn.on('pointerout', () => {
             if (!this.gameState.heroAbilityUsed) this.heroAbilityBtn.setStyle({ backgroundColor: '#6633cc' });
-            if (this.heroAbilityTooltip) {
-                this.heroAbilityTooltip.destroy();
-                this.heroAbilityTooltip = null;
-            }
         });
     }
 
