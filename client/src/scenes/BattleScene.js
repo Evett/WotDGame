@@ -24,11 +24,11 @@ export class BattleScene extends BaseScene {
 
     preload() {
         this.load.image('char_alaen', 'characters/char_alaen.png');
-        this.load.image('char_hassan', 'characters/char_alaen.png');
-        this.load.image('char_marcus', 'characters/char_alaen.png');
-        this.load.image('char_mohef', 'characters/char_alaen.png');
-        this.load.image('char_nephereta', 'characters/char_alaen.png');
-        this.load.image('char_urusha', 'characters/char_alaen.png');
+        this.load.image('char_hassan', 'characters/char_hassan.png');
+        this.load.image('char_marcus', 'characters/char_marcus.png');
+        this.load.image('char_mohef', 'characters/char_mohef.png');
+        this.load.image('char_nephereta', 'characters/char_nephereta.png');
+        this.load.image('char_urusha', 'characters/char_urusha.png');
 
         // Enemy sprites — all point to placeholder until real art is added
         const enemyNames = [
