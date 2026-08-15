@@ -29,7 +29,7 @@ const CharacterLibrary = {
         levelBonuses: [
             { level: 2, description: "+1 Hand Size", stat: 'handLimit', value: 1 },
             { level: 3, description: "+1 Max Mana", stat: 'maxMana', value: 1 },
-            { level: 4, description: "Allies deal +2 damage", passive: 'allyDamageBonus', value: 2 },
+            { level: 4, description: "Your summons deal +2 damage", passive: 'allyDamageBonus', value: 2 },
             { level: 5, description: "Start combat with Khan summoned", passive: 'autoSummonEidolon', value: true }
         ]
     }),
@@ -55,9 +55,9 @@ const CharacterLibrary = {
             gameState.armor += 3 + level * 2;
         },
         levelBonuses: [
-            { level: 2, description: "Allies deal +1 damage", passive: 'allyDamageBonus', value: 1 },
+            { level: 2, description: "Your summons deal +1 damage", passive: 'allyDamageBonus', value: 1 },
             { level: 3, description: "+1 Hand Size", stat: 'handLimit', value: 1 },
-            { level: 4, description: "Allies deal +2 more damage", passive: 'allyDamageBonus', value: 2 },
+            { level: 4, description: "Your summons deal +2 more damage", passive: 'allyDamageBonus', value: 2 },
             { level: 5, description: "+1 Max Mana", stat: 'maxMana', value: 1 }
         ]
     }),
@@ -108,7 +108,7 @@ const CharacterLibrary = {
         heroAbilityDescription: (level) => `Next attack deals x${1 + level} damage`,
         heroAbility: (gameState) => {
             const level = gameState.heroAbilityLevel || 1;
-            gameState.nextAttackBonus = 1 + level;
+            gameState.nextAttackMultiplier = 1 + level;
         },
         levelBonuses: [
             { level: 2, description: "+1 Max Actions", stat: 'maxActions', value: 1 },

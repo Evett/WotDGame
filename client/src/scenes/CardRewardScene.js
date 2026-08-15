@@ -168,6 +168,16 @@ export class CardRewardScene extends BaseScene {
     doneMap[player.id] = true;
     this.service.setRoomState('rewardDone', doneMap);
     this.waitingText.setText('Waiting for other players...');
+
+    // Timeout fallback: proceed after 15s even if others haven't responded
+    this.time.delayedCall(15000, () => {
+      if (!this.transitioned) {
+        console.log('CardRewardScene: timeout fallback transition');
+        this.transitioned = true;
+        this.service.setRoomState('rewardDone', null);
+        this.proceedToNextScene();
+      }
+    });
   }
 
   checkAllDone() {
@@ -178,18 +188,29 @@ export class CardRewardScene extends BaseScene {
     const doneMap = this.service.getRoomState('rewardDone') || {};
     const allDone = players.every(p => doneMap[p.id] === true);
 
+    // Fallback: if solo or only one player responded, proceed after choice is made
+    if (!allDone && this.choiceMade && players.length <= 1) {
+      console.log('CardRewardScene: solo fallback transition');
+      this.transitioned = true;
+      this.service.setRoomState('rewardDone', null);
+      this.proceedToNextScene();
+      return;
+    }
+
     if (allDone) {
       this.transitioned = true;
       this.service.setRoomState('rewardDone', null);
+      this.proceedToNextScene();
+    }
+  }
 
-      // After the 3rd boss (battle 12), route to final boss sequence
-      const battleCount = this.service.getBattleCount();
-      if (battleCount >= 12 && battleCount % 4 === 0 && !this.service.isFinalBoss()) {
-        this.service.setFinalBoss(true);
-        this.service.broadcastSceneSwitch('AltarScene');
-      } else {
-        this.service.broadcastSceneSwitch('BeginningChoiceScene');
-      }
+  proceedToNextScene() {
+    const battleCount = this.service.getBattleCount();
+    if (battleCount >= 12 && battleCount % 4 === 0 && !this.service.isFinalBoss()) {
+      this.service.setFinalBoss(true);
+      this.service.broadcastSceneSwitch('AltarScene');
+    } else {
+      this.service.broadcastSceneSwitch('BeginningChoiceScene');
     }
   }
 

@@ -27,7 +27,7 @@ export default {
         description: "Deal 10 damage to all enemies.",
         upgradedDescription: "Deal 16 damage to all enemies.",
         effect: (_, state, card) => {
-            const damage = (card.upgraded ? 16 : 10) * state.nextAttackBonus;
+            const damage = state.calcDamage(card.upgraded ? 16 : 10);
             state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage); });
         },
         upgraded: false
@@ -56,7 +56,7 @@ export default {
         description: "Deal 14 damage.",
         upgradedDescription: "Deal 20 damage.",
         effect: (target, state, card) => {
-            if (target) target.takeDamage((card.upgraded ? 20 : 14) * state.nextAttackBonus);
+            if (target) target.takeDamage(state.calcDamage(card.upgraded ? 20 : 14));
         },
         upgraded: false
     }),
@@ -70,7 +70,7 @@ export default {
         description: "Deal 8 damage. Draw 1 card.",
         upgradedDescription: "Deal 12 damage. Draw 1 card.",
         effect: (target, state, card, scene) => {
-            if (target) target.takeDamage((card.upgraded ? 12 : 8) * state.nextAttackBonus);
+            if (target) target.takeDamage(state.calcDamage(card.upgraded ? 12 : 8));
             state.drawCards(1, scene);
         },
         upgraded: false
@@ -100,7 +100,7 @@ export default {
         upgradedDescription: "Deal 8 damage. Apply Frozen for 2 turns.",
         effect: (target, state, card) => {
             if (target) {
-                target.takeDamage((card.upgraded ? 8 : 5) * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(card.upgraded ? 8 : 5));
                 target.applyStatus("Frozen", card.upgraded ? 2 : 1);
             }
         },
@@ -146,7 +146,7 @@ export default {
         upgradedDescription: "Deal 9 damage. Stun for 1 turn.",
         effect: (target, state, card) => {
             if (target) {
-                target.takeDamage((card.upgraded ? 9 : 6) * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(card.upgraded ? 9 : 6));
                 if (!target.isBoss) target.applyStatus("Stunned", 1);
             }
         },
@@ -162,7 +162,7 @@ export default {
         description: "Deal 7 damage to all enemies.",
         upgradedDescription: "Deal 11 damage to all enemies.",
         effect: (_, state, card) => {
-            const damage = (card.upgraded ? 11 : 7) * state.nextAttackBonus;
+            const damage = state.calcDamage(card.upgraded ? 11 : 7);
             state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage); });
         },
         upgraded: false
@@ -237,7 +237,7 @@ export default {
         description: "Deal 6 damage to all. Apply Frozen 1 turn.",
         upgradedDescription: "Deal 9 damage to all. Apply Frozen 1 turn.",
         effect: (_, state, card) => {
-            const damage = (card.upgraded ? 9 : 6) * state.nextAttackBonus;
+            const damage = state.calcDamage(card.upgraded ? 9 : 6);
             state.enemies.forEach(e => {
                 if (e.isAlive) {
                     e.takeDamage(damage);
@@ -258,7 +258,7 @@ export default {
         upgradedDescription: "Deal 6 damage. Apply Corrode for 3 turns.",
         effect: (target, state, card) => {
             if (target) {
-                target.takeDamage((card.upgraded ? 6 : 4) * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(card.upgraded ? 6 : 4));
                 target.applyStatus("Corrode", card.upgraded ? 3 : 2);
             }
         },
@@ -333,7 +333,7 @@ export default {
         description: "Deal 20 damage to all enemies.",
         upgradedDescription: "Deal 30 damage to all enemies.",
         effect: (_, state, card) => {
-            const damage = (card.upgraded ? 30 : 20) * state.nextAttackBonus;
+            const damage = state.calcDamage(card.upgraded ? 30 : 20);
             state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage); });
         },
         upgraded: false
@@ -350,7 +350,7 @@ export default {
         effect: (target, state, card) => {
             const damage = card.upgraded ? 7 : 5;
             if (target) {
-                for (let i = 0; i < 3; i++) target.takeDamage(damage * state.nextAttackBonus);
+                for (let i = 0; i < 3; i++) target.takeDamage(state.calcDamage(damage));
             }
         },
         upgraded: false
@@ -415,7 +415,7 @@ export default {
         upgradedDescription: "Deal 6 damage. Gain 6 armor.",
         effect: (target, state, card) => {
             const amount = card.upgraded ? 6 : 4;
-            if (target) target.takeDamage(amount * state.nextAttackBonus);
+            if (target) target.takeDamage(state.calcDamage(amount));
             state.playerArmor(amount);
         },
         upgraded: false
@@ -445,7 +445,7 @@ export default {
         description: "Next spell deals double damage.",
         upgradedDescription: "Next spell deals triple damage.",
         effect: (_, state, card) => {
-            state.nextAttackBonus *= card.upgraded ? 3 : 2;
+            state.nextAttackMultiplier *= card.upgraded ? 3 : 2;
         },
         upgraded: false
     }),
@@ -460,7 +460,7 @@ export default {
         upgradedDescription: "Deal 8 damage to all enemies. Gain 8 armor.",
         effect: (_, state, card) => {
             const amount = card.upgraded ? 8 : 5;
-            state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(amount * state.nextAttackBonus); });
+            state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(state.calcDamage(amount)); });
             state.playerArmor(amount);
         },
         upgraded: false

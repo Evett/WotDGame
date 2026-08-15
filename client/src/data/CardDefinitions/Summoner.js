@@ -46,7 +46,7 @@ export default {
         effect: (target, state, card) => {
             if (target) {
                 const damage = state.hasEidolon ? (card.upgraded ? 12 : 8) : (card.upgraded ? 5 : 3);
-                target.takeDamage(damage * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(damage));
             }
         },
         upgraded: false
@@ -172,7 +172,7 @@ export default {
         effect: (target, state, card) => {
             if (target && state.hasEidolon) {
                 const damage = card.upgraded ? 5 : 4;
-                for (let i = 0; i < 3; i++) target.takeDamage(damage * state.nextAttackBonus);
+                for (let i = 0; i < 3; i++) target.takeDamage(state.calcDamage(damage));
             }
         },
         upgraded: false
@@ -218,7 +218,7 @@ export default {
         description: "Deal 7 damage. Heal 3 if Eidolon active.",
         upgradedDescription: "Deal 11 damage. Heal 5 if Eidolon active.",
         effect: (target, state, card) => {
-            if (target) target.takeDamage((card.upgraded ? 11 : 7) * state.nextAttackBonus);
+            if (target) target.takeDamage(state.calcDamage(card.upgraded ? 11 : 7));
             if (state.hasEidolon) state.playerHeal(card.upgraded ? 5 : 3);
         },
         upgraded: false
@@ -233,7 +233,7 @@ export default {
         description: "Next attack deals double damage.",
         upgradedDescription: "Next attack deals triple damage.",
         effect: (_, state, card) => {
-            state.nextAttackBonus *= card.upgraded ? 3 : 2;
+            state.nextAttackMultiplier *= card.upgraded ? 3 : 2;
         },
         upgraded: false
     }),
@@ -302,7 +302,7 @@ export default {
             if (target) {
                 const base = card.upgraded ? 14 : 10;
                 const bonus = state.hasEidolon ? (card.upgraded ? 7 : 5) : 0;
-                target.takeDamage((base + bonus) * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(base + bonus));
             }
         },
         upgraded: false

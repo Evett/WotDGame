@@ -14,7 +14,7 @@ export default {
         effect: (target, state, card) => {
             if (target) {
                 const damage = card.upgraded ? 12 : 7;
-                target.takeDamage(damage * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(damage));
                 state.playerHeal(Math.floor(damage / 2));
             }
         },
@@ -59,7 +59,7 @@ export default {
         description: "Next attack deals double damage.",
         upgradedDescription: "Next attack deals triple damage.",
         effect: (_, state, card) => {
-            state.nextAttackBonus *= card.upgraded ? 3 : 2;
+            state.nextAttackMultiplier *= card.upgraded ? 3 : 2;
         },
         upgraded: false
     }),
@@ -73,7 +73,7 @@ export default {
         description: "Deal 6 damage. Gain 1 mana.",
         upgradedDescription: "Deal 9 damage. Gain 2 mana.",
         effect: (target, state, card) => {
-            if (target) target.takeDamage((card.upgraded ? 9 : 6) * state.nextAttackBonus);
+            if (target) target.takeDamage(state.calcDamage(card.upgraded ? 9 : 6));
             state.mana += card.upgraded ? 2 : 1;
         },
         upgraded: false
@@ -116,7 +116,7 @@ export default {
         description: "Deal 12 damage. Heal 6 HP.",
         upgradedDescription: "Deal 18 damage. Heal 9 HP.",
         effect: (target, state, card) => {
-            if (target) target.takeDamage((card.upgraded ? 18 : 12) * state.nextAttackBonus);
+            if (target) target.takeDamage(state.calcDamage(card.upgraded ? 18 : 12));
             state.playerHeal(card.upgraded ? 9 : 6);
         },
         upgraded: false
@@ -164,7 +164,7 @@ export default {
             if (target) {
                 const base = card.upgraded ? 12 : 8;
                 const isUndead = target.tags?.includes("Undead");
-                target.takeDamage((isUndead ? base * 2 : base) * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(isUndead ? base * 2 : base));
             }
         },
         upgraded: false
@@ -223,7 +223,7 @@ export default {
         upgradedDescription: "Deal 8 damage. Gain 8 armor.",
         effect: (target, state, card) => {
             const amount = card.upgraded ? 8 : 5;
-            if (target) target.takeDamage(amount * state.nextAttackBonus);
+            if (target) target.takeDamage(state.calcDamage(amount));
             state.playerArmor(amount);
         },
         upgraded: false
@@ -240,7 +240,7 @@ export default {
         effect: (target, state, card) => {
             const damage = card.upgraded ? 11 : 8;
             if (target) {
-                for (let i = 0; i < 3; i++) target.takeDamage(damage * state.nextAttackBonus);
+                for (let i = 0; i < 3; i++) target.takeDamage(state.calcDamage(damage));
             }
         },
         upgraded: false
@@ -307,7 +307,7 @@ export default {
         upgradedDescription: "Deal 14 damage. Heal 7 if enemy is Evil.",
         effect: (target, state, card) => {
             if (target) {
-                target.takeDamage((card.upgraded ? 14 : 10) * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(card.upgraded ? 14 : 10));
                 if (target.tags?.includes("Evil")) state.playerHeal(card.upgraded ? 7 : 5);
             }
         },
@@ -355,7 +355,7 @@ export default {
         upgradedDescription: "Deal 30 damage. Stun for 2 turns.",
         effect: (target, state, card) => {
             if (target) {
-                target.takeDamage((card.upgraded ? 30 : 22) * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(card.upgraded ? 30 : 22));
                 target.applyStatus("Stunned", card.upgraded ? 2 : 1);
             }
         },
@@ -437,7 +437,7 @@ export default {
         upgradedDescription: "Deal 13 damage. Apply Weakened for 2 turns.",
         effect: (target, state, card) => {
             if (target) {
-                target.takeDamage((card.upgraded ? 13 : 9) * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(card.upgraded ? 13 : 9));
                 target.applyStatus("Weakened", card.upgraded ? 2 : 1);
             }
         },

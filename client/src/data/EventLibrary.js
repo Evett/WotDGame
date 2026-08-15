@@ -63,9 +63,9 @@ const events = {
                 }
             },
             {
-                text: "Wash your weapons (+2 next attack bonus)",
+                text: "Wash your weapons (+2 damage next combat)",
                 effect: (gameState) => {
-                    gameState.nextAttackBonus += 2;
+                    gameState.flatDamageBonus += 2;
                 }
             },
             {

@@ -23,7 +23,8 @@ export default class GameState {
         this.discardPile = [];
         this.handLimit = 6;
         this.armor = 0;
-        this.nextAttackBonus = 1;
+        this.nextAttackMultiplier = 1;
+        this.flatDamageBonus = 0;
         this.removedUntilRest = [];
 
         this.enemies = [];
@@ -86,6 +87,11 @@ export default class GameState {
         console.log(`Player puts on ${amount} armor. Total armor: ${this.armor}`);
     }
 
+    // Applies multiplier and flat bonus to base damage
+    calcDamage(base) {
+        return Math.floor(base * this.nextAttackMultiplier) + this.flatDamageBonus;
+    }
+
     gainHealth(amount) {
         this.maxHealth += amount;
         this.health += amount;
@@ -124,10 +130,10 @@ export default class GameState {
                 messages.push(`${ally.name} heals you for ${ally.heal}!`);
             }
 
-            // Ally grants attack bonus each turn
+            // Ally grants flat attack bonus each turn
             if (ally.attackBonus) {
-                this.nextAttackBonus += ally.attackBonus;
-                messages.push(`${ally.name} empowers you! (+${ally.attackBonus} next attack)`);
+                this.flatDamageBonus += ally.attackBonus;
+                messages.push(`${ally.name} empowers you! (+${ally.attackBonus} damage)`);
             }
 
             ally.turnsRemaining--;
@@ -192,15 +198,20 @@ export default class GameState {
 
     // Called at start of each player turn — applies and ticks buffs
     tickBuffs() {
-        if (!this.buffs) return;
+        if (!this.buffs) this.buffs = {};
         this.healedThisTurn = false;
+
+        // Re-apply persistent passive bonus each turn
+        if (this.passives?.startStrength) {
+            this.flatDamageBonus += this.passives.startStrength;
+        }
 
         // Apply active buff effects
         Object.keys(this.buffs).forEach(key => {
             const buff = this.buffs[key];
             switch (key) {
                 case 'AttackBonus':
-                    this.nextAttackBonus += buff.amount;
+                    this.flatDamageBonus += buff.amount;
                     break;
                 case 'ArmorGain':
                     this.armor += buff.amount;
@@ -209,10 +220,10 @@ export default class GameState {
                     this.mana = Math.min(this.mana + buff.amount, this.maxMana + 3);
                     break;
                 case 'Strength':
-                    this.nextAttackBonus += buff.amount;
+                    this.flatDamageBonus += buff.amount;
                     break;
                 case 'HolyDamage':
-                    this.nextAttackBonus += buff.amount;
+                    this.flatDamageBonus += buff.amount;
                     break;
             }
         });
@@ -283,7 +294,6 @@ export default class GameState {
         // Apply combat-start passives from leveling
         const p = this.passives || {};
         if (p.startArmor) this.armor = (this.armor || 0) + p.startArmor;
-        if (p.startStrength) this.nextAttackBonus = 1 + p.startStrength;
         if (p.autoSummonEidolon) {
             this.hasEidolon = true;
             const charName = this.character?.name;
@@ -433,9 +443,9 @@ export default class GameState {
 
             this.hand.splice(index, 1);
 
-            // Apply Weakened: reduce nextAttackBonus for this attack
+            // Apply Weakened: reduce multiplier for this attack
             if (card.type === "Attack" && this.getAttackModifier() < 1) {
-                this.nextAttackBonus *= this.getAttackModifier();
+                this.nextAttackMultiplier *= this.getAttackModifier();
             }
 
             // ArmorPierce: temporarily remove all enemy armor before attack resolves
@@ -500,7 +510,7 @@ export default class GameState {
     }
     
     temporaryEffectReset() {
-        this.nextAttackBonus = 1;
+        this.nextAttackMultiplier = 1;
     }
 
     restoreDailyCards() {

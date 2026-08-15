@@ -36,7 +36,7 @@ const magicItems = {
         type: "passive",
         triggers: {
             onTurnStart: (state) => {
-                state.nextAttackBonus += 3;
+                state.flatDamageBonus += 3;
             }
         }
     }),
@@ -48,7 +48,6 @@ const magicItems = {
         type: "passive",
         triggers: {
             onBattleStart: (state) => {
-                state.maxMana += 1;
                 state.mana += 1;
             }
         }
@@ -61,7 +60,6 @@ const magicItems = {
         type: "passive",
         triggers: {
             onBattleStart: (state) => {
-                state.maxActions += 1;
                 state.actions += 1;
             }
         }
@@ -308,11 +306,11 @@ const magicItems = {
     GauntletsOfOgrePower: () => createMagicItem({
         id: "gauntlets_of_ogre_power",
         name: "Gauntlets of Ogre Power",
-        description: "Attack cards deal +2 damage (applied as bonus to next attack each turn).",
+        description: "Attack cards deal +2 damage each turn.",
         type: "passive",
         triggers: {
             onTurnStart: (state) => {
-                state.nextAttackBonus += 2;
+                state.flatDamageBonus += 2;
             }
         }
     }),
@@ -393,7 +391,6 @@ const magicItems = {
         type: "passive",
         triggers: {
             onBattleStart: (state) => {
-                state.maxActions += 1;
                 state.actions += 1;
             }
         }

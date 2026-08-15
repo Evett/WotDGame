@@ -14,7 +14,7 @@ export default {
         effect: (target, state, card) => {
             if (target) {
                 const damage = card.upgraded ? 15 : 10;
-                target.takeDamage(damage * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(damage));
                 state.playerTakeDamage(3);
             }
         },
@@ -63,7 +63,7 @@ export default {
         upgradedDescription: "Deal 11 damage. Apply Bleed for 3 turns.",
         effect: (target, state, card) => {
             if (target) {
-                target.takeDamage((card.upgraded ? 11 : 8) * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(card.upgraded ? 11 : 8));
                 target.applyStatus("Bleed", card.upgraded ? 3 : 2);
             }
         },
@@ -81,7 +81,7 @@ export default {
         effect: (target, state, card) => {
             if (target) {
                 const damage = card.upgraded ? 11 : 7;
-                target.takeDamage(damage * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(damage));
                 state.playerHeal(damage);
             }
         },
@@ -113,7 +113,7 @@ export default {
         upgradedDescription: "Deal 10 damage to all enemies. Take 2 damage.",
         effect: (_, state, card) => {
             const damage = card.upgraded ? 10 : 6;
-            state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage * state.nextAttackBonus); });
+            state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(state.calcDamage(damage)); });
             state.playerTakeDamage(2);
         },
         upgraded: false
@@ -146,7 +146,7 @@ export default {
             const damage = card.upgraded ? 5 : 4;
             if (target) {
                 for (let i = 0; i < 3; i++) {
-                    target.takeDamage(damage * state.nextAttackBonus);
+                    target.takeDamage(state.calcDamage(damage));
                 }
             }
         },
@@ -194,7 +194,7 @@ export default {
         description: "Deal 20 damage. Take 6 damage.",
         upgradedDescription: "Deal 28 damage. Take 6 damage.",
         effect: (target, state, card) => {
-            if (target) target.takeDamage((card.upgraded ? 28 : 20) * state.nextAttackBonus);
+            if (target) target.takeDamage(state.calcDamage(card.upgraded ? 28 : 20));
             state.playerTakeDamage(6);
         },
         upgraded: false
@@ -253,7 +253,7 @@ export default {
         description: "Deal 6 damage. Gain 4 armor.",
         upgradedDescription: "Deal 9 damage. Gain 6 armor.",
         effect: (target, state, card) => {
-            if (target) target.takeDamage((card.upgraded ? 9 : 6) * state.nextAttackBonus);
+            if (target) target.takeDamage(state.calcDamage(card.upgraded ? 9 : 6));
             state.playerArmor(card.upgraded ? 6 : 4);
         },
         upgraded: false
@@ -270,7 +270,7 @@ export default {
         effect: (target, state, card) => {
             const missing = state.maxHealth - state.health;
             const damage = card.upgraded ? 6 + Math.floor(missing / 4) : 4 + Math.floor(missing / 5);
-            if (target) target.takeDamage(damage * state.nextAttackBonus);
+            if (target) target.takeDamage(state.calcDamage(damage));
         },
         upgraded: false
     }),
@@ -302,7 +302,7 @@ export default {
         effect: (_, state, card) => {
             const armorLost = state.armor || 0;
             state.armor = 0;
-            state.nextAttackBonus += card.upgraded ? Math.floor(armorLost * 1.5) : armorLost;
+            state.flatDamageBonus += card.upgraded ? Math.floor(armorLost * 1.5) : armorLost;
         },
         upgraded: false
     }),
@@ -387,7 +387,7 @@ export default {
         effect: (target, state, card) => {
             const low = state.health <= state.maxHealth / 2;
             const damage = low ? (card.upgraded ? 32 : 24) : (card.upgraded ? 20 : 16);
-            if (target) target.takeDamage(damage * state.nextAttackBonus);
+            if (target) target.takeDamage(state.calcDamage(damage));
         },
         upgraded: false
     }),
@@ -402,7 +402,7 @@ export default {
         upgradedDescription: "Deal 13 damage. Apply Burn for 3 turns.",
         effect: (target, state, card) => {
             if (target) {
-                target.takeDamage((card.upgraded ? 13 : 9) * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(card.upgraded ? 13 : 9));
                 target.applyStatus("Burn", card.upgraded ? 3 : 2);
             }
         },
@@ -418,7 +418,7 @@ export default {
         description: "Deal 12 damage. Take 5 damage. Draw 1 card.",
         upgradedDescription: "Deal 18 damage. Take 5 damage. Draw 2 cards.",
         effect: (target, state, card, scene) => {
-            if (target) target.takeDamage((card.upgraded ? 18 : 12) * state.nextAttackBonus);
+            if (target) target.takeDamage(state.calcDamage(card.upgraded ? 18 : 12));
             state.playerTakeDamage(5);
             state.drawCards(card.upgraded ? 2 : 1, scene);
         },
@@ -451,7 +451,7 @@ export default {
         effect: (target, state, card) => {
             if (target) {
                 const damage = card.upgraded ? 10 : 7;
-                target.takeDamage(damage * state.nextAttackBonus);
+                target.takeDamage(state.calcDamage(damage));
                 if (target.isAlive && target.health <= target.maxHealth / 2) {
                     target.applyStatus("Stunned", 1);
                 }
