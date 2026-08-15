@@ -21,6 +21,10 @@ class Card {
     getDescription() {
         return this.upgraded ? this.upgradedDescription : this.description;
     }
+
+    getDisplayName() {
+        return this.upgraded ? `${this.name}+` : this.name;
+    }
     
     upgrade() {
         this.upgraded = true;

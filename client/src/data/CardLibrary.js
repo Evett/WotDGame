@@ -16,6 +16,17 @@ const cards = {
   Wizard
 };
 
+// Cards in starter decks — excluded from rewards and shops
+const STARTER_CARD_NAMES = new Set([
+  'Strike', 'Block', 'Berserk',
+  'Eidolon Strike', 'Summon Khan', 'Phantom Strike',
+  'Summon Kamau', 'Planar Binding',
+  'Magic Missile', 'Shield', 'Fireball',
+  'Blood Fury', 'Raging Howl', 'Arcane Bloodline',
+  'Smite Evil', 'Divine Shield', 'Lay on Hands',
+  'Sacred Strike', 'Blessing of War', 'Sacrifice'
+]);
+
 function shuffleArray(arr) {
     const array = [...arr];
     for (let i = array.length - 1; i > 0; i--) {
@@ -27,14 +38,17 @@ function shuffleArray(arr) {
 
 const CardLibrary = {
   cards,
+  STARTER_CARD_NAMES,
 
   getRandomCommonCard() {
-    const pool = Object.values(cards.Common);
+    const pool = Object.values(cards.Common)
+      .filter(f => !STARTER_CARD_NAMES.has(f().name));
     return pool[Math.floor(Math.random() * pool.length)]();
   },
 
   getRandomCommonCards(amount = 1) {
-    return shuffleArray(Object.values(cards.Common))
+    return shuffleArray(Object.values(cards.Common)
+      .filter(f => !STARTER_CARD_NAMES.has(f().name)))
       .slice(0, amount)
       .map(factory => factory());
   },
@@ -44,7 +58,8 @@ const CardLibrary = {
   },
 
   getRandomCardsForClass(characterClass, amount = 1) {
-    return shuffleArray(Object.values(cards[characterClass] || {}))
+    return shuffleArray(Object.values(cards[characterClass] || {})
+      .filter(f => !STARTER_CARD_NAMES.has(f().name)))
       .slice(0, amount)
       .map(factory => factory());
   },

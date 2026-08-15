@@ -116,13 +116,12 @@ export class BattleScene extends BaseScene {
                     this.waitingForHost = false;
                     const enemies = this.service.getBattleEnemies();
                     if (enemies.length > 0) {
+                        this.gameState.armor = 0;
                         this.gameState.startBattle(enemies);
                         this.gameState.resetDeck();
                         this.gameState.actions = this.gameState.maxActions;
                         this.gameState.mana = this.gameState.maxMana;
-                        this.gameState.armor = 0;
                         this.gameState.drawHand(this);
-                        this.gameState.runItemTriggers('onBattleStart', this);
                         this.service.saveMyGameState(this.gameState);
                         // Rebuild enemy display with new enemies
                         this.enemyObjects.forEach(obj => obj.container.destroy());
@@ -212,13 +211,12 @@ export class BattleScene extends BaseScene {
             }
             enemies.forEach(e => e.decideIntent());
 
+            this.gameState.armor = 0;
             this.gameState.startBattle(enemies);
             this.gameState.resetDeck();
             this.gameState.actions = this.gameState.maxActions;
             this.gameState.mana = this.gameState.maxMana;
-            this.gameState.armor = 0;
             this.gameState.drawHand(this);
-            this.gameState.runItemTriggers('onBattleStart', this);
             this.service.saveMyGameState(this.gameState);
 
             // Broadcast to others that battle is ready
@@ -227,13 +225,12 @@ export class BattleScene extends BaseScene {
             // Non-host: check if host already set up, otherwise wait for RPC
             const enemies = this.service.getBattleEnemies();
             if (enemies.length > 0 && enemies.some(e => e.isAlive)) {
+                this.gameState.armor = 0;
                 this.gameState.startBattle(enemies);
                 this.gameState.resetDeck();
                 this.gameState.actions = this.gameState.maxActions;
                 this.gameState.mana = this.gameState.maxMana;
-                this.gameState.armor = 0;
                 this.gameState.drawHand(this);
-                this.gameState.runItemTriggers('onBattleStart', this);
                 this.service.saveMyGameState(this.gameState);
             } else {
                 // Wait for BATTLE_READY RPC from host
@@ -613,8 +610,8 @@ export class BattleScene extends BaseScene {
                 .setInteractive({ useHandCursor: true });
 
             // Card name
-            const name = this.add.text(0, -60, card.name, {
-                fontSize: '12px', color: '#fff', fontStyle: 'bold',
+            const name = this.add.text(0, -60, card.getDisplayName(), {
+                fontSize: '12px', color: card.upgraded ? '#44ffff' : '#fff', fontStyle: 'bold',
                 wordWrap: { width: CARD_WIDTH - 10 }, align: 'center'
             }).setOrigin(0.5);
 
@@ -811,6 +808,7 @@ export class BattleScene extends BaseScene {
                 this.heroAbilityBtn.setAlpha(0.5);
                 this.heroAbilityBtn.disableInteractive();
                 this.updateStatsUI();
+                this.updateHandDisplay();
                 this.showMessage(`Used ${abilityName}!`, '#aa44ff');
             }
         });
@@ -909,6 +907,7 @@ export class BattleScene extends BaseScene {
                 if (success) {
                     this.showMessage(`Used ${item.name}!`, '#aa44ff');
                     this.updateStatsUI();
+                    this.updateHandDisplay();
                     this.updateEnemyDisplay();
                     this.updateItemDisplay();
                     this.service.saveMyGameState(this.gameState);
@@ -1067,8 +1066,10 @@ export class BattleScene extends BaseScene {
         this.turnEnded = false;
         this.enemyTurnRunning = false;
 
-        // Reset armor each turn, restore actions/mana
-        this.gameState.armor = 0;
+        // Reset armor each turn (skip first turn — battle-start effects already applied)
+        if (this.currentRound > 1) {
+            this.gameState.armor = 0;
+        }
         this.gameState.flatDamageBonus = 0;
         this.gameState.nextAttackMultiplier = 1;
         this.gameState.actions = this.gameState.maxActions;
@@ -1087,6 +1088,11 @@ export class BattleScene extends BaseScene {
         if (this.gameState.isDead()) {
             this.battleLost();
             return;
+        }
+
+        // On the first turn, fire onBattleStart triggers (after resource reset)
+        if (this.currentRound === 1) {
+            this.gameState.runItemTriggers('onBattleStart', this);
         }
 
         // Fire onTurnStart triggers for passive items

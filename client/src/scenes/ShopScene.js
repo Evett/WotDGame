@@ -63,6 +63,13 @@ export class ShopScene extends BaseScene {
     const commonCards = CardLibrary.getRandomCommonCards(2);
     const allCards = [...classCards, ...commonCards];
 
+    // Chance to offer upgraded cards scales with progress
+    const battleCount = this.service.getBattleCount ? this.service.getBattleCount() : 0;
+    const upgradeChance = Math.min(0.1 + battleCount * 0.05, 0.5);
+    allCards.forEach(card => {
+      if (Math.random() < upgradeChance) card.upgraded = true;
+    });
+
     this.shopItems = allCards.map(card => ({
       card,
       price: this.getCardPrice(card),
@@ -102,11 +109,11 @@ export class ShopScene extends BaseScene {
     const bgColor = typeColors[card.type] || 0x333333;
 
     const bg = this.add.rectangle(cx, cy, w, h, bgColor)
-      .setStrokeStyle(2, 0x666666)
+      .setStrokeStyle(2, card.upgraded ? 0x44ffff : 0x666666)
       .setInteractive({ useHandCursor: true });
 
-    const nameText = this.add.text(cx, cy - 50, card.name, {
-      fontSize: '13px', color: '#fff', fontStyle: 'bold',
+    const nameText = this.add.text(cx, cy - 50, card.getDisplayName(), {
+      fontSize: '13px', color: card.upgraded ? '#44ffff' : '#fff', fontStyle: 'bold',
       wordWrap: { width: w - 12 }, align: 'center'
     }).setOrigin(0.5);
 
@@ -200,6 +207,9 @@ export class ShopScene extends BaseScene {
 
     // Daily cards cost more
     if (card.isOncePerDay) base += 15;
+
+    // Upgraded cards cost more
+    if (card.upgraded) base += 20;
 
     // Add some randomness (+/- 20%)
     const variance = Math.floor(base * 0.2);

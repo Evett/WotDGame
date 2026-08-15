@@ -89,10 +89,10 @@ export class DeckScene extends BaseScene {
       const cy = gridStartY + row * (cardH + 6);
 
       this.add.rectangle(cx, cy, cardW, cardH, 0x2a2a4a)
-        .setStrokeStyle(1, this.getCardTypeColor(card.type));
+        .setStrokeStyle(1, card.upgraded ? 0x44ffff : this.getCardTypeColor(card.type));
 
-      this.add.text(cx, cy - 8, card.name, {
-        fontSize: '10px', color: '#fff', fontStyle: 'bold'
+      this.add.text(cx, cy - 8, card.getDisplayName(), {
+        fontSize: '10px', color: card.upgraded ? '#44ffff' : '#fff', fontStyle: 'bold'
       }).setOrigin(0.5);
 
       this.add.text(cx, cy + 10, `${card.actionCost}⚡ ${card.manaCost}✦`, {

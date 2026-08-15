@@ -79,17 +79,25 @@ export default class BaseScene extends Phaser.Scene {
     playMusic(key, { volume = 0.4, loop = true } = {}) {
         if (!this.cache.audio.exists(key)) return;
         if (this.sound.get(key)?.isPlaying) return;
-        this.stopMusic();
+        // Stop all currently playing music tracks
+        this.sound.getAll().forEach(s => {
+            if (s.key.startsWith('bgm_') && s.isPlaying) {
+                s.stop();
+                s.destroy();
+            }
+        });
         this.currentMusic = this.sound.add(key, { volume, loop });
         this.currentMusic.play();
     }
 
     stopMusic() {
-        if (this.currentMusic) {
-            this.currentMusic.stop();
-            this.currentMusic.destroy();
-            this.currentMusic = null;
-        }
+        this.sound.getAll().forEach(s => {
+            if (s.key.startsWith('bgm_') && s.isPlaying) {
+                s.stop();
+                s.destroy();
+            }
+        });
+        this.currentMusic = null;
     }
 
     createInventoryButton(service) {
