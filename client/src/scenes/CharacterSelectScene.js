@@ -8,11 +8,11 @@ export class CharacterSelectScene extends BaseScene {
 
   preload() {
     this.load.image('char_alaen', 'characters/char_alaen.png');
-    this.load.image('char_hassan', 'characters/char_alaen.png');
-    this.load.image('char_marcus', 'characters/char_alaen.png');
-    this.load.image('char_mohef', 'characters/char_alaen.png');
-    this.load.image('char_nephereta', 'characters/char_alaen.png');
-    this.load.image('char_urusha', 'characters/char_alaen.png');
+    this.load.image('char_hassan', 'characters/char_hassan.png');
+    this.load.image('char_marcus', 'characters/char_marcus.png');
+    this.load.image('char_mohef', 'characters/char_mohef.png');
+    this.load.image('char_nephereta', 'characters/char_nephereta.png');
+    this.load.image('char_urusha', 'characters/char_urusha.png');
   }
 
   create(data) {
@@ -86,7 +86,7 @@ export class CharacterSelectScene extends BaseScene {
     const textureKey = `char_${charKey.toLowerCase()}`;
 
     this.previewSprite = this.add.image(previewX, previewY, textureKey)
-      .setScale(1.2)
+      .setScale(0.6)
       .setOrigin(0.5);
 
     this.previewName = this.add.text(previewX, previewY - 120, character.name, {
