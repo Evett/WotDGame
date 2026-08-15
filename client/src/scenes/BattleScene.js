@@ -1107,15 +1107,18 @@ export class BattleScene extends BaseScene {
 
         // Summoned allies act
         const hpBeforeAllies = this.gameState.enemies.map(e => ({ health: e.health, isAlive: e.isAlive, armor: e.armor, statuses: { ...e.statuses } }));
-        const allyMessages = this.gameState.tickAllies();
-        allyMessages.forEach((msg, i) => {
-            this.time.delayedCall(i * 300 + statusMessages.length * 400, () => this.showMessage(msg, '#66ffaa'));
+        const allyActions = this.gameState.tickAllies();
+        allyActions.forEach((action, i) => {
+            const delay = i * 600 + statusMessages.length * 400;
+            this.time.delayedCall(delay, () => this.playAllyAction(action));
         });
 
         // Broadcast ally damage to other players
         this.broadcastEnemyChanges(hpBeforeAllies);
-        this.updateEnemyDisplay();
-        this.checkBattleEnd();
+        this.time.delayedCall(allyActions.length * 600 + statusMessages.length * 400 + 200, () => {
+            this.updateEnemyDisplay();
+            this.checkBattleEnd();
+        });
 
         // Draw new hand
         this.gameState.drawHand(this);
@@ -1272,6 +1275,71 @@ export class BattleScene extends BaseScene {
         });
 
         this.updateTurnUI();
+    }
+
+    // ─── Ally Animation ─────────────────────────────────────
+
+    playAllyAction(action) {
+        if (action.type === 'attack') {
+            // Find the target enemy's screen position
+            const enemyObj = this.enemyObjects[action.targetIndex];
+            if (!enemyObj) {
+                this.showMessage(`${action.allyName} deals ${action.damage} to ${action.targetName}!`, '#66ffaa');
+                return;
+            }
+            const targetX = enemyObj.container.x;
+            const targetY = enemyObj.container.y;
+
+            // Create a projectile slash from the left side
+            const startX = 50;
+            const startY = 160;
+            const slash = this.add.text(startX, startY, '⚔', { fontSize: '24px' }).setOrigin(0.5);
+
+            // Ally name flash
+            this.showMessage(`${action.allyName} → ${action.targetName}`, '#66ffaa');
+
+            // Tween projectile to enemy
+            this.tweens.add({
+                targets: slash,
+                x: targetX,
+                y: targetY,
+                duration: 350,
+                ease: 'Power2',
+                onComplete: () => {
+                    slash.destroy();
+                    // Flash damage number on the enemy
+                    const dmgText = this.add.text(targetX, targetY - 30, `-${action.damage}`, {
+                        fontSize: '20px', color: '#66ffaa', fontStyle: 'bold'
+                    }).setOrigin(0.5);
+                    this.tweens.add({
+                        targets: dmgText,
+                        y: targetY - 60,
+                        alpha: 0,
+                        duration: 800,
+                        onComplete: () => dmgText.destroy()
+                    });
+                    // Brief red flash on enemy
+                    if (enemyObj.body) {
+                        const origAlpha = enemyObj.body.alpha;
+                        this.tweens.add({
+                            targets: enemyObj.body,
+                            alpha: 0.3,
+                            duration: 80,
+                            yoyo: true,
+                            repeat: 1,
+                            onComplete: () => { enemyObj.body.alpha = origAlpha; }
+                        });
+                    }
+                    this.updateEnemyDisplay();
+                }
+            });
+        } else if (action.type === 'heal') {
+            this.showMessage(`${action.allyName} heals you for ${action.amount}!`, '#44ff44');
+            this.updateStatsUI();
+        } else if (action.type === 'buff') {
+            this.showMessage(`${action.allyName} empowers you! (+${action.amount} damage)`, '#ffcc44');
+            this.updateStatsUI();
+        }
     }
 
     // ─── Helpers ────────────────────────────────────────────

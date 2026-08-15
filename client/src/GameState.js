@@ -107,7 +107,7 @@ export default class GameState {
     tickAllies() {
         if (!this.allies || this.allies.length === 0) return [];
 
-        const messages = [];
+        const actions = [];
         const aliveEnemies = this.enemies.filter(e => e.isAlive);
         const damageBonus = (this.passives?.allyDamageBonus) || 0;
         const eidolonBonus = this.buffs?.EidolonBonus?.amount || 0;
@@ -121,26 +121,27 @@ export default class GameState {
                 const totalDmg = ally.damage + damageBonus + eidolonBonus;
                 target.takeDamage(totalDmg);
                 if (ally.debuff) target.applyStatus(ally.debuff, 1);
-                messages.push(`${ally.name} deals ${totalDmg} to ${target.name}!`);
+                const targetIndex = this.enemies.indexOf(target);
+                actions.push({ type: 'attack', allyName: ally.name, damage: totalDmg, targetName: target.name, targetIndex });
             }
 
             // Ally heals player
             if (ally.heal) {
                 this.playerHeal(ally.heal);
-                messages.push(`${ally.name} heals you for ${ally.heal}!`);
+                actions.push({ type: 'heal', allyName: ally.name, amount: ally.heal });
             }
 
             // Ally grants flat attack bonus each turn
             if (ally.attackBonus) {
                 this.flatDamageBonus += ally.attackBonus;
-                messages.push(`${ally.name} empowers you! (+${ally.attackBonus} damage)`);
+                actions.push({ type: 'buff', allyName: ally.name, amount: ally.attackBonus });
             }
 
             ally.turnsRemaining--;
             return ally.turnsRemaining > 0;
         });
 
-        return messages;
+        return actions;
     }
 
     applyPlayerBuff(buffName, amount, duration) {
