@@ -490,10 +490,14 @@ export class BattleScene extends BaseScene {
                 fontSize: '11px', color: '#6699ff'
             }).setOrigin(0.5);
 
-            container.add([highlight, body, nameText, hpBar, hpFill, hpText, intentText, armorText]);
+            const debuffText = this.add.text(0, 110, '', {
+                fontSize: '10px', color: '#cc88ff'
+            }).setOrigin(0.5);
+
+            container.add([highlight, body, nameText, hpBar, hpFill, hpText, intentText, armorText, debuffText]);
 
             this.enemyObjects.push({
-                container, body, highlight, nameText, hpBar, hpFill, hpText, intentText, armorText, enemy
+                container, body, highlight, nameText, hpBar, hpFill, hpText, intentText, armorText, debuffText, enemy
             });
         });
 
@@ -501,8 +505,9 @@ export class BattleScene extends BaseScene {
     }
 
     updateEnemyDisplay() {
+        const statusIcons = { Frozen: '❄', Corrode: '🧪', Weakened: '↓', Poison: '☠', Stunned: '💫' };
         this.enemyObjects.forEach(obj => {
-            const { enemy, hpFill, hpText, intentText, armorText, body, container } = obj;
+            const { enemy, hpFill, hpText, intentText, armorText, debuffText, body, container } = obj;
 
             if (!enemy.isAlive) {
                 container.setAlpha(0.3);
@@ -511,6 +516,7 @@ export class BattleScene extends BaseScene {
                 hpText.setText('0');
                 hpFill.displayWidth = 0;
                 armorText.setText('');
+                debuffText.setText('');
                 return;
             }
 
@@ -564,6 +570,13 @@ export class BattleScene extends BaseScene {
                         intentText.setColor('#888888');
                 }
             }
+
+            // Show active debuffs (excluding Stunned which is shown in intent)
+            const debuffs = Object.entries(enemy.statuses || {})
+                .filter(([k, v]) => v > 0 && k !== 'Stunned')
+                .map(([k, v]) => `${statusIcons[k] || '•'}${k}(${v})`)
+                .join(' ');
+            debuffText.setText(debuffs);
         });
     }
 
@@ -1150,6 +1163,13 @@ export class BattleScene extends BaseScene {
         let delay = 0;
         aliveEnemies.forEach((enemy, i) => {
             this.time.delayedCall(delay, () => {
+                // Tick enemy statuses (poison damage, etc.)
+                const statusMsgs = enemy.tickStatuses();
+                statusMsgs.forEach(msg => this.showMessage(msg, '#aa44ff'));
+                this.updateEnemyDisplay();
+
+                if (!enemy.isAlive) return;
+
                 enemy.takeTurn(this.gameState);
                 this.updateStatsUI();
                 this.updateEnemyDisplay();

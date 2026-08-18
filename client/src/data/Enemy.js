@@ -49,6 +49,27 @@ class Enemy {
         return Math.abs(h);
     }
 
+    tickStatuses() {
+        const messages = [];
+        if (this.statuses.Poison && this.statuses.Poison > 0) {
+            const dmg = 3;
+            this.health -= dmg;
+            if (this.health <= 0) { this.health = 0; this.isAlive = false; }
+            messages.push(`${this.name} takes ${dmg} poison damage!`);
+        }
+        // Decrement all durations
+        Object.keys(this.statuses).forEach(key => {
+            if (key === 'Stunned') return; // Stunned is decremented in takeTurn
+            this.statuses[key]--;
+            if (this.statuses[key] <= 0) delete this.statuses[key];
+        });
+        return messages;
+    }
+
+    getDamageMultiplier() {
+        return (this.statuses.Weakened && this.statuses.Weakened > 0) ? 0.75 : 1;
+    }
+
     takeTurn(target) {
         if (!this.isAlive) return;
 
@@ -59,10 +80,11 @@ class Enemy {
         }
 
         if (!this.intent) return;
+        const weakMult = this.getDamageMultiplier();
 
         switch (this.intent.type) {
             case 'attack': {
-                let damage = this.intent.damage + this.strength;
+                let damage = Math.floor((this.intent.damage + this.strength) * weakMult);
                 if (target.armor > 0) {
                     const absorbed = Math.min(target.armor, damage);
                     target.armor -= absorbed;
@@ -71,13 +93,13 @@ class Enemy {
                 if (damage > 0) {
                     target.playerTakeDamage(damage);
                 }
-                console.log(`${this.name} attacks for ${this.intent.damage + this.strength} damage!`);
+                console.log(`${this.name} attacks for ${damage} damage!`);
                 break;
             }
             case 'multi_attack': {
                 const hits = this.intent.hits || 2;
                 for (let i = 0; i < hits; i++) {
-                    let damage = this.intent.damage + this.strength;
+                    let damage = Math.floor((this.intent.damage + this.strength) * weakMult);
                     if (target.armor > 0) {
                         const absorbed = Math.min(target.armor, damage);
                         target.armor -= absorbed;
@@ -87,12 +109,16 @@ class Enemy {
                         target.playerTakeDamage(damage);
                     }
                 }
-                console.log(`${this.name} attacks ${hits} times for ${this.intent.damage + this.strength} each!`);
+                console.log(`${this.name} attacks ${hits} times for ${Math.floor((this.intent.damage + this.strength) * weakMult)} each!`);
                 break;
             }
             case 'block': {
-                this.armor += this.intent.amount;
-                console.log(`${this.name} blocks! Gained ${this.intent.amount} armor. Total: ${this.armor}`);
+                if (this.statuses.Corrode && this.statuses.Corrode > 0) {
+                    console.log(`${this.name} tries to block but is corroded!`);
+                } else {
+                    this.armor += this.intent.amount;
+                    console.log(`${this.name} blocks! Gained ${this.intent.amount} armor. Total: ${this.armor}`);
+                }
                 break;
             }
             case 'buff': {
@@ -107,7 +133,7 @@ class Enemy {
                 break;
             }
             case 'attack_and_block': {
-                let damage = this.intent.damage + this.strength;
+                let damage = Math.floor((this.intent.damage + this.strength) * weakMult);
                 if (target.armor > 0) {
                     const absorbed = Math.min(target.armor, damage);
                     target.armor -= absorbed;
@@ -116,8 +142,12 @@ class Enemy {
                 if (damage > 0) {
                     target.playerTakeDamage(damage);
                 }
-                this.armor += this.intent.block;
-                console.log(`${this.name} attacks for ${this.intent.damage + this.strength} and gains ${this.intent.block} armor!`);
+                if (this.statuses.Corrode && this.statuses.Corrode > 0) {
+                    console.log(`${this.name} attacks for ${damage} but can't block (corroded)!`);
+                } else {
+                    this.armor += this.intent.block;
+                    console.log(`${this.name} attacks for ${damage} and gains ${this.intent.block} armor!`);
+                }
                 break;
             }
             case 'debuff': {
@@ -131,7 +161,10 @@ class Enemy {
     }
 
     takeDamage(amount) {
-        let remaining = amount;
+        // Frozen: take 50% more damage
+        const frozenMult = (this.statuses.Frozen && this.statuses.Frozen > 0) ? 1.5 : 1;
+        const adjusted = Math.floor(amount * frozenMult);
+        let remaining = adjusted;
         if (this.armor > 0) {
             const absorbed = Math.min(this.armor, remaining);
             this.armor -= absorbed;
@@ -144,7 +177,7 @@ class Enemy {
                 this.isAlive = false;
             }
         }
-        console.log(`${this.name} takes ${amount} damage (${amount - remaining} absorbed). HP: ${this.health}/${this.maxHealth}, Armor: ${this.armor}`);
+        console.log(`${this.name} takes ${adjusted} damage (${adjusted - remaining} absorbed). HP: ${this.health}/${this.maxHealth}, Armor: ${this.armor}`);
     }
 
     takeTrueDamage(amount) {
