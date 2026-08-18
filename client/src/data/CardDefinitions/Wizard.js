@@ -24,10 +24,10 @@ export default {
         type: "Spell",
         requiresTarget: false,
         isOncePerDay: true,
-        description: "Deal 10 damage to all enemies.",
-        upgradedDescription: "Deal 16 damage to all enemies.",
+        description: "Deal 14 damage to all enemies.",
+        upgradedDescription: "Deal 22 damage to all enemies.",
         effect: (_, state, card) => {
-            const damage = state.calcDamage(card.upgraded ? 16 : 10);
+            const damage = state.calcDamage(card.upgraded ? 22 : 14);
             state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage); });
         },
         upgraded: false
@@ -54,15 +54,15 @@ export default {
         type: "Spell",
         requiresTarget: true,
         description: "Deal 14 damage.",
-        upgradedDescription: "Deal 20 damage.",
+        upgradedDescription: "Deal 22 damage.",
         effect: (target, state, card) => {
-            if (target) target.takeDamage(state.calcDamage(card.upgraded ? 20 : 14));
+            if (target) target.takeDamage(state.calcDamage(card.upgraded ? 22 : 14));
         },
         upgraded: false
     }),
 
-    ArcaneBlast: () => createCard({
-        name: "Arcane Blast",
+    TelekineticProjectile: () => createCard({
+        name: "Telekinetic Projectile",
         actionCost: 1,
         manaCost: 1,
         type: "Spell",
@@ -110,7 +110,7 @@ export default {
     Counterspell: () => createCard({
         name: "Counterspell",
         actionCost: 0,
-        manaCost: 2,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: false,
         description: "Gain 8 armor. Gain 1 action.",
@@ -122,28 +122,28 @@ export default {
         upgraded: false
     }),
 
-    ArcaneRecovery: () => createCard({
-        name: "Arcane Recovery",
+    QuickenSpell: () => createCard({
+        name: "Quicken Spell",
         actionCost: 0,
         manaCost: 0,
         type: "Skill",
         requiresTarget: false,
-        description: "Gain 3 mana.",
-        upgradedDescription: "Gain 4 mana.",
+        description: "Gain 2 mana.",
+        upgradedDescription: "Gain 3 mana.",
         effect: (_, state, card) => {
-            state.mana += card.upgraded ? 4 : 3;
+            state.mana += card.upgraded ? 3 : 2;
         },
         upgraded: false
     }),
 
-    Telekinesis: () => createCard({
-        name: "Telekinesis",
+    Boneshatter: () => createCard({
+        name: "Boneshatter",
         actionCost: 1,
         manaCost: 1,
         type: "Spell",
         requiresTarget: true,
-        description: "Deal 6 damage. Stun for 1 turn.",
-        upgradedDescription: "Deal 9 damage. Stun for 1 turn.",
+        description: "Deal 6 damage. Stun for 1 turn if non-boss.",
+        upgradedDescription: "Deal 9 damage. Stun for 1 turn if non-boss.",
         effect: (target, state, card) => {
             if (target) {
                 target.takeDamage(state.calcDamage(card.upgraded ? 9 : 6));
@@ -212,12 +212,13 @@ export default {
         upgraded: false
     }),
 
-    Slow: () => createCard({
-        name: "Slow",
+    TimeStop: () => createCard({
+        name: "Time Stop",
         actionCost: 1,
         manaCost: 1,
         type: "Spell",
         requiresTarget: false,
+        isOncePerDay: true,
         description: "Stun all non-boss enemies for 1 turn.",
         upgradedDescription: "Stun all enemies for 1 turn.",
         effect: (_, state, card) => {
@@ -280,8 +281,8 @@ export default {
         upgraded: false
     }),
 
-    Stoneskin: () => createCard({
-        name: "Stoneskin",
+    EmergencyForceSphere: () => createCard({
+        name: "Emergency Force Sphere",
         actionCost: 1,
         manaCost: 2,
         type: "Spell",
@@ -294,8 +295,8 @@ export default {
         upgraded: false
     }),
 
-    PowerWordStun: () => createCard({
-        name: "Power Word: Stun",
+    SpellAbsorption: () => createCard({
+        name: "Spell Absorption",
         actionCost: 1,
         manaCost: 3,
         type: "Spell",
@@ -315,10 +316,10 @@ export default {
         manaCost: 0,
         type: "Spell",
         requiresTarget: false,
-        description: "Draw 2 cards.",
-        upgradedDescription: "Draw 3 cards.",
+        description: "Draw 1 card.",
+        upgradedDescription: "Draw 2 cards.",
         effect: (_, state, card, scene) => {
-            state.drawCards(card.upgraded ? 3 : 2, scene);
+            state.drawCards(card.upgraded ? 2 : 1, scene);
         },
         upgraded: false
     }),
@@ -330,8 +331,8 @@ export default {
         type: "Spell",
         requiresTarget: false,
         isOncePerDay: true,
-        description: "Deal 20 damage to all enemies.",
-        upgradedDescription: "Deal 30 damage to all enemies.",
+        description: "Deal 25 damage to all enemies.",
+        upgradedDescription: "Deal 40 damage to all enemies.",
         effect: (_, state, card) => {
             const damage = state.calcDamage(card.upgraded ? 30 : 20);
             state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage); });
@@ -356,29 +357,30 @@ export default {
         upgraded: false
     }),
 
-    Dispel: () => createCard({
-        name: "Dispel",
+    LimitedWish: () => createCard({
+        name: "Limited Wish",
         actionCost: 0,
         manaCost: 1,
         type: "Spell",
         requiresTarget: false,
-        description: "Draw 1 card. Gain 1 mana.",
-        upgradedDescription: "Draw 2 cards. Gain 1 mana.",
+        isOncePerDay: true,
+        description: "Draw 2 cards. Gain 2 mana.",
+        upgradedDescription: "Draw 3 cards. Gain 3 mana.",
         effect: (_, state, card, scene) => {
-            state.drawCards(card.upgraded ? 2 : 1, scene);
-            state.mana += 1;
+            state.drawCards(card.upgraded ? 3 : 2, scene);
+            state.mana += card.upgraded ? 3 : 2;
         },
         upgraded: false
     }),
 
-    WallOfForce: () => createCard({
-        name: "Wall of Force",
+    DispelMagic: () => createCard({
+        name: "Dispel Magic",
         actionCost: 1,
         manaCost: 2,
         type: "Spell",
         requiresTarget: false,
-        description: "Gain 12 armor. Stun 1 random enemy.",
-        upgradedDescription: "Gain 16 armor. Stun 1 random enemy.",
+        description: "Gain 12 armor. Stun 1 random non-boss enemy.",
+        upgradedDescription: "Gain 16 armor. Stun 1 random non-boss enemy.",
         effect: (_, state, card) => {
             state.playerArmor(card.upgraded ? 16 : 12);
             const alive = state.enemies.filter(e => e.isAlive && !e.isBoss);
@@ -389,8 +391,8 @@ export default {
         upgraded: false
     }),
 
-    TimeStop: () => createCard({
-        name: "Time Stop",
+    ResplendentMansion: () => createCard({
+        name: "Resplendent Mansion",
         actionCost: 0,
         manaCost: 3,
         type: "Spell",
@@ -405,8 +407,8 @@ export default {
         upgraded: false
     }),
 
-    Frostbite: () => createCard({
-        name: "Frostbite",
+    Fly: () => createCard({
+        name: "Fly",
         actionCost: 1,
         manaCost: 0,
         type: "Spell",
@@ -450,16 +452,16 @@ export default {
         upgraded: false
     }),
 
-    Thunderwave: () => createCard({
-        name: "Thunderwave",
+    Deflection: () => createCard({
+        name: "Deflection",
         actionCost: 1,
         manaCost: 1,
         type: "Spell",
         requiresTarget: false,
-        description: "Deal 5 damage to all enemies. Gain 5 armor.",
-        upgradedDescription: "Deal 8 damage to all enemies. Gain 8 armor.",
+        description: "Deal 6 damage to all enemies. Gain 6 armor.",
+        upgradedDescription: "Deal 10 damage to all enemies. Gain 10 armor.",
         effect: (_, state, card) => {
-            const amount = card.upgraded ? 8 : 5;
+            const amount = card.upgraded ? 10 : 6;
             state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(state.calcDamage(amount)); });
             state.playerArmor(amount);
         },
@@ -484,18 +486,19 @@ export default {
         upgraded: false
     }),
 
-    ArcaneSurge: () => createCard({
-        name: "Arcane Surge",
+    Stormbolts: () => createCard({
+        name: "Stormbolts",
         actionCost: 1,
         manaCost: 0,
         type: "Power",
         requiresTarget: false,
-        description: "Spend all mana. Deal 4 damage per mana spent to a random enemy.",
-        upgradedDescription: "Spend all mana. Deal 6 damage per mana spent to a random enemy.",
+        isOncePerDay: true,
+        description: "Spend all mana. Deal 9 damage per mana spent to a random enemy.",
+        upgradedDescription: "Spend all mana. Deal 17 damage per mana spent to a random enemy.",
         effect: (_, state, card) => {
             const manaSpent = state.mana;
             state.mana = 0;
-            const damage = manaSpent * (card.upgraded ? 6 : 4);
+            const damage = manaSpent * (card.upgraded ? 17 : 9);
             const alive = state.enemies.filter(e => e.isAlive);
             if (alive.length > 0) {
                 alive[Math.floor(Math.random() * alive.length)].takeDamage(damage);

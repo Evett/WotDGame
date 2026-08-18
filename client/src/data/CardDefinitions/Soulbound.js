@@ -20,14 +20,14 @@ export default {
         upgraded: false
     }),
 
-    PhantomStrike: () => createCard({
-        name: "Phantom Strike",
+    TentacleStrike: () => createCard({
+        name: "Tentacle Strike",
         actionCost: 1,
         manaCost: 0,
         type: "Attack",
         requiresTarget: true,
-        description: "Deal 6 damage. Deal 4 more if Eidolon active.",
-        upgradedDescription: "Deal 9 damage. Deal 6 more if Eidolon active.",
+        description: "Deal 6 damage. Deal 4 more if a summon is active.",
+        upgradedDescription: "Deal 9 damage. Deal 6 more if a summon is active.",
         effect: (target, state, card) => {
             if (target) {
                 const base = card.upgraded ? 9 : 6;
@@ -38,44 +38,62 @@ export default {
         upgraded: false
     }),
 
-    EidolonStrike: () => createCard({
-        name: "Eidolon Strike",
+    CorrosiveTouch: () => createCard({
+        name: "Corrosive Touch",
         actionCost: 1,
         manaCost: 0,
         type: "Attack",
         requiresTarget: true,
-        description: "Deal 3 damage. Deal 8 if Eidolon is active.",
-        upgradedDescription: "Deal 5 damage. Deal 12 if Eidolon is active.",
+        description: "Deal 7 damage.",
+        upgradedDescription: "Deal 11 damage.",
         effect: (target, state, card) => {
             if (target) {
-                const damage = state.hasEidolon ? (card.upgraded ? 12 : 8) : (card.upgraded ? 5 : 3);
+                const damage = card.upgraded ? 11 : 7;
                 target.takeDamage(state.calcDamage(damage));
             }
         },
         upgraded: false
     }),
 
-    SoulBond: () => createCard({
-        name: "Soul Bond",
-        actionCost: 1,
+    ObscuringMist: () => createCard({
+        name: "Obscuring Mist",
+        actionCost: 0,
         manaCost: 1,
-        type: "Power",
+        type: "Spell",
         requiresTarget: false,
-        description: "Summon Eidolon. Gain 6 armor.",
-        upgradedDescription: "Summon Eidolon. Gain 10 armor. Draw 1 card.",
+        description: "Gain 6 armor.",
+        upgradedDescription: "Gain 10 armor. Draw 1 card.",
         effect: (_, state, card, scene) => {
-            state.hasEidolon = true;
             state.playerArmor(card.upgraded ? 10 : 6);
             if (card.upgraded) state.drawCards(1, scene);
         },
         upgraded: false
     }),
 
-    LifeTransference: () => createCard({
-        name: "Life Transference",
+    CreatePit: () => createCard({
+        name: "Create Pit",
+        actionCost: 1,
+        manaCost: 1,
+        type: "Spell",
+        requiresTarget: false,
+        isOncePerDay: true,
+        description: "Gain 10 armor. Deal 10 damage.",
+        upgradedDescription: "Gain 15 armor. Deal 15 damage.",
+        effect: (target, state, card) => {
+            if (target) {
+                const damage = card.upgraded ? 15 : 10;
+                target.takeDamage(state.calcDamage(damage));
+                state.playerArmor(card.upgraded ? 15 : 10);
+            }
+        },
+        upgraded: false
+    }),
+
+    DarkWhispers: () => createCard({
+        name: "Dark Whispers",
         actionCost: 0,
         manaCost: 1,
-        type: "Skill",
+        type: "Spell",
         requiresTarget: false,
         description: "Lose 2 HP. Gain 10 armor.",
         upgradedDescription: "Lose 2 HP. Gain 15 armor.",
@@ -86,8 +104,8 @@ export default {
         upgraded: false
     }),
 
-    SharedPain: () => createCard({
-        name: "Shared Pain",
+    BloodTentacles: () => createCard({
+        name: "Blood Tentacles",
         actionCost: 1,
         manaCost: 1,
         type: "Attack",
@@ -102,12 +120,13 @@ export default {
         upgraded: false
     }),
 
-    SoulSiphon: () => createCard({
-        name: "Soul Siphon",
+    CausticBlood: () => createCard({
+        name: "Caustic Blood",
         actionCost: 1,
         manaCost: 2,
         type: "Spell",
         requiresTarget: true,
+        isOncePerDay: true,
         description: "Deal 8 damage. Heal for damage dealt.",
         upgradedDescription: "Deal 12 damage. Heal for damage dealt.",
         effect: (target, state, card) => {
@@ -120,14 +139,14 @@ export default {
         upgraded: false
     }),
 
-    PhantomArmor: () => createCard({
-        name: "Phantom Armor",
+    FusedEidolon: () => createCard({
+        name: "Fused Eidolon",
         actionCost: 0,
         manaCost: 1,
         type: "Skill",
         requiresTarget: false,
-        description: "Gain 7 armor. Gain 5 more if Eidolon active.",
-        upgradedDescription: "Gain 10 armor. Gain 7 more if Eidolon active.",
+        description: "Gain 7 armor. Gain 5 more if a summon is active.",
+        upgradedDescription: "Gain 10 armor. Gain 7 more if a summon is active.",
         effect: (_, state, card) => {
             const base = card.upgraded ? 10 : 7;
             const bonus = state.hasEidolon ? (card.upgraded ? 7 : 5) : 0;
@@ -136,8 +155,8 @@ export default {
         upgraded: false
     }),
 
-    TetherStrike: () => createCard({
-        name: "Tether Strike",
+    WhisperingGroveStrike: () => createCard({
+        name: "Whispering Grove Strike",
         actionCost: 1,
         manaCost: 0,
         type: "Attack",
@@ -151,55 +170,56 @@ export default {
         upgraded: false
     }),
 
-    SoulBurst: () => createCard({
-        name: "Soul Burst",
+    BreathOfNightmares: () => createCard({
+        name: "Breath of Nightmares",
         actionCost: 2,
-        manaCost: 2,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: false,
-        description: "Deal 7 damage to all. Lose 5 HP.",
-        upgradedDescription: "Deal 11 damage to all. Lose 5 HP.",
+        description: "Deal 8 damage to all enemies.",
+        upgradedDescription: "Deal 12 damage to all.",
         effect: (_, state, card) => {
-            const damage = card.upgraded ? 11 : 7;
+            const damage = card.upgraded ? 12 : 8;
             state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage); });
-            state.playerTakeDamage(5);
         },
         upgraded: false
     }),
 
-    PhantomReach: () => createCard({
-        name: "Phantom Reach",
+    LongArms: () => createCard({
+        name: "Long Arms",
         actionCost: 1,
         manaCost: 1,
         type: "Attack",
         requiresTarget: true,
-        description: "Deal 10 true damage. Requires Eidolon.",
-        upgradedDescription: "Deal 15 true damage. Requires Eidolon.",
+        description: "Deal 10 true damage.",
+        upgradedDescription: "Deal 15 true damage.",
         effect: (target, state, card) => {
-            if (target && state.hasEidolon) {
+            if (target) {
                 target.takeTrueDamage(card.upgraded ? 15 : 10);
             }
         },
         upgraded: false
     }),
 
-    EtherealMend: () => createCard({
-        name: "Ethereal Mend",
-        actionCost: 1,
-        manaCost: 1,
+    Haste: () => createCard({
+        name: "Haste",
+        actionCost: 0,
+        manaCost: 0,
         type: "Skill",
         requiresTarget: false,
-        description: "Heal 8 HP. Gain 4 armor.",
-        upgradedDescription: "Heal 12 HP. Gain 6 armor.",
-        effect: (_, state, card) => {
-            state.playerHeal(card.upgraded ? 12 : 8);
-            state.playerArmor(card.upgraded ? 6 : 4);
+        isOncePerDay: true,
+        description: "Heal 4 HP. Gain 1 action. Draw 1 card",
+        upgradedDescription: "Heal 6 HP. Gain 2 actions. Draw 2 cards.",
+        effect: (_, state, card, scene) => {
+            state.playerHeal(card.upgraded ? 6 : 4);
+            state.drawCards(card.upgraded ? 2 : 1, scene);
+            state.actions += card.upgraded ? 2 : 1;
         },
         upgraded: false
     }),
 
-    SoulChains: () => createCard({
-        name: "Soul Chains",
+    HoldMonster: () => createCard({
+        name: "Hold Monster",
         actionCost: 1,
         manaCost: 2,
         type: "Spell",
@@ -215,8 +235,8 @@ export default {
         upgraded: false
     }),
 
-    FeedOnSuffering: () => createCard({
-        name: "Feed on Suffering",
+    BlackTentacles: () => createCard({
+        name: "Black Tentacles",
         actionCost: 1,
         manaCost: 0,
         type: "Attack",
@@ -235,14 +255,14 @@ export default {
         upgraded: false
     }),
 
-    BondOfSouls: () => createCard({
-        name: "Bond of Souls",
+    LivingShadows: () => createCard({
+        name: "Living Shadows",
         actionCost: 0,
         manaCost: 2,
         type: "Power",
         requiresTarget: false,
-        description: "While Eidolon active, all attacks deal +4.",
-        upgradedDescription: "While Eidolon active, all attacks deal +6.",
+        description: "While a summon is active, all attacks deal +4.",
+        upgradedDescription: "While a summon is active, all attacks deal +6.",
         effect: (_, state, card) => {
             if (state.hasEidolon) {
                 state.applyPlayerBuff("AttackBonus", card.upgraded ? 6 : 4, 99);
@@ -251,8 +271,8 @@ export default {
         upgraded: false
     }),
 
-    PhantomLash: () => createCard({
-        name: "Phantom Lash",
+    TarPool: () => createCard({
+        name: "Tar Pool",
         actionCost: 1,
         manaCost: 1,
         type: "Attack",
@@ -268,8 +288,8 @@ export default {
         upgraded: false
     }),
 
-    SpectralBarrier: () => createCard({
-        name: "Spectral Barrier",
+    Invisibility: () => createCard({
+        name: "Invisibility",
         actionCost: 0,
         manaCost: 2,
         type: "Skill",
@@ -282,8 +302,8 @@ export default {
         upgraded: false
     }),
 
-    SoulDrain: () => createCard({
-        name: "Soul Drain",
+    VitriolicMist: () => createCard({
+        name: "Vitriolic Mist",
         actionCost: 1,
         manaCost: 2,
         type: "Spell",
@@ -297,22 +317,22 @@ export default {
         upgraded: false
     }),
 
-    GhostlyPresence: () => createCard({
-        name: "Ghostly Presence",
+    Aspect: () => createCard({
+        name: "Aspect",
         actionCost: 0,
         manaCost: 0,
         type: "Skill",
         requiresTarget: false,
-        description: "Draw 2 cards.",
-        upgradedDescription: "Draw 3 cards.",
+        description: "Draw 1 card.",
+        upgradedDescription: "Draw 2 cards.",
         effect: (_, state, card, scene) => {
-            state.drawCards(card.upgraded ? 3 : 2, scene);
+            state.drawCards(card.upgraded ? 2 : 1, scene);
         },
         upgraded: false
     }),
 
-    SoulStorm: () => createCard({
-        name: "Soul Storm",
+    TissandeisStorm: () => createCard({
+        name: "Tissandei's Storm",
         actionCost: 2,
         manaCost: 2,
         type: "Spell",
@@ -330,8 +350,8 @@ export default {
         upgraded: false
     }),
 
-    PhantomDodge: () => createCard({
-        name: "Phantom Dodge",
+    Glide: () => createCard({
+        name: "Glide",
         actionCost: 0,
         manaCost: 1,
         type: "Skill",
@@ -345,14 +365,14 @@ export default {
         upgraded: false
     }),
 
-    SoulTether: () => createCard({
-        name: "Soul Tether",
+    LifeBond: () => createCard({
+        name: "Life Bond",
         actionCost: 1,
         manaCost: 1,
         type: "Power",
         requiresTarget: false,
-        description: "Summon Eidolon. Gain 2 mana.",
-        upgradedDescription: "Summon Eidolon. Gain 3 mana. Draw 1 card.",
+        description: "Gain 2 mana.",
+        upgradedDescription: "Gain 3 mana. Draw 1 card.",
         effect: (_, state, card, scene) => {
             state.hasEidolon = true;
             state.mana += card.upgraded ? 3 : 2;
@@ -361,30 +381,30 @@ export default {
         upgraded: false
     }),
 
-    VengefulPhantom: () => createCard({
-        name: "Vengeful Phantom",
+    WalkThePlank: () => createCard({
+        name: "Walk the Plank",
         actionCost: 1,
         manaCost: 1,
         type: "Attack",
         requiresTarget: true,
-        description: "Deal 4 + (missing HP / 4) damage.",
-        upgradedDescription: "Deal 6 + (missing HP / 3) damage.",
+        description: "Deal 6 + (missing HP / 4) damage.",
+        upgradedDescription: "Deal 9 + (missing HP / 3) damage.",
         effect: (target, state, card) => {
             const missing = state.maxHealth - state.health;
-            const damage = card.upgraded ? 6 + Math.floor(missing / 3) : 4 + Math.floor(missing / 4);
+            const damage = card.upgraded ? 9 + Math.floor(missing / 3) : 6 + Math.floor(missing / 4);
             if (target) target.takeDamage(state.calcDamage(damage));
         },
         upgraded: false
     }),
 
-    SpiritualFusion: () => createCard({
-        name: "Spiritual Fusion",
+    LifeLink: () => createCard({
+        name: "Life Link",
         actionCost: 1,
         manaCost: 2,
         type: "Power",
         requiresTarget: false,
-        description: "Merge with Eidolon. Gain 8 armor, +4 attacks for 3 turns.",
-        upgradedDescription: "Merge with Eidolon. Gain 12 armor, +6 attacks for 3 turns.",
+        description: "If you have a summon active, gain 8 armor, +4 attacks for 3 turns.",
+        upgradedDescription: "If you have a summon active, gain 12 armor, +6 attacks for 3 turns.",
         effect: (_, state, card) => {
             if (state.hasEidolon) {
                 state.playerArmor(card.upgraded ? 12 : 8);
@@ -394,44 +414,46 @@ export default {
         upgraded: false
     }),
 
-    WailOfAgony: () => createCard({
-        name: "Wail of Agony",
+    IncendiaryCloud: () => createCard({
+        name: "Incendiary Cloud",
         actionCost: 1,
         manaCost: 2,
         type: "Spell",
         requiresTarget: false,
-        description: "Lose 6 HP. Deal 10 damage to all enemies.",
-        upgradedDescription: "Lose 6 HP. Deal 15 damage to all enemies.",
+        isOncePerDay: true,
+        description: "Lose 6 HP. Deal 18 damage to all enemies.",
+        upgradedDescription: "Lose 6 HP. Deal 25 damage to all enemies.",
         effect: (_, state, card) => {
             state.playerTakeDamage(6);
-            const damage = card.upgraded ? 15 : 10;
+            const damage = card.upgraded ? 25 : 18;
             state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage); });
         },
         upgraded: false
     }),
 
-    SoulRecovery: () => createCard({
-        name: "Soul Recovery",
+    Transposition: () => createCard({
+        name: "Transposition",
         actionCost: 1,
         manaCost: 1,
         type: "Skill",
         requiresTarget: false,
-        description: "Heal 10 HP. Requires Eidolon.",
-        upgradedDescription: "Heal 16 HP. Requires Eidolon.",
+        isOncePerDay: true,
+        description: "Heal 10 HP. Requires a summon.",
+        upgradedDescription: "Heal 16 HP. Requires a summon.",
         effect: (_, state, card) => {
             if (state.hasEidolon) state.playerHeal(card.upgraded ? 16 : 10);
         },
         upgraded: false
     }),
 
-    PhantomFlurry: () => createCard({
-        name: "Phantom Flurry",
+    SwarmOfFangs: () => createCard({
+        name: "Swarm of Fangs",
         actionCost: 1,
         manaCost: 1,
         type: "Attack",
         requiresTarget: true,
-        description: "Deal 4 damage 4 times. Requires Eidolon.",
-        upgradedDescription: "Deal 5 damage 4 times. Requires Eidolon.",
+        description: "Deal 4 damage 4 times. Requires a summon.",
+        upgradedDescription: "Deal 6 damage 4 times. Requires a summon.",
         effect: (target, state, card) => {
             if (target && state.hasEidolon) {
                 const damage = card.upgraded ? 5 : 4;
@@ -441,15 +463,15 @@ export default {
         upgraded: false
     }),
 
-    DualExistence: () => createCard({
-        name: "Dual Existence",
+    SplitForms: () => createCard({
+        name: "Split Forms",
         actionCost: 0,
         manaCost: 2,
         type: "Power",
         requiresTarget: false,
         isOncePerDay: true,
-        description: "Summon Eidolon. Gain 3 actions. Gain 8 armor.",
-        upgradedDescription: "Summon Eidolon. Gain 4 actions. Gain 12 armor.",
+        description: "Gain 3 actions. Gain 8 armor.",
+        upgradedDescription: "Gain 4 actions. Gain 12 armor.",
         effect: (_, state, card) => {
             state.hasEidolon = true;
             state.actions += card.upgraded ? 4 : 3;
@@ -458,32 +480,33 @@ export default {
         upgraded: false
     }),
 
-    EchoingScream: () => createCard({
-        name: "Echoing Scream",
+    Maze: () => createCard({
+        name: "Maze",
         actionCost: 1,
         manaCost: 1,
         type: "Spell",
         requiresTarget: false,
         description: "Deal 5 damage to all. Apply Weakened 1 turn.",
-        upgradedDescription: "Deal 8 damage to all. Apply Weakened 1 turn.",
+        upgradedDescription: "Deal 8 damage to all. Apply Weakened 2 turns.",
         effect: (_, state, card) => {
             const damage = card.upgraded ? 8 : 5;
             state.enemies.forEach(e => {
                 if (e.isAlive) {
                     e.takeDamage(damage);
-                    e.applyStatus("Weakened", 1);
+                    e.applyStatus("Weakened", 2);
                 }
             });
         },
         upgraded: false
     }),
 
-    DeathPact: () => createCard({
-        name: "Death Pact",
+    TissandeisPact: () => createCard({
+        name: "Tissandei's Pact",
         actionCost: 1,
         manaCost: 0,
         type: "Skill",
         requiresTarget: false,
+        isOncePerDay: true,
         description: "Lose 8 HP. Draw 4 cards. Gain 2 mana.",
         upgradedDescription: "Lose 6 HP. Draw 5 cards. Gain 3 mana.",
         effect: (_, state, card, scene) => {
@@ -494,24 +517,24 @@ export default {
         upgraded: false
     }),
 
-    SoulShatter: () => createCard({
-        name: "Soul Shatter",
+    AcidPit: () => createCard({
+        name: "Acid Pit",
         actionCost: 2,
         manaCost: 2,
         type: "Attack",
         requiresTarget: true,
         isOncePerDay: true,
-        description: "Deal 25 damage. Lose 8 HP.",
-        upgradedDescription: "Deal 35 damage. Lose 8 HP.",
+        description: "Deal 25 damage. Gain 8 armor.",
+        upgradedDescription: "Deal 35 damage. Gain 12 armor.",
         effect: (target, state, card) => {
             if (target) target.takeDamage(state.calcDamage(card.upgraded ? 35 : 25));
-            state.playerTakeDamage(8);
+            state.playerArmor(card.upgraded ? 12 : 8);
         },
         upgraded: false
     }),
 
-    SpiritWalk: () => createCard({
-        name: "Spirit Walk",
+    InsectScouts: () => createCard({
+        name: "Insect Scouts",
         actionCost: 0,
         manaCost: 1,
         type: "Skill",

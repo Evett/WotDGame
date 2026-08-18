@@ -13,14 +13,14 @@ const CharacterLibrary = {
         actions: 3,
         mana: 2,
         deck: [
-            ...repeat(() => CardLibrary.cards.Common.Strike(), 2),
-            ...repeat(() => CardLibrary.cards.Common.Block(), 3),
-            ...repeat(() => CardLibrary.cards.Soulbound.EidolonStrike(), 2),
-            CardLibrary.cards.Common.Berserk(),
-            CardLibrary.cards.Soulbound.SummonKhan(),
-            CardLibrary.cards.Soulbound.PhantomStrike()
+            ...repeat(() => CardLibrary.cards.Soulbound.CorrosiveTouch(), 2),
+            ...repeat(() => CardLibrary.cards.Soulbound.ObscuringMist(), 4),
+            ...repeat(() => CardLibrary.cards.Soulbound.TentacleStrike(), 1),
+            CardLibrary.cards.Soulbound.CreatePit(),
+            CardLibrary.cards.Common.Meditate(),
+            CardLibrary.cards.Soulbound.SummonKhan()
         ],
-        heroAbilityName: "Summon Khan",
+        heroAbilityName: "Help from Khan",
         heroAbilityDescription: (level) => `Gain +${level} Action(s)`,
         heroAbility: (gameState) => {
             const level = gameState.heroAbilityLevel || 1;
@@ -41,12 +41,12 @@ const CharacterLibrary = {
         mana: 2,
         deck: 
         [
-            ...repeat(() => CardLibrary.cards.Common.Strike(), 2),
+            ...repeat(() => CardLibrary.cards.Summoner.ForceBow(), 2),
             ...repeat(() => CardLibrary.cards.Common.Block(), 3),
-            ...repeat(() => CardLibrary.cards.Summoner.EidolonStrike(), 2),
-            CardLibrary.cards.Common.Berserk(),
+            ...repeat(() => CardLibrary.cards.Summoner.KamauStrike(), 2),
+            CardLibrary.cards.Common.Meditate(),
             CardLibrary.cards.Summoner.SummonKamau(),
-            CardLibrary.cards.Summoner.PlanarBinding()
+            CardLibrary.cards.Summoner.Planetarium()
         ],
         heroAbilityName: "Shadow Step",
         heroAbilityDescription: (level) => `Gain ${3 + level * 2} Armor`,
@@ -72,7 +72,7 @@ const CharacterLibrary = {
             ...repeat(() => CardLibrary.cards.Common.Strike(), 2),
             ...repeat(() => CardLibrary.cards.Wizard.MagicMissile(), 3),
             ...repeat(() => CardLibrary.cards.Wizard.Shield(), 3),
-            CardLibrary.cards.Common.Block(),
+            CardLibrary.cards.Common.Meditate(),
             CardLibrary.cards.Wizard.Fireball()
         ],
         heroAbilityName: "Arcane Surge",
