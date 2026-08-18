@@ -6,14 +6,14 @@ export default {
     SacredStrike: () => createCard({
         name: "Sacred Strike",
         actionCost: 1,
-        manaCost: 1,
+        manaCost: 0,
         type: "Attack",
         requiresTarget: true,
-        description: "Deal 7 damage. Heal for half.",
+        description: "Deal 8 damage. Heal for half.",
         upgradedDescription: "Deal 12 damage. Heal for half.",
         effect: (target, state, card) => {
             if (target) {
-                const damage = card.upgraded ? 12 : 7;
+                const damage = card.upgraded ? 12 : 8;
                 target.takeDamage(state.calcDamage(damage));
                 state.playerHeal(Math.floor(damage / 2));
             }
@@ -21,10 +21,10 @@ export default {
         upgraded: false
     }),
 
-    BlessingOfWar: () => createCard({
-        name: "Blessing of War",
-        actionCost: 1,
-        manaCost: 2,
+    StrengthSurge: () => createCard({
+        name: "Strength Surge",
+        actionCost: 0,
+        manaCost: 1,
         type: "Skill",
         requiresTarget: false,
         description: "Gain 2 strength for 2 turns.",
@@ -35,17 +35,16 @@ export default {
         upgraded: false
     }),
 
-    Sacrifice: () => createCard({
-        name: "Sacrifice",
+    Fervor: () => createCard({
+        name: "Fervor",
         actionCost: 1,
         manaCost: 0,
         type: "Skill",
         requiresTarget: false,
-        description: "Lose 5 HP. Draw 3 cards.",
-        upgradedDescription: "Lose 3 HP. Draw 5 cards.",
+        description: "Draw 2 cards.",
+        upgradedDescription: "Draw 3 cards.",
         effect: (_, state, card, scene) => {
-            state.playerTakeDamage(card.upgraded ? 3 : 5);
-            state.drawCards(card.upgraded ? 5 : 3, scene);
+            state.drawCards(card.upgraded ? 3 : 2, scene);
         },
         upgraded: false
     }),
@@ -71,30 +70,30 @@ export default {
         type: "Attack",
         requiresTarget: true,
         description: "Deal 6 damage. Gain 1 mana.",
-        upgradedDescription: "Deal 9 damage. Gain 2 mana.",
+        upgradedDescription: "Deal 10 damage. Gain 2 mana.",
         effect: (target, state, card) => {
-            if (target) target.takeDamage(state.calcDamage(card.upgraded ? 9 : 6));
+            if (target) target.takeDamage(state.calcDamage(card.upgraded ? 10 : 6));
             state.mana += card.upgraded ? 2 : 1;
         },
         upgraded: false
     }),
 
-    DivineProtection: () => createCard({
-        name: "Divine Protection",
+    SacredArmor: () => createCard({
+        name: "Sacred Armor",
         actionCost: 0,
-        manaCost: 2,
+        manaCost: 1,
         type: "Skill",
         requiresTarget: false,
-        description: "Gain 10 armor.",
-        upgradedDescription: "Gain 15 armor.",
+        description: "Gain 7 armor.",
+        upgradedDescription: "Gain 11 armor.",
         effect: (_, state, card) => {
-            state.playerArmor(card.upgraded ? 15 : 10);
+            state.playerArmor(card.upgraded ? 11 : 7);
         },
         upgraded: false
     }),
 
-    CureWounds: () => createCard({
-        name: "Cure Wounds",
+    CureLightWounds: () => createCard({
+        name: "Cure Light Wounds",
         actionCost: 1,
         manaCost: 1,
         type: "Spell",
@@ -107,10 +106,10 @@ export default {
         upgraded: false
     }),
 
-    ChannelSmite: () => createCard({
-        name: "Channel Smite",
+    DivineFavor: () => createCard({
+        name: "Divine Favor",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Attack",
         requiresTarget: true,
         description: "Deal 12 damage. Heal 6 HP.",
@@ -122,8 +121,8 @@ export default {
         upgraded: false
     }),
 
-    Zeal: () => createCard({
-        name: "Zeal",
+    GuardianArmor: () => createCard({
+        name: "Guardian Armor",
         actionCost: 0,
         manaCost: 0,
         type: "Skill",
@@ -137,8 +136,8 @@ export default {
         upgraded: false
     }),
 
-    BlessedArmor: () => createCard({
-        name: "Blessed Armor",
+    Ironskin: () => createCard({
+        name: "Ironskin",
         actionCost: 1,
         manaCost: 1,
         type: "Skill",
@@ -152,54 +151,53 @@ export default {
         upgraded: false
     }),
 
-    HolyStrike: () => createCard({
-        name: "Holy Strike",
-        actionCost: 1,
-        manaCost: 1,
+    ShieldBonk: () => createCard({
+        name: "Shield Bonk",
+        actionCost: 0,
+        manaCost: 0,
         type: "Attack",
         requiresTarget: true,
-        description: "Deal 8 damage. Double vs Undead.",
-        upgradedDescription: "Deal 12 damage. Double vs Undead.",
+        description: "Deal damage equal to your armor.",
+        upgradedDescription: "Deal damage equal to twice your armor",
         effect: (target, state, card) => {
             if (target) {
-                const base = card.upgraded ? 12 : 8;
-                const isUndead = target.tags?.includes("Undead");
-                target.takeDamage(state.calcDamage(isUndead ? base * 2 : base));
+                const damage = state.armor;
+                target.takeDamage(state.calcDamage(card.upgraded ? damage * 2 : damage));
             }
         },
         upgraded: false
     }),
 
-    WarBlessing: () => createCard({
-        name: "War Blessing",
+    Sunmetal: () => createCard({
+        name: "Sunmetal",
         actionCost: 1,
-        manaCost: 2,
+        manaCost: 1,
         type: "Power",
         requiresTarget: false,
-        description: "Gain +3 to all attacks for 3 turns.",
-        upgradedDescription: "Gain +5 to all attacks for 3 turns.",
+        description: "Gain +3 to all attacks for 4 turns.",
+        upgradedDescription: "Gain +5 to all attacks for 4 turns.",
         effect: (_, state, card) => {
-            state.applyPlayerBuff("AttackBonus", card.upgraded ? 5 : 3, 3);
+            state.applyPlayerBuff("AttackBonus", card.upgraded ? 5 : 3, 4);
         },
         upgraded: false
     }),
 
-    SpiritualWeapon: () => createCard({
-        name: "Spiritual Weapon",
+    SummonRhinoceros: () => createCard({
+        name: "Summon Rhinoceros",
         actionCost: 1,
         manaCost: 2,
         type: "Spell",
         requiresTarget: false,
-        description: "Summon a weapon that deals 5 damage each turn.",
-        upgradedDescription: "Summon a weapon that deals 8 damage each turn.",
+        description: "Summon a Rhinoceros that deals 5 damage each turn for 3 turns.",
+        upgradedDescription: "Summon a Rhinoceros that deals 8 damage each turn for 3 turns.",
         effect: (_, state, card) => {
-            state.summonAlly({ name: "Spiritual Weapon", damage: card.upgraded ? 8 : 5, duration: 3 });
+            state.summonAlly({ name: "Rhinoceros", damage: card.upgraded ? 8 : 5, duration: 3 });
         },
         upgraded: false
     }),
 
-    MartialPrayer: () => createCard({
-        name: "Martial Prayer",
+    Blessing: () => createCard({
+        name: "Blessing",
         actionCost: 0,
         manaCost: 1,
         type: "Skill",
@@ -213,32 +211,32 @@ export default {
         upgraded: false
     }),
 
-    Retaliation: () => createCard({
+    Ironhide: () => createCard({
         name: "Retaliation",
         actionCost: 1,
         manaCost: 0,
         type: "Attack",
         requiresTarget: true,
-        description: "Deal 5 damage. Gain 5 armor.",
-        upgradedDescription: "Deal 8 damage. Gain 8 armor.",
+        description: "Deal 6 damage. Gain 6 armor.",
+        upgradedDescription: "Deal 10 damage. Gain 10 armor.",
         effect: (target, state, card) => {
-            const amount = card.upgraded ? 8 : 5;
+            const amount = card.upgraded ? 10 : 6;
             if (target) target.takeDamage(state.calcDamage(amount));
             state.playerArmor(amount);
         },
         upgraded: false
     }),
 
-    DevoutFury: () => createCard({
-        name: "Devout Fury",
+    ForGorum: () => createCard({
+        name: "For Gorum",
         actionCost: 2,
-        manaCost: 1,
+        manaCost: 0,
         type: "Attack",
         requiresTarget: true,
         description: "Deal 8 damage 3 times.",
-        upgradedDescription: "Deal 11 damage 3 times.",
+        upgradedDescription: "Deal 12 damage 3 times.",
         effect: (target, state, card) => {
-            const damage = card.upgraded ? 11 : 8;
+            const damage = card.upgraded ? 12 : 8;
             if (target) {
                 for (let i = 0; i < 3; i++) target.takeDamage(state.calcDamage(damage));
             }
@@ -246,30 +244,23 @@ export default {
         upgraded: false
     }),
 
-    RestorationPrayer: () => createCard({
-        name: "Restoration Prayer",
+    CureModerateWounds: () => createCard({
+        name: "Heal",
         actionCost: 1,
         manaCost: 2,
         type: "Spell",
         requiresTarget: false,
-        description: "Heal 12 HP. Remove 1 status.",
-        upgradedDescription: "Heal 18 HP. Remove all statuses.",
+        isOncePerDay: true,
+        description: "Heal 12 HP.",
+        upgradedDescription: "Heal 18 HP.",
         effect: (_, state, card) => {
             state.playerHeal(card.upgraded ? 18 : 12);
-            if (state.statuses) {
-                if (card.upgraded) {
-                    state.statuses = {};
-                } else {
-                    const keys = Object.keys(state.statuses);
-                    if (keys.length > 0) delete state.statuses[keys[0]];
-                }
-            }
         },
         upgraded: false
     }),
 
-    ShieldOfDevotion: () => createCard({
-        name: "Shield of Devotion",
+    ShieldOfGorum: () => createCard({
+        name: "Shield of Gorum",
         actionCost: 0,
         manaCost: 2,
         type: "Skill",
@@ -282,40 +273,39 @@ export default {
         upgraded: false
     }),
 
-    RighteousFervor: () => createCard({
-        name: "Righteous Fervor",
-        actionCost: 1,
-        manaCost: 1,
+    BreathOfLife: () => createCard({
+        name: "Breath of Life",
+        actionCost: 0,
+        manaCost: 0,
         type: "Power",
         requiresTarget: false,
-        description: "Gain 2 actions.",
-        upgradedDescription: "Gain 2 actions. Draw 1 card.",
+        description: "Gain 2 actions. Draw 1 card.",
+        upgradedDescription: "Gain 3 actions. Draw 2 card.",
         effect: (_, state, card, scene) => {
-            state.actions += 2;
-            if (card.upgraded) state.drawCards(1, scene);
+            state.actions += card.upgraded ? 3 : 2;
+            state.drawCards(card.upgraded ? 2 : 1, scene);
         },
         upgraded: false
     }),
 
-    ConsecratedBlade: () => createCard({
-        name: "Consecrated Blade",
+    DeadlyJuggernaut: () => createCard({
+        name: "Deadly Juggernaut",
         actionCost: 1,
         manaCost: 1,
         type: "Attack",
         requiresTarget: true,
-        description: "Deal 10 damage. Heal 5 if enemy is Evil.",
-        upgradedDescription: "Deal 14 damage. Heal 7 if enemy is Evil.",
+        description: "Deal 15 damage.",
+        upgradedDescription: "Deal 20 damage.",
         effect: (target, state, card) => {
             if (target) {
-                target.takeDamage(state.calcDamage(card.upgraded ? 14 : 10));
-                if (target.tags?.includes("Evil")) state.playerHeal(card.upgraded ? 7 : 5);
+                target.takeDamage(state.calcDamage(card.upgraded ? 20 : 15));
             }
         },
         upgraded: false
     }),
 
-    MassHealing: () => createCard({
-        name: "Mass Healing",
+    Heal: () => createCard({
+        name: "Heal",
         actionCost: 2,
         manaCost: 2,
         type: "Spell",
@@ -329,8 +319,8 @@ export default {
         upgraded: false
     }),
 
-    WarpriestsFocus: () => createCard({
-        name: "Warpriest's Focus",
+    HeroesFeast: () => createCard({
+        name: "Heroes' Feast",
         actionCost: 0,
         manaCost: 0,
         type: "Skill",
@@ -344,8 +334,8 @@ export default {
         upgraded: false
     }),
 
-    HammerOfFaith: () => createCard({
-        name: "Hammer of Faith",
+    SummonStampede: () => createCard({
+        name: "SummonStampede",
         actionCost: 2,
         manaCost: 2,
         type: "Attack",
@@ -362,8 +352,8 @@ export default {
         upgraded: false
     }),
 
-    Persistence: () => createCard({
-        name: "Persistence",
+    MusicOfTheSpheres: () => createCard({
+        name: "Music of the Spheres",
         actionCost: 0,
         manaCost: 0,
         type: "Skill",
@@ -377,14 +367,14 @@ export default {
         upgraded: false
     }),
 
-    DivineStorm: () => createCard({
-        name: "Divine Storm",
+    ChannelEnergy: () => createCard({
+        name: "Channel Energy",
         actionCost: 2,
         manaCost: 2,
         type: "Spell",
         requiresTarget: false,
-        description: "Deal 8 damage to all. Heal 4 per enemy hit.",
-        upgradedDescription: "Deal 12 damage to all. Heal 6 per enemy hit.",
+        description: "Deal 8 damage to all enemies. Heal 4 per enemy hit.",
+        upgradedDescription: "Deal 12 damage to all enemies. Heal 6 per enemy hit.",
         effect: (_, state, card) => {
             const damage = card.upgraded ? 12 : 8;
             const heal = card.upgraded ? 6 : 4;
@@ -395,8 +385,8 @@ export default {
         upgraded: false
     }),
 
-    BattleMeditation: () => createCard({
-        name: "Battle Meditation",
+    ChantForGorum: () => createCard({
+        name: "Chant for Gorum",
         actionCost: 1,
         manaCost: 0,
         type: "Skill",
@@ -410,10 +400,10 @@ export default {
         upgraded: false
     }),
 
-    Absolution: () => createCard({
-        name: "Absolution",
-        actionCost: 1,
-        manaCost: 2,
+    Geniekind: () => createCard({
+        name: "Geniekind",
+        actionCost: 0,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: false,
         isOncePerDay: true,
@@ -427,8 +417,8 @@ export default {
         upgraded: false
     }),
 
-    WrathfulSmite: () => createCard({
-        name: "Wrathful Smite",
+    CompelHostility: () => createCard({
+        name: "Compel Hostility",
         actionCost: 1,
         manaCost: 1,
         type: "Attack",
@@ -444,26 +434,28 @@ export default {
         upgraded: false
     }),
 
-    SacredFlame: () => createCard({
-        name: "Sacred Flame",
+    HellfireRay: () => createCard({
+        name: "Hellfire Ray",
         actionCost: 1,
         manaCost: 1,
         type: "Spell",
         requiresTarget: true,
-        description: "Deal 7 true damage.",
-        upgradedDescription: "Deal 11 true damage.",
+        isOncePerDay: true,
+        description: "Deal 33 true damage.",
+        upgradedDescription: "Deal 66 true damage.",
         effect: (target, state, card) => {
-            if (target) target.takeTrueDamage(card.upgraded ? 11 : 7);
+            if (target) target.takeTrueDamage(card.upgraded ? 66 : 33);
         },
         upgraded: false
     }),
 
-    Endurance: () => createCard({
-        name: "Endurance",
+    Diehard: () => createCard({
+        name: "Diehard",
         actionCost: 0,
         manaCost: 1,
         type: "Power",
         requiresTarget: false,
+        isOncePerDay: true,
         description: "Gain +5 max HP permanently.",
         upgradedDescription: "Gain +8 max HP permanently.",
         isOncePerDay: true,
@@ -473,12 +465,13 @@ export default {
         upgraded: false
     }),
 
-    BattlePrayer: () => createCard({
-        name: "Battle Prayer",
-        actionCost: 1,
-        manaCost: 1,
+    Prayer: () => createCard({
+        name: "Prayer",
+        actionCost: 0,
+        manaCost: 0,
         type: "Skill",
         requiresTarget: false,
+        isOncePerDay: true,
         description: "Heal 5. Gain 5 armor. Draw 1 card.",
         upgradedDescription: "Heal 8. Gain 8 armor. Draw 1 card.",
         effect: (_, state, card, scene) => {

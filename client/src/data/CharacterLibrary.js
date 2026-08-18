@@ -92,7 +92,7 @@ const CharacterLibrary = {
     Mohef: createCharacter({
         name: "Mohef",
         characterClass: "Bloodrager",
-        health: 100,
+        health: 110,
         actions: 4,
         mana: 1,
         deck: 
@@ -104,7 +104,7 @@ const CharacterLibrary = {
             CardLibrary.cards.Bloodrager.FastHealer(),
             CardLibrary.cards.Bloodrager.FireBreath()
         ],
-        heroAbilityName: "Bloodlust",
+        heroAbilityName: "Power Attack",
         heroAbilityDescription: (level) => `Next attack deals x${1 + level} damage`,
         heroAbility: (gameState) => {
             const level = gameState.heroAbilityLevel || 1;
@@ -120,18 +120,19 @@ const CharacterLibrary = {
     Nephereta: createCharacter({
         name: "Nephereta",
         characterClass: "Paladin",
-        health: 110,
+        health: 100,
         actions: 3,
-        mana: 1,
+        mana: 2,
         deck: 
         [
-            ...repeat(() => CardLibrary.cards.Common.Strike(), 2),
-            ...repeat(() => CardLibrary.cards.Common.Block(), 3),
-            ...repeat(() => CardLibrary.cards.Paladin.SmiteEvil(), 2),
-            ...repeat(() => CardLibrary.cards.Paladin.DivineShield(), 2),
-            CardLibrary.cards.Paladin.LayOnHands()
+            ...repeat(() => CardLibrary.cards.Paladin.DevastatingStrike(), 3),
+            ...repeat(() => CardLibrary.cards.Paladin.AuraOfCourage(), 3),
+            CardLibrary.cards.Paladin.SmiteEvil(),
+            CardLibrary.cards.Paladin.CureLightWounds(),
+            CardLibrary.cards.Paladin.ChannelEnergy(),
+            CardLibrary.cards.Paladin.DivineShield()
         ],
-        heroAbilityName: "Divine Blessing",
+        heroAbilityName: "Lay on Hands",
         heroAbilityDescription: (level) => `Heal ${5 * level} HP`,
         heroAbility: (gameState) => {
             const level = gameState.heroAbilityLevel || 1;
@@ -153,14 +154,14 @@ const CharacterLibrary = {
         mana: 2,
         deck: 
         [
-            ...repeat(() => CardLibrary.cards.Common.Strike(), 2),
-            ...repeat(() => CardLibrary.cards.Common.Block(), 3),
-            ...repeat(() => CardLibrary.cards.Warpriest.SacredStrike(), 2),
-            CardLibrary.cards.Common.Berserk(),
-            CardLibrary.cards.Warpriest.BlessingOfWar(),
-            CardLibrary.cards.Warpriest.Sacrifice()
+            ...repeat(() => CardLibrary.cards.Warpriest.SacredArmor(), 3),
+            ...repeat(() => CardLibrary.cards.Warpriest.FervorStrike(), 3),
+            CardLibrary.cards.Warpriest.SacredStrike(),
+            CardLibrary.cards.Warpriest.StrengthSurge(),
+            CardLibrary.cards.Warpriest.SacredWeapon(),
+            CardLibrary.cards.Warpriest.Fervor()
         ],
-        heroAbilityName: "War Sacrifice",
+        heroAbilityName: "Death or Glory",
         heroAbilityDescription: (level) => `Lose 5 HP, gain ${1 + level} actions`,
         heroAbility: (gameState) => {
             if (gameState.health <= 5) return;

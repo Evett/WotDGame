@@ -438,17 +438,17 @@ export default {
         upgraded: false
     }),
 
-    PowerAttack: () => createCard({
-        name: "Power Attack",
+    GreaterVitalStrike: () => createCard({
+        name: "GreaterVitalStrike",
         actionCost: 1,
         manaCost: 0,
         type: "Attack",
         requiresTarget: true,
         description: "Deal 7 damage. Stun for 1 turn if enemy below half HP.",
-        upgradedDescription: "Deal 10 damage. Stun for 1 turn if enemy below half HP.",
+        upgradedDescription: "Deal 12 damage. Stun for 1 turn if enemy below half HP.",
         effect: (target, state, card) => {
             if (target) {
-                const damage = card.upgraded ? 10 : 7;
+                const damage = card.upgraded ? 12 : 7;
                 target.takeDamage(state.calcDamage(damage));
                 if (target.isAlive && target.health <= target.maxHealth / 2) {
                     target.applyStatus("Stunned", 1);
