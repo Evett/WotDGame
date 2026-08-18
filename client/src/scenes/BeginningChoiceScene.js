@@ -15,7 +15,7 @@ export class BeginningChoiceScene extends BaseScene {
     this.lastVotesJSON = '';
     const { x, y } = this.getCenter();
 
-    this.add.text(x, y - 200, 'Beginning Choice', { fontSize: '32px', color: '#fff' }).setOrigin(0.5);
+    this.add.text(x, y - 200, 'Make your choice', { fontSize: '32px', color: '#fff' }).setOrigin(0.5);
 
     this.mapChoices = this.service.getChoices();
 

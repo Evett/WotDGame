@@ -424,7 +424,7 @@ export class BattleScene extends BaseScene {
             const container = this.add.container(x, y);
 
             // Size based on enemy type
-            const spriteSize = enemy.isFinalBoss ? 160 : (enemy.isBoss ? 130 : 100);
+            const spriteSize = enemy.isFinalBoss ? 500 : (enemy.isBoss ? 200 : 100);
             const highlightSize = spriteSize + 6;
 
             // Enemy sprite or fallback colored box
