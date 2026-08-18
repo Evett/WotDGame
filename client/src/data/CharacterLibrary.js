@@ -42,7 +42,7 @@ const CharacterLibrary = {
         deck: 
         [
             ...repeat(() => CardLibrary.cards.Summoner.ForceBow(), 2),
-            ...repeat(() => CardLibrary.cards.Common.Block(), 3),
+            ...repeat(() => CardLibrary.cards.Summoner.SpiderClimb(), 3),
             ...repeat(() => CardLibrary.cards.Summoner.KamauStrike(), 2),
             CardLibrary.cards.Common.Meditate(),
             CardLibrary.cards.Summoner.SummonKamau(),
@@ -69,11 +69,11 @@ const CharacterLibrary = {
         mana: 3,
         deck: 
         [
-            ...repeat(() => CardLibrary.cards.Common.Strike(), 2),
             ...repeat(() => CardLibrary.cards.Wizard.MagicMissile(), 3),
-            ...repeat(() => CardLibrary.cards.Wizard.Shield(), 3),
+            ...repeat(() => CardLibrary.cards.Wizard.Shield(), 4),
             CardLibrary.cards.Common.Meditate(),
-            CardLibrary.cards.Wizard.Fireball()
+            CardLibrary.cards.Wizard.Fireball(),
+            CardLibrary.cards.Wizard.RayOfFrost()
         ],
         heroAbilityName: "Arcane Surge",
         heroAbilityDescription: (level) => `Restore ${level} Action(s) and ${level} Mana`,
@@ -97,12 +97,12 @@ const CharacterLibrary = {
         mana: 1,
         deck: 
         [
-            ...repeat(() => CardLibrary.cards.Common.Strike(), 3),
-            ...repeat(() => CardLibrary.cards.Common.Block(), 2),
-            ...repeat(() => CardLibrary.cards.Bloodrager.BloodFury(), 2),
-            CardLibrary.cards.Common.Berserk(),
-            CardLibrary.cards.Bloodrager.RagingHowl(),
-            CardLibrary.cards.Bloodrager.ArcaneBloodline()
+            ...repeat(() => CardLibrary.cards.Bloodrager.FlyingBlade(), 3),
+            ...repeat(() => CardLibrary.cards.Bloodrager.ArmorProficiency(), 2),
+            ...repeat(() => CardLibrary.cards.Bloodrager.DraconicClaws(), 2),
+            CardLibrary.cards.Bloodrager.Rage(),
+            CardLibrary.cards.Bloodrager.FastHealer(),
+            CardLibrary.cards.Bloodrager.FireBreath()
         ],
         heroAbilityName: "Bloodlust",
         heroAbilityDescription: (level) => `Next attack deals x${1 + level} damage`,

@@ -9,13 +9,11 @@ export default {
         manaCost: 1,
         type: "Attack",
         requiresTarget: true,
-        description: "Deal 8 damage. Double if enemy is Evil.",
-        upgradedDescription: "Deal 12 damage. Double if enemy is Evil.",
+        description: "Deal 8 damage.",
+        upgradedDescription: "Deal 12 damage.",
         effect: (target, state, card) => {
             if (target) {
-                const base = card.upgraded ? 12 : 8;
-                const isEvil = target.tags?.includes("Evil");
-                const damage = isEvil ? base * 2 : base;
+                const damage = card.upgraded ? 12 : 8;
                 target.takeDamage(state.calcDamage(damage));
             }
         },
