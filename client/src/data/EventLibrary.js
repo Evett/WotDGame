@@ -560,7 +560,7 @@ const events = {
         tags: [EventTags.CARD, EventTags.SAFE],
         choices: [
             {
-                text: "Learn an advanced technique (Gain 1 upgraded class card)",
+                text: "Learn an advanced technique (Gain 1 random upgraded class card)",
                 effect: (gameState) => {
                     const cards = CardLibrary.getRandomCardsForClass(gameState.characterClass, 1);
                     if (cards.length > 0) {
@@ -570,7 +570,7 @@ const events = {
                 }
             },
             {
-                text: "Ask about fundamentals (Gain 1 upgraded common card)",
+                text: "Ask about fundamentals (Gain 1 random upgraded common card)",
                 effect: (gameState) => {
                     const card = CardLibrary.getRandomCommonCard();
                     card.upgrade();
@@ -658,17 +658,17 @@ const events = {
         tags: [EventTags.RISKY, EventTags.CARD],
         choices: [
             {
-                text: "Sacrifice 25 HP (Upgrade all Attack cards in your deck)",
+                text: "Sacrifice 50 HP (Upgrade all Attack cards in your deck)",
                 effect: (gameState) => {
-                    gameState.playerTakeDamage(25);
+                    gameState.playerTakeDamage(50);
                     gameState.fullDeck.filter(c => c.type === 'Attack' && !c.upgraded)
                         .forEach(c => c.upgrade());
                 }
             },
             {
-                text: "Sacrifice 15 HP (Gain +2 max mana)",
+                text: "Sacrifice 25 HP (Gain +2 max mana)",
                 effect: (gameState) => {
-                    gameState.playerTakeDamage(15);
+                    gameState.playerTakeDamage(25);
                     gameState.maxMana += 2;
                 }
             },
@@ -695,7 +695,7 @@ const events = {
                 }
             },
             {
-                text: "Buy 3 class cards (35 gold)",
+                text: "Buy 3 random class cards (35 gold)",
                 effect: (gameState) => {
                     if (gameState.gold >= 35) {
                         gameState.gold -= 35;
@@ -754,7 +754,7 @@ const events = {
         tags: [EventTags.RISKY, EventTags.CARD],
         choices: [
             {
-                text: "Rewind time (Remove 3 cards, lose 10 HP)",
+                text: "Rewind time (Remove 3 cards at random, lose 10 HP)",
                 effect: (gameState) => {
                     gameState.playerTakeDamage(10);
                     for (let i = 0; i < 3 && gameState.fullDeck.length > 3; i++) {
