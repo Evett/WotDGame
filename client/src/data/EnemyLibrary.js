@@ -224,7 +224,7 @@ const EnemyLibrary = {
         isBoss: true,
         intents: [
             { type: 'attack', damage: 20 },
-            { type: 'attack_and_block', damage: 14, block: 15 },
+            { type: 'attack_and_block', damage: 14, block: 45 },
             { type: 'buff', amount: 6 },
             { type: 'multi_attack', damage: 10, hits: 4 }
         ],
@@ -238,11 +238,11 @@ const EnemyLibrary = {
         maxHealth: 750,
         isBoss: true,
         intents: [
-            { type: 'debuff', status: 'Cursed', duration: 2 },
+            { type: 'debuff', status: 'Cursed', duration: 5 },
             { type: 'attack', damage: 22 },
-            { type: 'heal', amount: 50 },
+            { type: 'heal', amount: 150 },
             { type: 'attack', damage: 30 },
-            { type: 'block', amount: 30 }
+            { type: 'block', amount: 90 }
         ],
         intentPattern: [0, 1, 2, 3, 4],
         tags: ["Evil", "Undead"]
@@ -254,11 +254,11 @@ const EnemyLibrary = {
         maxHealth: 1000,
         isBoss: true,
         intents: [
-            { type: 'block', amount: 40 },
-            { type: 'block', amount: 40 },
+            { type: 'block', amount: 120 },
+            { type: 'block', amount: 120 },
             { type: 'attack', damage: 38 },
-            { type: 'attack_and_block', damage: 16, block: 16 },
-            { type: 'heal', amount: 30 }
+            { type: 'attack_and_block', damage: 16, block: 48 },
+            { type: 'heal', amount: 100 }
         ],
         intentPattern: [0, 1, 2, 3, 4],
         tags: []
@@ -274,7 +274,7 @@ const EnemyLibrary = {
             { type: 'attack', damage: 18 },
             { type: 'buff', amount: 5 },
             { type: 'multi_attack', damage: 8, hits: 5 },
-            { type: 'debuff', status: 'Weakened', duration: 2 }
+            { type: 'debuff', status: 'Weakened', duration: 4 }
         ],
         intentPattern: [0, 1, 2, 3, 4],
         tags: ["Evil"]
@@ -288,14 +288,14 @@ const EnemyLibrary = {
         isBoss: true,
         isFinalBoss: true,
         intents: [
-            { type: 'block', amount: 50 },
-            { type: 'debuff', status: 'Weakened', duration: 2 },
+            { type: 'block', amount: 150 },
+            { type: 'debuff', status: 'Weakened', duration: 5 },
             { type: 'attack', damage: 24 },
-            { type: 'block', amount: 35 },
+            { type: 'block', amount: 105 },
             { type: 'attack', damage: 36 },
             { type: 'buff', amount: 7 },
             { type: 'multi_attack', damage: 9, hits: 5 },
-            { type: 'heal', amount: 60 },
+            { type: 'heal', amount: 180 },
             { type: 'multi_attack', damage: 11, hits: 4 },
             { type: 'attack', damage: 45 }
         ],

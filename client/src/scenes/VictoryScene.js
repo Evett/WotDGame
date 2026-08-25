@@ -21,15 +21,22 @@ export class VictoryScene extends BaseScene {
 
         // Lore text
         const loreText = [
-            'Nyxaroth, the Shadow Gate Guardian, has fallen.',
+            'Nyxaroth, the Shadow Guardian, has fallen.',
             '',
             'The barrier between the Shadow Plane and the Material Plane',
             'shatters like glass. Light pours through the rift as countless',
             'trapped souls surge toward freedom.',
             '',
-            'The darkness recedes. The world breathes again.',
+            'The darkness recedes as you step back out into Loteria. Khan flies',
+            'out, the shadowy tendrils of Tissandei around Alaen dissipating from',
+            'where your bodies await you on top of the tower, being once again',
+            'replaced by the shadows of Khan as he takes the form of an adult',
+            'dragon. The headless version of Kamau from the Shadow Plane steps',
+            'out and reaches for Kamau, their shadows melding together, flying apart',
+            'and taking form again, mist twirling until it becomes flesh.',
             '',
-            'Your journey through the Wastes of the Damned is complete.'
+            'Your journey in here is complete.',
+            'Alaen, gain mythic tier 4 and 5. Everyone else, gain mythic tier 5.'
         ].join('\n');
 
         this.add.text(cx, height * 0.45, loreText, {
