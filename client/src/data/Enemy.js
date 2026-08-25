@@ -17,6 +17,8 @@ class Enemy {
         this.phasePattern = options.phasePattern || null; // Alternate pattern below 50% HP
 
         this.intent = options.intent || null;
+        // Per-combat random seed so the same enemy name has different intent sequences each fight
+        this.combatSeed = options.combatSeed ?? Math.floor(Math.random() * 100000);
     }
 
     decideIntent() {
@@ -32,8 +34,7 @@ class Enemy {
             const intentIndex = pattern[patternIndex];
             this.intent = this.intents[intentIndex];
         } else {
-            // Deterministic pick so all clients see the same intent
-            const seed = this.hashSeed(this.name, this.turnCount);
+            const seed = this.hashSeed(this.name, this.turnCount + this.combatSeed);
             const index = seed % this.intents.length;
             this.intent = this.intents[index];
         }
@@ -211,7 +212,8 @@ class Enemy {
             isFinalBoss: this.isFinalBoss,
             isAlive: this.isAlive,
             statuses: { ...this.statuses },
-            intent: this.intent
+            intent: this.intent,
+            combatSeed: this.combatSeed
         };
     }
 

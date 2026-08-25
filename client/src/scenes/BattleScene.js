@@ -978,6 +978,14 @@ export class BattleScene extends BaseScene {
         }
         this.statusDisplayObjects = [];
 
+        const statusDescs = {
+            Poisoned: 'Take 3 damage/turn',
+            Weakened: 'Deal 25% less damage',
+            Frozen: '-1 action/turn',
+            Cursed: '-1 mana/turn',
+            Vulnerable: 'Take 50% more damage'
+        };
+
         const statuses = this.gameState.statuses || {};
         const buffs = this.gameState.buffs || {};
         const statusKeys = Object.keys(statuses);
@@ -989,7 +997,8 @@ export class BattleScene extends BaseScene {
 
         let y = startY;
         statusKeys.forEach(name => {
-            const txt = this.add.text(startX, y, `⚠ ${name} (${statuses[name]} turns)`, {
+            const desc = statusDescs[name] ? ` — ${statusDescs[name]}` : '';
+            const txt = this.add.text(startX, y, `⚠ ${name} (${statuses[name]} turns)${desc}`, {
                 fontSize: '11px', color: '#ff6688'
             });
             this.statusDisplayObjects.push(txt);

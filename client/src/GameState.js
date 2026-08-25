@@ -186,6 +186,11 @@ export default class GameState {
             messages.push('Cursed! -1 mana this turn');
         }
 
+        // Vulnerable: take 50% more damage (applied in playerTakeDamage)
+        if (this.statuses.Vulnerable && this.statuses.Vulnerable > 0) {
+            messages.push('Vulnerable! Taking 50% more damage');
+        }
+
         // Decrement all status durations
         Object.keys(this.statuses).forEach(key => {
             this.statuses[key]--;
