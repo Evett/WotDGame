@@ -18,10 +18,10 @@ const events = {
                 }
             },
             {
-                text: "Loot his scattered goods (+35 gold, lose 5 HP)",
+                text: "Loot his scattered goods (+50 gold, lose 15 HP)",
                 effect: (gameState) => {
-                    gameState.gold += 35;
-                    gameState.playerTakeDamage(5);
+                    gameState.gold += 50;
+                    gameState.playerTakeDamage(15);
                 }
             },
             {
@@ -37,9 +37,9 @@ const events = {
         tags: [EventTags.CARD, EventTags.RISKY],
         choices: [
             {
-                text: "Accept the bargain (-10 HP, gain a random card)",
+                text: "Accept the bargain (-20 HP, gain a random card)",
                 effect: (gameState) => {
-                    gameState.playerTakeDamage(10);
+                    gameState.playerTakeDamage(20);
                     const cards = CardLibrary.getRandomCardsForClass(gameState.characterClass, 1);
                     if (cards.length > 0) gameState.addCard(cards[0]);
                 }

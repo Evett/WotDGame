@@ -200,7 +200,7 @@ export default {
     Haste: () => createCard({
         name: "Haste",
         actionCost: 0,
-        manaCost: 2,
+        manaCost: 1,
         type: "Spell",
         requiresTarget: false,
         description: "Gain 2 actions. Draw 1 card.",
