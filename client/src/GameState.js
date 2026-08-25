@@ -295,6 +295,8 @@ export default class GameState {
         this.hasEidolon = false;
         this.allies = [];
         this.heroAbilityUsed = false;
+        this.buffs = {};
+        this.statuses = {};
         this.resetItemsForCombat();
 
         // Apply combat-start passives from leveling
