@@ -254,8 +254,8 @@ const EnemyLibrary = {
         maxHealth: 1000,
         isBoss: true,
         intents: [
-            { type: 'block', amount: 80 },
-            { type: 'block', amount: 80 },
+            { type: 'block', amount: 60 },
+            { type: 'block', amount: 60 },
             { type: 'attack', damage: 38 },
             { type: 'attack_and_block', damage: 16, block: 30 },
             { type: 'heal', amount: 100 }
