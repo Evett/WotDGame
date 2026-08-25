@@ -320,21 +320,39 @@ const EnemyLibrary = {
         const tierTwo = ['Orc', 'GiantSpider', 'Wraith', 'DarkCultist', 'FrostWitch', 'Harpy', 'ShadowAssassin'];
         const tierThree = ['OgreBrute', 'StoneGolem', 'FireElemental', 'VampireSpawn', 'Minotaur', 'PlagueBear', 'BoneKnight'];
 
-        const enemies = [];
-        const count = Math.min(1 + difficulty, 4);
+        // Enemy count: 2 early, ramps to 3 mid, 4 late
+        let count;
+        if (difficulty <= 2) count = 2;
+        else if (difficulty <= 6) count = 3;
+        else count = Math.min(3 + Math.floor((difficulty - 6) / 3), 4);
 
+        const enemies = [];
         for (let i = 0; i < count; i++) {
             let pool;
-            if (difficulty <= 1) {
+            if (difficulty <= 2) {
                 pool = tierOne;
-            } else if (difficulty <= 2) {
+            } else if (difficulty <= 4) {
                 pool = Math.random() < 0.6 ? tierTwo : tierOne;
+            } else if (difficulty <= 7) {
+                pool = Math.random() < 0.3 ? tierThree : tierTwo;
             } else {
-                pool = Math.random() < 0.5 ? tierThree : tierTwo;
+                pool = Math.random() < 0.7 ? tierThree : tierTwo;
             }
             const key = pool[Math.floor(Math.random() * pool.length)];
             enemies.push(EnemyLibrary[key]());
         }
+
+        // Late-game scaling: bonus HP and strength
+        if (difficulty > 6) {
+            const hpBonus = 1 + (difficulty - 6) * 0.1;
+            const strBonus = Math.floor((difficulty - 8) / 2);
+            enemies.forEach(e => {
+                e.maxHealth = Math.round(e.maxHealth * hpBonus);
+                e.health = e.maxHealth;
+                if (strBonus > 0) e.strength += strBonus;
+            });
+        }
+
         return this.scaleForPlayers(enemies, playerCount);
     },
 

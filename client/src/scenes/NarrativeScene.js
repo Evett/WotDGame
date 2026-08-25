@@ -71,7 +71,7 @@ export class NarrativeScene extends BaseScene {
 
             // Scale difficulty based on progress
             const count = this.service.getBattleCount();
-            const difficulty = Math.min(Math.ceil(count / 3), 3);
+            const difficulty = count;
             this.service.setRoomState('battleDifficulty', difficulty);
         }
 

@@ -403,6 +403,7 @@ export default {
         manaCost: 2,
         type: "Power",
         requiresTarget: false,
+        isOncePerDay: true,
         description: "If you have a summon active, gain 8 armor, +4 attacks for 3 turns.",
         upgradedDescription: "If you have a summon active, gain 12 armor, +6 attacks for 3 turns.",
         effect: (_, state, card) => {
