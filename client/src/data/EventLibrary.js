@@ -63,9 +63,10 @@ const events = {
                 }
             },
             {
-                text: "Wash your weapons (+2 damage next combat)",
+                text: "Wash your weapons (+2 damage permanently)",
                 effect: (gameState) => {
-                    gameState.flatDamageBonus += 2;
+                    if (!gameState.passives) gameState.passives = {};
+                    gameState.passives.startStrength = (gameState.passives.startStrength || 0) + 2;
                 }
             },
             {
