@@ -221,7 +221,7 @@ export default {
     }),
 
     ShadowStep: () => createCard({
-        name: "ShadowStep",
+        name: "Shadow Step",
         actionCost: 0,
         manaCost: 1,
         type: "Spell",
