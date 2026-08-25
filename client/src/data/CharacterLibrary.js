@@ -105,10 +105,10 @@ const CharacterLibrary = {
             CardLibrary.cards.Bloodrager.FireBreath()
         ],
         heroAbilityName: "Power Attack",
-        heroAbilityDescription: (level) => `Next attack deals x${1 + level} damage`,
+        heroAbilityDescription: (level) => `Next attack deals x${1 + Math.ceil(level / 2)} damage`,
         heroAbility: (gameState) => {
             const level = gameState.heroAbilityLevel || 1;
-            gameState.nextAttackMultiplier = 1 + level;
+            gameState.nextAttackMultiplier = 1 + Math.ceil(level / 2);
         },
         levelBonuses: [
             { level: 2, description: "+1 Max Actions", stat: 'maxActions', value: 1 },

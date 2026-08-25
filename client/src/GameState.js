@@ -358,6 +358,14 @@ export default class GameState {
         }
 
         console.log(`Level up! Now level ${this.level}. +${hpGain} max HP.`, bonus?.description || '');
+
+        // Upgrade a random non-upgraded card
+        const upgradeable = this.fullDeck.filter(c => !c.upgraded);
+        if (upgradeable.length > 0) {
+            const card = upgradeable[Math.floor(Math.random() * upgradeable.length)];
+            card.upgraded = true;
+            console.log(`Level up upgraded card: ${card.name}+`);
+        }
     }
 
     shuffleDeck() {
