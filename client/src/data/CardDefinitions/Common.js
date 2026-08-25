@@ -487,6 +487,7 @@ export default {
         manaCost: 1,
         type: "Power",
         requiresTarget: false,
+        isOncePerDay: true,
         description: "All attacks deal +3 this combat.",
         upgradedDescription: "All attacks deal +5 this combat.",
         effect: (_, state, card) => {

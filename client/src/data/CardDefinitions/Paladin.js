@@ -60,7 +60,7 @@ export default {
         upgradedDescription: "Deal 18 true damage to all enemies.",
         effect: (target, state, card) => {
             const damage = card.upgraded ? 18 : 12;
-            state.enemies.forEach(e => { if (e.isAlive) e.takeTrueDamage(amount); });
+            state.enemies.forEach(e => { if (e.isAlive) e.takeTrueDamage(damage); });
         },
         upgraded: false
     }),
