@@ -75,7 +75,7 @@ export default {
         actionCost: 1,
         manaCost: 1,
         type: "Spell",
-        requiresTarget: false,
+        requiresTarget: true,
         isOncePerDay: true,
         description: "Gain 10 armor. Deal 10 damage.",
         upgradedDescription: "Gain 15 armor. Deal 15 damage.",
@@ -177,7 +177,7 @@ export default {
         type: "Spell",
         requiresTarget: false,
         description: "Deal 8 damage to all enemies.",
-        upgradedDescription: "Deal 12 damage to all.",
+        upgradedDescription: "Deal 12 damage to all enemies.",
         effect: (_, state, card) => {
             const damage = card.upgraded ? 12 : 8;
             state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(damage); });

@@ -54,13 +54,13 @@ export default {
         actionCost: 1,
         manaCost: 1,
         type: "Attack",
-        requiresTarget: true,
+        requiresTarget: false,
         isOncePerDay: true,
         description: "Deal 12 true damage to all enemies.",
         upgradedDescription: "Deal 18 true damage to all enemies.",
         effect: (target, state, card) => {
             const damage = card.upgraded ? 18 : 12;
-            state.enemies.forEach(e => { if (e.isAlive) e.takeDamage(amount); });
+            state.enemies.forEach(e => { if (e.isAlive) e.takeTrueDamage(amount); });
         },
         upgraded: false
     }),
@@ -401,10 +401,10 @@ export default {
         type: "Attack",
         requiresTarget: false,
         isOncePerDay: true,
-        description: "Deal 10 true damage to all enemies.",
-        upgradedDescription: "Deal 16 true damage to all enemies.",
+        description: "Deal 5 true damage to all enemies.",
+        upgradedDescription: "Deal 9 true damage to all enemies.",
         effect: (_, state, card) => {
-            const damage = card.upgraded ? 16 : 10;
+            const damage = card.upgraded ? 9 : 5;
             state.enemies.forEach(e => { if (e.isAlive) e.takeTrueDamage(damage); });
         },
         upgraded: false

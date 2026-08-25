@@ -297,7 +297,7 @@ export class BattleScene extends BaseScene {
         const gap = 10;
         const totalW = players.length * (boxW + gap) - gap;
         const startX = (width - totalW) / 2 + boxW / 2;
-        const y = height - 210;
+        const y = height - 250;
 
         players.forEach((player, index) => {
             const x = startX + index * (boxW + gap);
